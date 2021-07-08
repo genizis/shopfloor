@@ -1,0 +1,509 @@
+.login {
+  margin-top: 50px;
+}
+/* Dropdown da barra do topo */
+
+.show-on-hover:hover > div.dropdown-menu {
+    display: block;    
+}
+
+/* --------------------------------------------
+Relevant Style
+---------------------------------------------*/
+.dropdown-cols-2 .dropdown-menu {
+    min-width: 400px;
+    
+}
+
+.light {
+  font-family: Verdana, Arial, Tahoma, Serif;
+}
+
+.tab-pane .button-pane {
+  margin-top: 10px!important;
+}
+
+.row table {
+  margin-top: 10px!important;
+}
+
+.dropdown-icon-right {
+  margin-left: 70px !important;
+}
+
+.bg-default {    
+    background-color: #f8f8f8;
+}
+
+.navbar {
+	margin-bottom: 18px;
+}
+
+.dropdown-label {
+	font-size: 12px;
+    line-height: 22px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.dropdown-label {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 1.5rem;
+  clear: both;
+  font-weight: 700;
+  color: #325D88;
+  text-align: inherit;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  text-transform: uppercase;
+}
+
+
+
+.aviso-op {
+  margin-top: 70px!important;
+}
+
+.aviso-pv {
+  margin-top: 80px!important;
+}
+
+.aviso-graf {
+  margin-top: 130px!important;
+}
+
+.aviso-oc {
+  margin-top: 80px!important;
+}
+
+
+.border-secondary {
+	min-height: 20px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #ffffff;
+    color: #555555;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    border: 1px solid #ecf0f1;
+    border-bottom: 3px solid #ecf0f1;
+ }
+
+ .card-table .table {
+ 	font-size: 12;
+ }
+
+.pull-right {
+  float: right !important;
+}
+.pull-left {
+  float: left !important;
+}
+
+.btn-input-primary {
+  font-size: 0.845rem;
+  font-weight: 400;
+  line-height: 1.5;
+  height: calc(1.5em + 0.75rem + 2px);
+  color: #495057;
+  background-color: #ffffff;
+  border: 1px solid #ced4da;
+  text-transform: none !important;
+}
+.btn-input-primary:focus,
+.btn-input-primary:hover {
+  color: #325d88;
+  background-color: #ffffff;
+  border-color: #ccc!important;
+}
+
+.selectpicker option {
+  text-transform: none !important;
+}
+
+.margem-baixo-10 {
+  margin-bottom: 10px !important;
+}
+
+.margem-direita-10 {
+  margin-right: 10px !important;
+}
+
+.margem-cima-30 {
+  margin-top: 28px;
+}
+
+.status-iniciada {
+  border-color: #325D88 !important;
+}
+
+.table-reporte .btn {
+  margin: -8px;
+  margin-right: 0px;
+}
+
+.table-nf .btn {
+  margin: -8px;
+  margin-right: 0px;
+}
+
+.table-reporte input[type=text] {
+  margin-top: -8px!important;
+  margin-bottom: -8px!important;
+}
+.table-reporte .input-group-prepend {
+  margin-top: -8px!important;
+  margin-bottom: -8px!important;
+}
+
+.table-reporte .show-tick {
+  margin-top: -8px!important;
+  margin-bottom: -8px!important;
+}
+
+.table-reporte .btn-input-primary {
+  margin: 0px!important;
+}
+
+.table-reporte .bs-searchbox {
+  padding: 12px 8px!important;
+}
+
+.modal-body-scroll {
+  max-height: 650px;
+  overflow: auto;
+  position: relative;
+}
+
+.month-control input {
+  background-color: #fff !important;
+  border-color: 0.15s ease-in-out !important;
+  font-weight: 550 !important;
+  box-shadow: none !important;
+}
+
+.month-control input:focus {
+  border-color: 0.15s ease-in-out !important;
+  box-shadow: none !important;
+}
+
+.table-material .form-control {
+  margin-top: -8px;
+  margin-bottom: -18px !important;
+}
+
+.card-counter{
+    margin-bottom: 20px;
+    padding: 20px 10px;
+    background-color: #fff;
+    height: 130px;
+    border-radius: 5px;
+    transition: .3s linear all;
+    border-color: #ecf0f1 !important;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    border: 1px solid;
+    border-bottom: 3px solid;
+  }
+
+  .card-counter:hover{
+    box-shadow: 4px 4px 20px #DADADA;
+    transition: .3s linear all;
+  }
+
+  .card-counter.primary{
+    background-color: #325D88;
+    color: #FFF;
+  }
+
+  .card-counter.secondary{
+    background-color: #8E8C84;
+    color: #FFF;
+  }  
+
+  .card-counter.danger{
+    background-color: #d9534f;
+    color: #FFF;
+  }  
+
+  .card-counter.success{
+    background-color: #66bb6a;
+    color: #FFF;
+  }  
+
+  .card-counter.info{
+    background-color: #26c6da;
+    color: #FFF;
+  }  
+
+  .card-counter i{
+    font-size: 5em;
+    opacity: 0.2;
+  }
+
+  .card-counter .count-numbers{
+    position: absolute;
+    right: 35px;
+    top: 20px;
+    font-size: 52px;
+    display: block;
+  }
+
+  .card-counter .count-name{
+    position: absolute;
+    right: 35px;
+    top: 95px;
+    font-style: italic;
+    opacity: 0.5;
+    display: block;
+    font-size: 18px;
+  }
+
+  .btn-report{
+    height: 44px;
+  }
+
+  .custo-produto{
+    height: 600px; 
+  }
+
+  .height-1{
+    height: 597px; 
+  }
+
+  .height-graph-3{
+    height: 65px;
+  }
+
+  @media (max-width: 1381px) {
+
+    .height-1{
+      height: 501px; 
+    }
+    
+  }
+
+  .produto-venda{
+    height: 292px; 
+  }
+
+  .graph {
+    height: 450;
+  }
+
+  .producao-dia{
+    height: 280;
+  }
+
+  .compra-dia{
+    height: 280px;
+  }
+
+  .estoque-produto{
+    height: 430px;
+  }
+
+  .movimento-produto{
+    height: 280px;
+  }
+
+  .consumo-produto{
+    height: 292px; 
+  }
+
+  /* width */
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #8E8C84; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #3E3F3A; 
+}
+
+.input-group-prepend a i{
+  font-size: 16px!important;
+  margin-top: 3px;
+}
+
+.input-group-append a i{
+  font-size: 16px!important;
+  margin-top: 3px;
+}
+
+.visao-geral-cards {
+  font-size: 12px;
+}
+
+.jumbotron {
+  margin-top: -15px!important;
+}
+
+.reg-bold {
+  font-weight: bold;
+}
+
+.btn-group [type='radio'] {
+  display: none; 
+}
+
+.bd-example-modal-lg .modal-dialog{
+  display: table;
+  position: relative;
+  margin: 0 auto;
+  top: calc(50% - 24px);
+}
+
+.bd-example-modal-lg .modal-dialog .modal-content{
+  background-color: transparent;
+  border: none;
+}
+
+.icon-home {
+  background-color: #325D88;
+  color: white;
+  border-radius: 50%;
+  border: 1px solid #325D88;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.limit-text-graph {
+  max-width: 25ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.limit-text-50 {
+  max-width: 50ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.limit-text-100 {
+  max-width: 100ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.limit-text-15 {
+  max-width: 15ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.limit-text-30 {
+  max-width: 30ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.container-cupom {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 0px!important;
+}
+
+.print-cupom{
+  color:#000 !important;
+  text-shadow:none !important;
+  filter:none !important;
+  -ms-filter:none !important;
+}
+
+.print-cupom .table{
+  color:#000 !important;
+  text-shadow:none !important;
+  filter:none !important;
+  -ms-filter:none !important;
+}
+
+/*teste 2
+.table-produto-nf tr {
+  cursor: pointer;
+}*/
+
+.hedding h1{
+	color:#fff;
+	font-size:25px;
+}
+.main-section{
+	margin-top: 120px;
+}
+.hiddenRow {
+    padding: 0!important;
+    background-color: #fdfcfb;
+}
+
+.accordian-body label{
+  padding-bottom: 10px;
+  
+}
+
+.accordian-body .impostos label{
+  padding-top: 10px;
+}
+
+.accordion-toggle .fas{
+  cursor: pointer;
+}
+
+.accordian-body .input-group-append .input-group-text{
+  margin-top: -8px!important;
+  margin-bottom: -8px!important;
+}
+
+small2,
+  .small2 {
+    font-size: 90%;
+    font-weight: 400;
+  }
+
+@media (max-width: 1381px) {
+
+  small2,
+  .small2 {
+    font-size: 75%;
+    font-weight: 400;
+  }
+}
+
+.h1-cupom {
+  font-size: 3.2rem;
+}
+
+.h2-cupom {
+  font-size: 2.2rem;
+}
+
+.h3-cupom {
+  font-size: 1.8rem;
+}
+
+
+
+
+
+
