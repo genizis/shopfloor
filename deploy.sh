@@ -1,4 +1,4 @@
 git pull
-git reset --hard origin/master
+git reset --hard origin/main
 
 
