@@ -2527,6 +2527,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 // <ContactsList />
 // import ContactsList from './ContactsList';
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -28833,24 +28835,50 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "container" }, [
-    _c("div", [
+  return _c("div", { staticClass: "modal-content" }, [
+    _c("div", { staticClass: "modal-header" }, [
+      _c("h5", { staticClass: "modal-title" }, [_vm._v(_vm._s(_vm.titulo))]),
+      _vm._v(" "),
       _c(
         "button",
         {
-          staticClass: "close rounded-pill",
-          attrs: { type: "button" },
+          staticClass: "close",
+          attrs: { type: "button", "aria-label": "Close" },
           on: {
             click: function($event) {
               return _vm.$emit("close")
             }
           }
         },
-        [_c("i", { staticClass: "fas fa-times" })]
+        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
       )
     ]),
     _vm._v(" "),
-    _vm._m(0)
+    _c(
+      "div",
+      {
+        ref: "formCadastro",
+        staticClass: " modal-body",
+        attrs: { id: "formRegra" }
+      },
+      [
+        _c("br"),
+        _vm._v(" "),
+        _c("h5", { staticClass: "text-center" }, [
+          _vm._v("\n\t\t\tImpostos\n\t\t")
+        ]),
+        _vm._v(" "),
+        _vm._m(0),
+        _vm._v(" "),
+        _c("br"),
+        _vm._v(" "),
+        _c("h5", { staticClass: "text-center" }, [
+          _vm._v("\n\t\t\tOutras informações\n\t\t")
+        ]),
+        _vm._v(" "),
+        _vm._m(1)
+      ]
+    )
   ])
 }
 var staticRenderFns = [
@@ -28858,157 +28886,147 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", [
-      _c("br"),
-      _vm._v(" "),
-      _c("h5", { staticClass: "text-center" }, [
-        _vm._v("\n\t\t\tImpostos\n\t\t")
+    return _c("ul", { staticClass: "list-group list-group-flush" }, [
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_BASE_ICMS] - Valor total da base do ICMS")
       ]),
       _vm._v(" "),
-      _c("ul", { staticClass: "list-group list-group-flush" }, [
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_BASE_ICMS] - Valor total da base do ICMS")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_ICMS] - Valor total do ICMS")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(
-            " [VALOR_BASE_DIFERIMENTO] - Valor total da base do diferimento do ICMS"
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_DIFERIMENTO] - Valor total do diferimento do ICMS")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [ICMS_PRESUMIDO] - Valor total do ICMS presumido")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(
-            " [VALOR_CREDITO_ICMS] - Valor total do crédito do ICMS (somente contribuintes do SIMPLES)"
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(
-            " [ALIQUOTA_CREDITO_ICMS] - Alíquota de crédito do ICMS (somente contribuintes do SIMPLES)"
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_ICMS_ST] - Valor total do ICMS ST")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_ICMS_RETIDO] - Valor total do ICMS retido")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [ALIQUOTA_ICMS_RETIDO] - Alíquota do ICMS retido")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(
-            " [VALOR_BASE_ICMS_RETENCAO] - Valor total da base do ICMS retido"
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(
-            " [APROX_TRIB] - Informações dos tributos aproximados conforme Lei da transparência"
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_PIS] - Valor total do PIS")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_COFINS] - Valor total do COFINS")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_FCP] - Valor total do FCP")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_RET_IR] - Valor do IR retido")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_RET_CSLL] - Valor do CSLL retido")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_RET_PIS] - Valor do PIS retido")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_RET_COFINS] - Valor do COFINS retido")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [VALOR_RET_ISS] - Valor do ISS retido")
-        ])
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_ICMS] - Valor total do ICMS")
       ]),
       _vm._v(" "),
-      _c("br"),
-      _vm._v(" "),
-      _c("h5", { staticClass: "text-center" }, [
-        _vm._v("\n\t\t\tOutras informações\n\t\t")
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(
+          " [VALOR_BASE_DIFERIMENTO] - Valor total da base do diferimento do ICMS"
+        )
       ]),
       _vm._v(" "),
-      _c("ul", { staticClass: "list-group list-group-flush" }, [
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [PESO_LIQUIDO] - Valor total do peso líquido dos produtos")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [PESO_BRUTO] - Valor total do peso bruto dos produtos")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(
-            " [NUMERO_CUPOM] - Número do cupom fiscal caso tenha sido gerado em ECF"
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(
-            " [NUMERO_PEDIDO] - Números dos pedidos de venda que estão vinculados à nota"
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [NOME_FANTASIA] - Nome fantasia do destinatário")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(
-            " [PEDIDO_COMPRA] - Número(s) do(s) pedido(s) de compra informado(s) na tag xPed"
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [NOME_VENDEDOR] - Nome do vendedor associado a venda")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [NUMERO_DI] - Número da Declaração de Importação (DI)")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [DATA_REGISTRO_DI] - Data de registro da DI")
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "list-group-item" }, [
-          _vm._v(" [LOCAL_DESEMBARACO] - Local de desembaraço")
-        ])
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_DIFERIMENTO] - Valor total do diferimento do ICMS")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [ICMS_PRESUMIDO] - Valor total do ICMS presumido")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(
+          " [VALOR_CREDITO_ICMS] - Valor total do crédito do ICMS (somente contribuintes do SIMPLES)"
+        )
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(
+          " [ALIQUOTA_CREDITO_ICMS] - Alíquota de crédito do ICMS (somente contribuintes do SIMPLES)"
+        )
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_ICMS_ST] - Valor total do ICMS ST")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_ICMS_RETIDO] - Valor total do ICMS retido")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [ALIQUOTA_ICMS_RETIDO] - Alíquota do ICMS retido")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(
+          " [VALOR_BASE_ICMS_RETENCAO] - Valor total da base do ICMS retido"
+        )
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(
+          " [APROX_TRIB] - Informações dos tributos aproximados conforme Lei da transparência"
+        )
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_PIS] - Valor total do PIS")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_COFINS] - Valor total do COFINS")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_FCP] - Valor total do FCP")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_RET_IR] - Valor do IR retido")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_RET_CSLL] - Valor do CSLL retido")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_RET_PIS] - Valor do PIS retido")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_RET_COFINS] - Valor do COFINS retido")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [VALOR_RET_ISS] - Valor do ISS retido")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ul", { staticClass: "list-group list-group-flush" }, [
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [PESO_LIQUIDO] - Valor total do peso líquido dos produtos")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [PESO_BRUTO] - Valor total do peso bruto dos produtos")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(
+          " [NUMERO_CUPOM] - Número do cupom fiscal caso tenha sido gerado em ECF"
+        )
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(
+          " [NUMERO_PEDIDO] - Números dos pedidos de venda que estão vinculados à nota"
+        )
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [NOME_FANTASIA] - Nome fantasia do destinatário")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(
+          " [PEDIDO_COMPRA] - Número(s) do(s) pedido(s) de compra informado(s) na tag xPed"
+        )
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [NOME_VENDEDOR] - Nome do vendedor associado a venda")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [NUMERO_DI] - Número da Declaração de Importação (DI)")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [DATA_REGISTRO_DI] - Data de registro da DI")
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "list-group-item" }, [
+        _vm._v(" [LOCAL_DESEMBARACO] - Local de desembaraço")
       ])
     ])
   }

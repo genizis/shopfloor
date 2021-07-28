@@ -1,16 +1,15 @@
 <template>
-	<div class="container">
-		<div>
-			
-			<button
-			type="button"
-			class="close rounded-pill"
-			v-on:click="$emit('close')"
-			>
-			<i class="fas fa-times"></i>
+<div class="modal-content"><!-- BODY -->
+
+		<div class="modal-header"><!-- HEADER -->
+			<h5 class="modal-title">{{ titulo }}</h5>
+			<button type="button" class="close" aria-label="Close" 
+			v-on:click="$emit('close')">
+			<span aria-hidden="true">×</span>
 		</button>
-	</div>
-	<div>
+	</div><!-- FIM HEADER -->
+
+	<div class=" modal-body" ref="formCadastro" id="formRegra"><!-- BODY -->
 <br>
 		<h5 class="text-center">
 			Impostos
@@ -81,8 +80,11 @@
 
 			<li class="list-group-item"> [LOCAL_DESEMBARACO] - Local de desembaraço</li>
 		</ul>
-	</div>
-</div>
+
+</div><!-- FIM BODY -->
+
+
+</div><!-- FIM CONTENT -->
 </template>
 
 <script>
