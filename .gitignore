@@ -5,3 +5,7 @@ error_log
 clientes/
 user_guide/
 notasFiscais/
+
+application/config/config.php
+application/config/database.php
+
