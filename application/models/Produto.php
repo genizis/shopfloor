@@ -61,7 +61,7 @@ class Produto extends CI_Model{
             
         }
 
-                
+
         return $query = $this->db->get()->result();
         
     }    
@@ -126,6 +126,16 @@ class Produto extends CI_Model{
 
         $this->db->select('ncm.*');
         $this->db->from('ncm');
+
+        return $query = $this->db->get()->result();
+
+    }
+
+    public function getNCMFiltro($filtro){
+
+        $this->db->select('ncm.*');
+        $this->db->from('ncm');
+        $this->db->or_like('ncm.desc_ncm',$filtro);
 
         return $query = $this->db->get()->result();
 
@@ -290,37 +300,47 @@ class Produto extends CI_Model{
         return $input;
 
     }
+    
+    public function buscaProdutoFiltro($filtro){
+       $this->db->from('produto');
+       $this->db->select('produto.*');
+       
+       $this->db->or_like('produto.nome_produto', $filtro);
+       $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+       return $query = $this->db->get()->result();
+   } 
 
-    public function buscaProdutoVenda($seqProdutoVenda = null){
-        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
 
-        $this->db->select('produto_venda.*, produto.cod_produto, produto.nome_produto, produto.cod_unidade_medida, tipo_produto.nome_tipo_produto');
-        $this->db->from('produto_venda');
-        $this->db->join('produto', 'produto.cod_produto = produto_venda.cod_produto');
-        $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
-        $this->db->where('produto_venda.seq_produto_venda', $seqProdutoVenda);
-        
-        return $query = $this->db->get()->row();
-    } 
+   public function buscaProdutoVenda($seqProdutoVenda = null){
+    $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
 
-    public function selectProdutoVenda($seqProdutoVenda = null){
-        $this->load->model('Vendas', 'venda', true);
+    $this->db->select('produto_venda.*, produto.cod_produto, produto.nome_produto, produto.cod_unidade_medida, tipo_produto.nome_tipo_produto');
+    $this->db->from('produto_venda');
+    $this->db->join('produto', 'produto.cod_produto = produto_venda.cod_produto');
+    $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
+    $this->db->where('produto_venda.seq_produto_venda', $seqProdutoVenda);
 
-        $produto = $this->buscaProdutoVenda($seqProdutoVenda);
-        $quantPedida = number_format($produto->quant_pedida, 3, ',', '.');
-        $quantAtendida = number_format($produto->quant_atendida, 3, ',', '.');
+    return $query = $this->db->get()->row();
+} 
 
-        $input = "{$produto->seq_produto_venda}|{$produto->cod_produto} - {$produto->nome_produto}|{$produto->cod_unidade_medida}|{$produto->nome_tipo_produto}|{$quantPedida}|{$quantAtendida}";
+public function selectProdutoVenda($seqProdutoVenda = null){
+    $this->load->model('Vendas', 'venda', true);
 
-        return $input;
+    $produto = $this->buscaProdutoVenda($seqProdutoVenda);
+    $quantPedida = number_format($produto->quant_pedida, 3, ',', '.');
+    $quantAtendida = number_format($produto->quant_atendida, 3, ',', '.');
 
-    }
+    $input = "{$produto->seq_produto_venda}|{$produto->cod_produto} - {$produto->nome_produto}|{$produto->cod_unidade_medida}|{$produto->nome_tipo_produto}|{$quantPedida}|{$quantAtendida}";
 
-    public function countPorCodigo($codProduto){   
-        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
-        
-        $this->db->where('cod_produto', $codProduto);      
-        return $this->db->count_all_results('produto');
-    }        
+    return $input;
+
+}
+
+public function countPorCodigo($codProduto){   
+    $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+
+    $this->db->where('cod_produto', $codProduto);      
+    return $this->db->count_all_results('produto');
+}        
 
 }

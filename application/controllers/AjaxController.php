@@ -14,6 +14,12 @@ class AjaxController extends CI_Controller {
     }
 
     //Para uso do Ajax no Form
+
+
+    public function getEstado(){
+        echo json_encode($this->tabelasauxiliares->getEstado());
+    }
+
     public function getCidades(){
 
         $idEstado = $this->input->post('estado');
@@ -80,6 +86,30 @@ class AjaxController extends CI_Controller {
 
         echo json_encode($listaNCM);
     }
+
+    public function getNCMFiltro(){
+
+        $filtro = $this->input->get('filtro');
+
+        $listaNCM = $this->produto->getNCMFiltro($filtro);
+
+        echo json_encode($listaNCM);
+    }
+
+    public function getProdutosFiltro(){
+
+        $filtro = $this->input->get('filtro');
+
+        echo json_encode($this->produto->buscaProdutoFiltro($filtro));
+    }
+
+    public function getTipoProdutosFiltro(){
+
+        $filtro = $this->input->get('filtro');
+
+        echo json_encode($this->tipoProduto->getTipoProduto( $filtro ));
+    }
+
 
     public function inserirCliente(){
 

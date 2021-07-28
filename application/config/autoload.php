@@ -136,4 +136,4 @@ $autoload['model'] = array('Cliente' => 'cliente', 'Compras' => 'compra', 'Conta
                            'Empresa' => 'empresa', 'Engenharia' => 'engenharia', 'Estoque' => 'estoque', 'Email' => 'email',
                            'Fornecedor' => 'fornecedor', 'Producao' => 'producao', 'Produto' => 'produto',
                            'TabelasAuxiliares' => 'tabelasauxiliares', 'TipoProduto' => 'tipoproduto', 'Vendedor' => 'vendedor',
-                           'UnidadeMedida' => 'unidademedida', 'Usuario' => 'usuario', 'Vendas' => 'venda', 'Financeiro' => 'financeiro');
+                           'UnidadeMedida' => 'unidademedida', 'Usuario' => 'usuario', 'Vendas' => 'venda', 'Financeiro' => 'financeiro','TipoProduto'=>'tipoProduto');

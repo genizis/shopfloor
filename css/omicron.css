@@ -1,18 +1,86 @@
+/* Select Dinamico */
+.select2{
+  width: 100%!important;
+  height: 38px;
+  padding-top: 3px;
+}
+.select2-container .select2-selection--single {
+  margin-top: -2px!important;
+  height: 38px!important;
+  padding-top: 3px;
+  z-index: 9;
+}
+
+.fs-15{
+  font-size: 15px;
+}
+.pointer{
+  cursor: pointer;
+}
+.caixa{
+  margin-left: 22px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  padding-bottom: 3px;
+  padding-top: 10px;
+}
+
+/* Modal Dinamico */
+
+.modalDinamico{
+  z-index: 1051!important;
+  position: fixed;
+  top: 10% !important;
+  left: 0;
+  z-index: 1050;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  outline: 0;
+
+  margin-top: 20px;
+  margin-bottom: 6%;
+}
+.vm--overlay {
+    background: rgba(0, 0, 0, 0.5)!important;
+}
+.hidden{
+  display: none!important;
+}
+.red{
+  color: red;
+}
+
+.modalDinamico .close{
+  position: absolute;
+  top: 17px;
+  right: 20px;
+}
+
+body.modalDinamico-open {
+  overflow: hidden!important;
+}
+.vm--container {
+  overflow: auto;
+  margin-top: 4%;
+  z-index: 1031!important;
+}
+
 .login {
   margin-top: 50px;
 }
 /* Dropdown da barra do topo */
 
 .show-on-hover:hover > div.dropdown-menu {
-    display: block;    
+  display: block;    
 }
 
 /* --------------------------------------------
 Relevant Style
 ---------------------------------------------*/
 .dropdown-cols-2 .dropdown-menu {
-    min-width: 400px;
-    
+  min-width: 400px;
+
 }
 
 .light {
@@ -32,18 +100,18 @@ Relevant Style
 }
 
 .bg-default {    
-    background-color: #f8f8f8;
+  background-color: #f8f8f8;
 }
 
 .navbar {
-	margin-bottom: 18px;
+  margin-bottom: 18px;
 }
 
 .dropdown-label {
-	font-size: 12px;
-    line-height: 22px;
-    font-weight: 500;
-    text-transform: uppercase;
+  font-size: 12px;
+  line-height: 22px;
+  font-weight: 500;
+  text-transform: uppercase;
 }
 
 .dropdown-label {
@@ -80,20 +148,20 @@ Relevant Style
 
 
 .border-secondary {
-	min-height: 20px;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #ffffff;
-    color: #555555;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    border: 1px solid #ecf0f1;
-    border-bottom: 3px solid #ecf0f1;
- }
+  min-height: 20px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #ffffff;
+  color: #555555;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  border: 1px solid #ecf0f1;
+  border-bottom: 3px solid #ecf0f1;
+}
 
- .card-table .table {
- 	font-size: 12;
- }
+.card-table .table {
+  font-size: 12;
+}
 
 .pull-right {
   float: right !important;
@@ -195,125 +263,125 @@ Relevant Style
 }
 
 .card-counter{
-    margin-bottom: 20px;
-    padding: 20px 10px;
-    background-color: #fff;
-    height: 130px;
-    border-radius: 5px;
-    transition: .3s linear all;
-    border-color: #ecf0f1 !important;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    border: 1px solid;
-    border-bottom: 3px solid;
-  }
+  margin-bottom: 20px;
+  padding: 20px 10px;
+  background-color: #fff;
+  height: 130px;
+  border-radius: 5px;
+  transition: .3s linear all;
+  border-color: #ecf0f1 !important;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  border: 1px solid;
+  border-bottom: 3px solid;
+}
 
-  .card-counter:hover{
-    box-shadow: 4px 4px 20px #DADADA;
-    transition: .3s linear all;
-  }
+.card-counter:hover{
+  box-shadow: 4px 4px 20px #DADADA;
+  transition: .3s linear all;
+}
 
-  .card-counter.primary{
-    background-color: #325D88;
-    color: #FFF;
-  }
+.card-counter.primary{
+  background-color: #325D88;
+  color: #FFF;
+}
 
-  .card-counter.secondary{
-    background-color: #8E8C84;
-    color: #FFF;
-  }  
+.card-counter.secondary{
+  background-color: #8E8C84;
+  color: #FFF;
+}  
 
-  .card-counter.danger{
-    background-color: #d9534f;
-    color: #FFF;
-  }  
+.card-counter.danger{
+  background-color: #d9534f;
+  color: #FFF;
+}  
 
-  .card-counter.success{
-    background-color: #66bb6a;
-    color: #FFF;
-  }  
+.card-counter.success{
+  background-color: #66bb6a;
+  color: #FFF;
+}  
 
-  .card-counter.info{
-    background-color: #26c6da;
-    color: #FFF;
-  }  
+.card-counter.info{
+  background-color: #26c6da;
+  color: #FFF;
+}  
 
-  .card-counter i{
-    font-size: 5em;
-    opacity: 0.2;
-  }
+.card-counter i{
+  font-size: 5em;
+  opacity: 0.2;
+}
 
-  .card-counter .count-numbers{
-    position: absolute;
-    right: 35px;
-    top: 20px;
-    font-size: 52px;
-    display: block;
-  }
+.card-counter .count-numbers{
+  position: absolute;
+  right: 35px;
+  top: 20px;
+  font-size: 52px;
+  display: block;
+}
 
-  .card-counter .count-name{
-    position: absolute;
-    right: 35px;
-    top: 95px;
-    font-style: italic;
-    opacity: 0.5;
-    display: block;
-    font-size: 18px;
-  }
+.card-counter .count-name{
+  position: absolute;
+  right: 35px;
+  top: 95px;
+  font-style: italic;
+  opacity: 0.5;
+  display: block;
+  font-size: 18px;
+}
 
-  .btn-report{
-    height: 44px;
-  }
+.btn-report{
+  height: 44px;
+}
 
-  .custo-produto{
-    height: 600px; 
-  }
+.custo-produto{
+  height: 600px; 
+}
+
+.height-1{
+  height: 597px; 
+}
+
+.height-graph-3{
+  height: 65px;
+}
+
+@media (max-width: 1381px) {
 
   .height-1{
-    height: 597px; 
+    height: 501px; 
   }
 
-  .height-graph-3{
-    height: 65px;
-  }
+}
 
-  @media (max-width: 1381px) {
+.produto-venda{
+  height: 292px; 
+}
 
-    .height-1{
-      height: 501px; 
-    }
-    
-  }
+.graph {
+  height: 450;
+}
 
-  .produto-venda{
-    height: 292px; 
-  }
+.producao-dia{
+  height: 280;
+}
 
-  .graph {
-    height: 450;
-  }
+.compra-dia{
+  height: 280px;
+}
 
-  .producao-dia{
-    height: 280;
-  }
+.estoque-produto{
+  height: 430px;
+}
 
-  .compra-dia{
-    height: 280px;
-  }
+.movimento-produto{
+  height: 280px;
+}
 
-  .estoque-produto{
-    height: 430px;
-  }
+.consumo-produto{
+  height: 292px; 
+}
 
-  .movimento-produto{
-    height: 280px;
-  }
-
-  .consumo-produto{
-    height: 292px; 
-  }
-
-  /* width */
+/* width */
 ::-webkit-scrollbar {
   width: 7px;
 }
@@ -322,7 +390,7 @@ Relevant Style
 ::-webkit-scrollbar-track {
   background: #f1f1f1; 
 }
- 
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
   background: #8E8C84; 
@@ -443,18 +511,18 @@ Relevant Style
 /*teste 2
 .table-produto-nf tr {
   cursor: pointer;
-}*/
+  }*/
 
-.hedding h1{
-	color:#fff;
-	font-size:25px;
-}
-.main-section{
-	margin-top: 120px;
-}
-.hiddenRow {
-    padding: 0!important;
-    background-color: #fdfcfb;
+  .hedding h1{
+   color:#fff;
+   font-size:25px;
+ }
+ .main-section{
+   margin-top: 120px;
+ }
+ .hiddenRow {
+  padding: 0!important;
+  background-color: #fdfcfb;
 }
 
 .accordian-body label{
@@ -476,10 +544,10 @@ Relevant Style
 }
 
 small2,
-  .small2 {
-    font-size: 90%;
-    font-weight: 400;
-  }
+.small2 {
+  font-size: 90%;
+  font-weight: 400;
+}
 
 @media (max-width: 1381px) {
 

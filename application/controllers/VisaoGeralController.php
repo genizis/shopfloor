@@ -59,7 +59,10 @@ class VisaoGeralController extends CI_Controller {
 
         $lista_pedido_venda = $this->venda->getPedidoVendaPendente();
         $venda_total = $this->venda->getVendaTotal();
-        $lista_venda_cliente = $this->venda->getVendaClienteVisaoGeral(); 
+
+        #TODO descomentar
+        //$lista_venda_cliente = $this->venda->getVendaClienteVisaoGeral(); 
+         $lista_venda_cliente = [];
 
         $labelCodCli = array();
         $labelNomeCli = array();

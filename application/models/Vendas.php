@@ -1358,6 +1358,8 @@ class Vendas extends CI_Model{
     }
 
     public function getVendaClienteVisaoGeral(){
+       
+
         $this->db->where('pedido_venda.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
         $this->db->where('cliente.id_empresa', getDadosUsuarioLogado()['id_empresa']);
 
@@ -1401,6 +1403,7 @@ class Vendas extends CI_Model{
         $this->db->group_by('vendas.cod_cliente');
         $this->db->order_by('sum(vendas.total_venda)', 'desc');
         $this->db->limit(3); 
+
 
         return $this->db->get()->result();        
 

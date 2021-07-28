@@ -1,0 +1,31 @@
+{
+  "name": "shoopflow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "webpack.mix.js",
+  "scripts": {
+    "dev": "npm run development",
+    "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress  --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "watch": "npm run development -- --watch",
+    "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "prod": "npm run production",
+    "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
+  },
+  "author": "jerfsonsilva",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "moment": "^2.29.1",
+    "rtlcss": "^2.5.0",
+    "v-mask": "^2.2.4",
+    "v-money": "^0.8.1",
+    "vue": "^2.0.8",
+    "vue-js-modal": "^2.0.0-rc.6",
+    "vue-the-mask": "^0.11.1"
+  },
+  "devDependencies": {
+    "cross-env": "^5.1",
+    "laravel-mix": "^5.0.1",
+    "vue-template-compiler": "^2.6.14"
+  }
+}

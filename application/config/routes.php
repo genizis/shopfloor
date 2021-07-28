@@ -92,7 +92,8 @@ $route['usuarios/novo-usuario']['GET'] =  'UsuariosController/formCadastroUsuari
 $route['usuarios/novo-usuario']['POST'] =  'UsuariosController/inserirUsuario';
 
 //Rotas Natureza de Operação
-$route['natureza-operacao/nova-natureza-operacao']['GET'] =  'EmpresaController/formNaturezaOperacao';
+$route['natureza-operacao']['GET'] =  'EmpresaController/listarNaturezaOperacao';
+$route['natureza-operacao/nova']['GET'] =  'EmpresaController/formNaturezaOperacao';
 
 //Rotas Financeiro
 $route['conta/nova-conta']['GET'] =  'FinanceiroController/formConta';
@@ -517,6 +518,14 @@ $route['ajax/busca-componente-prod']['POST'] = 'AjaxController/getComponentesOrd
 $route['ajax/busca-produto-venda']['POST'] = 'AjaxController/getProdutosVenda';
 $route['ajax/busca-ncm']['POST'] = 'AjaxController/getNCM';
 $route['ajax/inserir-cliente']['POST'] = 'AjaxController/inserirCliente';
+
+$route['ajax/busca-ncm-filtro']['GET'] = 'AjaxController/getNCMFiltro';
+
+$route['ajax/busca-produto-filtro']['GET'] = 'AjaxController/getProdutosFiltro';
+
+$route['ajax/busca-tipo-produto-filtro']['GET'] = 'AjaxController/getTipoProdutosFiltro';
+
+$route['ajax/busca-estado']['GET'] = 'AjaxController/getEstado';
 
 
 

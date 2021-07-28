@@ -12,16 +12,72 @@ class EmpresaController extends CI_Controller {
 
         }
     }  
+    public function listarNaturezaOperacao(){
 
-    public function formNaturezaOperacao(){
+         // Busca dos dados para apresentação
+        $filter = ($this->input->get('buscar')) ? $this->input->get('buscar') : "";
+        $offset = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
+        
+
+        $config = array(
+            'base_url' => base_url("producao/ordem-producao"),
+            'per_page' => 10,
+            'num_links' => 10,
+            'uri_segment' => 3,
+            'total_rows' => $this->producao->countAll($filter),
+            'reuse_query_string' => true,
+            'full_tag_open' => '<ul class="pagination justify-content-center">',
+            'full_tag_close' => '</ul>',
+            'first_link' => FALSE,
+            'last_link' => FALSE,
+            'first_tag_open' => '<li class="page-item">',
+            'first_tag_close' => '<li class="page-item">',
+            'prev_link' => '&laquo;',
+            'prev_tag_open' => '<li class="page-item prev">',
+            'prev_tag_close' => '</li>',
+            'next_link' => '&raquo;',
+            'next_tag_open' => '<li class="page-item next">',
+            'next_tag_close' => '</li>',
+            'last_tag_open' => '<li class="page-item">',
+            'last_tag_close' => "</li>",
+            'cur_tag_open' => '<li class="page-item active"><span class="page-link">',
+            'cur_tag_close' => '</span></li>',
+            'num_tag_open' => '<li class="page-item">',
+            'num_tag_close' => '</li>'
+        );
+
+        $listaOrdem = $this->producao->getOrdemProducao($filter, $config["per_page"], $offset);
+
+        $this->pagination->initialize($config);      
+
 
         $dados = array(
+            'filter' => $filter,
+            'filter' => $filter,
+            'pagination' => $this->pagination->create_links(),
+            'lista_ordem' => $listaOrdem,
             'menu' => 'Admin'
         );
 
-        $this->load->view('cadastros/nova-natureza-operacao', $dados);
+        $this->load->view('naturezaOperacao/lista', $dados);
 
     }
+
+    public function formNaturezaOperacao(){
+
+        $listaPrudutoProd = $this->produto->getProdutoProduzido();
+        $listaPedido = $this->venda->getPedidoVenda();
+
+        $dados = array(
+            'lista_produto_prod' => $listaPrudutoProd,
+            'lista_pedido' => $listaPedido,
+            'menu' => 'Admin'
+        );
+        
+
+        $this->load->view('naturezaOperacao/nova', $dados);
+
+    }     
 
     public function editarMeusDados(){
 
@@ -45,7 +101,7 @@ class EmpresaController extends CI_Controller {
 
         $this->form_validation->set_rules('NomeUsuario', 'Nome do Usuário', 'required|max_length[100]',
             array('required' => 'Você deve preencher o campo %s',
-                  'max_length' => 'O campo %s não deve ter mais que 100 caracteres')); 
+              'max_length' => 'O campo %s não deve ter mais que 100 caracteres')); 
 
         if($this->input->post('Senha1') <> '' || $this->input->post('Senha1') <> ''){
             $this->form_validation->set_rules('Senha1', 'Senha', 'required',
@@ -166,11 +222,11 @@ class EmpresaController extends CI_Controller {
         //Validações dos campo e array das mensagens apresentadas
         $this->form_validation->set_rules('NomeEmpresa', 'Nome da Empresa', 'required|max_length[60]',
             array('required' => 'Você deve preencher o campo %s',
-                  'max_length' => 'O campo %s não deve ter mais que 60 caracteres'));
+              'max_length' => 'O campo %s não deve ter mais que 60 caracteres'));
         $this->form_validation->set_rules('EmailContato', 'E-mail de Contato', 'required|valid_email|max_length[60]', 
             array('required' => 'Você deve preencher o campo %s',
-                  'max_length' => 'O campo %s não deve ter mais que 60 caracteres',
-                  'valid_email' => 'É necessário informar um e-mail válido'));
+              'max_length' => 'O campo %s não deve ter mais que 60 caracteres',
+              'valid_email' => 'É necessário informar um e-mail válido'));
         $this->form_validation->set_rules('Endereco', 'Rua e Número', 'max_length[60]', 
             array('max_length' => 'O campo %s não deve ter mais que 60 caracteres'));
         $this->form_validation->set_rules('Bairro', 'Bairro', 'max_length[45]', 
@@ -301,23 +357,23 @@ class EmpresaController extends CI_Controller {
             'uri_segment' => 2,
             'total_rows' => $this->cliente->countAll(),
             'full_tag_open' => '<ul class="pagination justify-content-center">',
-			'full_tag_close' => '</ul>',
-			'first_link' => FALSE,
-			'last_link' => FALSE,
-			'first_tag_open' => '<li class="page-item">',
-			'first_tag_close' => '<li class="page-item">',
-			'prev_link' => '&laquo;',
-			'prev_tag_open' => '<li class="page-item prev">',
-			'prev_tag_close' => '</li>',
-			'next_link' => '&raquo;',
-			'next_tag_open' => '<li class="page-item next">',
-			'next_tag_close' => '</li>',
-			'last_tag_open' => '<li class="page-item">',
-			'last_tag_close' => "</li>",
-			'cur_tag_open' => '<li class="page-item active"><span class="page-link">',
-			'cur_tag_close' => '</span></li>',
-			'num_tag_open' => '<li class="page-item">',
-			'num_tag_close' => '</li>'
+            'full_tag_close' => '</ul>',
+            'first_link' => FALSE,
+            'last_link' => FALSE,
+            'first_tag_open' => '<li class="page-item">',
+            'first_tag_close' => '<li class="page-item">',
+            'prev_link' => '&laquo;',
+            'prev_tag_open' => '<li class="page-item prev">',
+            'prev_tag_close' => '</li>',
+            'next_link' => '&raquo;',
+            'next_tag_open' => '<li class="page-item next">',
+            'next_tag_close' => '</li>',
+            'last_tag_open' => '<li class="page-item">',
+            'last_tag_close' => "</li>",
+            'cur_tag_open' => '<li class="page-item active"><span class="page-link">',
+            'cur_tag_close' => '</span></li>',
+            'num_tag_open' => '<li class="page-item">',
+            'num_tag_close' => '</li>'
         );
 
         $this->pagination->initialize($config);

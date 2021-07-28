@@ -237,7 +237,7 @@
                             aria-expanded="false"><i class="fas fa-cog"></i></a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown01">
                             <a class="dropdown-item" href="<?= base_url('dados-empresa') ?>">Dados da Minha Empresa</a>
-                            <a class="dropdown-item" href="<?= base_url('natureza-opercao') ?>">Natureza de Operação</a>
+                            <a class="dropdown-item" href="<?= base_url('natureza-operacao') ?>">Natureza de Operação</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="<?= base_url('usuario') ?>">Usuários da Empresa</a>
                         </div>
