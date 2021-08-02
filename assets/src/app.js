@@ -30,7 +30,8 @@ import axios from 'axios';
  Vue.mixin({
    methods: {
       mulSe(valor, lista){
-         return lista.indexOf(valor) > -1;
+         var Nvalor = parseInt(valor);
+         return lista.indexOf(Nvalor) > -1;
       },
       textoSelect($this){
          return $this.options[$this.selectedIndex].innerText;

@@ -106,7 +106,7 @@
 					<a class="nav-link" id="retencao-tab" data-toggle="tab" href="#retencao" role="tab" aria-controls="retencao" aria-selected="false">Retenções</a>
 				</li>
 			</ul>
-			<div class="tab-content  col-12" id="myTabContent">
+			<div class="tab-content  col-12" id="myTabContent" v-if="mostrar">
 
 				<div class="tab-pane fade show active" id="tabICMS" role="tabpanel" aria-labelledby="home-tab">
 					<ICMS :estados="estados" :formularios="regras.ICMS" :formulariopai="form"></ICMS>
@@ -381,13 +381,20 @@ export default {
 					if (element instanceof Object) {
 						$this.addRegra(index,element)
 					}else{
-						$this.form[index] = element;
+					
+						if(element!=null)
+							Vue.set($this.form,index, element.toString());
+						else
+							Vue.set($this.form,index, '');
+						//console.log(index);
 					}
 					
 				});
-
-				//console.log($this.regras);
+				$this.mostrar = true;
+				//console.log($this.form);
 			});
+		}else{
+			this.mostrar = true;
 		}
 
 		axios.get('/ajax/busca-estado') //Buscar estados
@@ -399,8 +406,7 @@ export default {
 		addRegra(index,listaCadastrada){
 			var $this = this;
 			$.each(listaCadastrada, function( indexli, lista) {
-				//lista['estados'] = [];
-				//lista['produtos'] = [];
+				
 				$this.regraCont++;
 				$this.regras[index].push({
 					cad:false, 

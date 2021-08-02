@@ -36,7 +36,6 @@ export default {
 	},
 	mounted() {
 		//Se cadastro
-	
 		if(this.idcont!=1 && this.form.cad==true)	this.abrirModal();
 		if(this.form.cad){
 			Vue.set(this.form,'CodigoSituacaoOperacao', 400);
@@ -46,7 +45,7 @@ export default {
 			Vue.set(this.form,'CFOP', 120);
 			Vue.set(this.form,'paTipoTributacao', 'N');
 		}
-	
+
 	},
 	methods: {
 		valorCodigo(cod, lista){

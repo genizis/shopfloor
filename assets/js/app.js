@@ -2379,10 +2379,13 @@ __webpack_require__.r(__webpack_exports__);
           if (element instanceof Object) {
             $this.addRegra(index, element);
           } else {
-            $this.form[index] = element;
+            if (element != null) Vue.set($this.form, index, element.toString());else Vue.set($this.form, index, ''); //console.log(index);
           }
-        }); //console.log($this.regras);
+        });
+        $this.mostrar = true; //console.log($this.form);
       });
+    } else {
+      this.mostrar = true;
     }
 
     axios.get('/ajax/busca-estado') //Buscar estados
@@ -2394,8 +2397,6 @@ __webpack_require__.r(__webpack_exports__);
     addRegra: function addRegra(index, listaCadastrada) {
       var $this = this;
       $.each(listaCadastrada, function (indexli, lista) {
-        //lista['estados'] = [];
-        //lista['produtos'] = [];
         $this.regraCont++;
         $this.regras[index].push({
           cad: false,
@@ -28210,438 +28211,267 @@ var render = function() {
           ]
         ),
         _vm._v(" "),
-        _c(
-          "div",
-          { staticClass: "tab-content  col-12", attrs: { id: "myTabContent" } },
-          [
-            _c(
+        _vm.mostrar
+          ? _c(
               "div",
               {
-                staticClass: "tab-pane fade show active",
-                attrs: {
-                  id: "tabICMS",
-                  role: "tabpanel",
-                  "aria-labelledby": "home-tab"
-                }
+                staticClass: "tab-content  col-12",
+                attrs: { id: "myTabContent" }
               },
               [
-                _c("ICMS", {
-                  attrs: {
-                    estados: _vm.estados,
-                    formularios: _vm.regras.ICMS,
-                    formulariopai: _vm.form
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "tab-pane fade",
-                attrs: {
-                  id: "tabIPI",
-                  role: "tabpanel",
-                  "aria-labelledby": "home-tab"
-                }
-              },
-              [
-                _c("IPI", {
-                  attrs: {
-                    estados: _vm.estados,
-                    formularios: _vm.regras.IPI,
-                    formulariopai: _vm.form
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "tab-pane fade",
-                attrs: {
-                  id: "tabPIS",
-                  role: "tabpanel",
-                  "aria-labelledby": "home-tab"
-                }
-              },
-              [
-                _c("PIS", {
-                  attrs: {
-                    estados: _vm.estados,
-                    formularios: _vm.regras.PIS,
-                    formulariopai: _vm.form
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "tab-pane fade",
-                attrs: {
-                  id: "tabCOFINS",
-                  role: "tabpanel",
-                  "aria-labelledby": "home-tab"
-                }
-              },
-              [
-                _c("COFINS", {
-                  attrs: {
-                    estados: _vm.estados,
-                    formularios: _vm.regras.COFINS,
-                    formulariopai: _vm.form
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "tab-pane fade",
-                attrs: {
-                  id: "tabII",
-                  role: "tabpanel",
-                  "aria-labelledby": "home-tab"
-                }
-              },
-              [
-                _c("II", {
-                  attrs: {
-                    estados: _vm.estados,
-                    formularios: _vm.regras.II,
-                    formulariopai: _vm.form
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "tab-pane fade",
-                attrs: {
-                  id: "tabISSQN",
-                  role: "tabpanel",
-                  "aria-labelledby": "home-tab"
-                }
-              },
-              [
-                _c("ISSQN", {
-                  attrs: {
-                    estados: _vm.estados,
-                    formularios: _vm.regras.ISSQN,
-                    formulariopai: _vm.form
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "tab-pane fade ",
-                attrs: {
-                  id: "outros",
-                  role: "tabpanel",
-                  "aria-labelledby": "profile-tab"
-                }
-              },
-              [
-                _c("div", { staticClass: "row" }, [
-                  _c("div", { staticClass: "form-group col-md-3" }, [
-                    _c("label", { attrs: { for: "" } }, [
-                      _vm._v("Presumido no cálculo do PIS/COFINS ")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.form.presumidoCalculoPisCofins,
-                            expression: "form.presumidoCalculoPisCofins"
-                          }
-                        ],
-                        staticClass: "form-control ",
-                        attrs: {
-                          name: "presumidoCalculoPisCofins",
-                          required: ""
-                        },
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.form,
-                              "presumidoCalculoPisCofins",
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      _vm._l(_vm.simnao, function(item) {
-                        return _c("option", { domProps: { value: item.id } }, [
-                          _vm._v(_vm._s(item.texto))
-                        ])
-                      }),
-                      0
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "form-group col-md-3" }, [
-                    _c("label", { attrs: { for: "" } }, [
-                      _vm._v("Somar outras despesas ")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.form.somarOutrasDespesas,
-                            expression: "form.somarOutrasDespesas"
-                          }
-                        ],
-                        staticClass: "form-control ",
-                        attrs: { name: "somarOutrasDespesas", required: "" },
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.form,
-                              "somarOutrasDespesas",
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      _vm._l(_vm.simnao, function(item) {
-                        return _c("option", { domProps: { value: item.id } }, [
-                          _vm._v(_vm._s(item.texto))
-                        ])
-                      }),
-                      0
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-12" }),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "form-group col-md-3" }, [
-                    _c("label", { attrs: { for: "" } }, [
-                      _vm._v(" Alíquota funrural (%) ")
-                    ]),
-                    _vm._v(" "),
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "money",
-                          rawName: "v-money",
-                          value: _vm.money,
-                          expression: "money"
-                        },
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.form.aliquotaFunrural,
-                          expression: "form.aliquotaFunrural"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      attrs: { type: "text", name: "aliquotaFunrural" },
-                      domProps: { value: _vm.form.aliquotaFunrural },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
-                          }
-                          _vm.$set(
-                            _vm.form,
-                            "aliquotaFunrural",
-                            $event.target.value
-                          )
-                        }
+                _c(
+                  "div",
+                  {
+                    staticClass: "tab-pane fade show active",
+                    attrs: {
+                      id: "tabICMS",
+                      role: "tabpanel",
+                      "aria-labelledby": "home-tab"
+                    }
+                  },
+                  [
+                    _c("ICMS", {
+                      attrs: {
+                        estados: _vm.estados,
+                        formularios: _vm.regras.ICMS,
+                        formulariopai: _vm.form
                       }
                     })
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "form-group col-md-3" }, [
-                    _c("label", { attrs: { for: "" } }, [
-                      _vm._v(" Compra de produtor rural")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.form.compraProdutorRural,
-                            expression: "form.compraProdutorRural"
-                          }
-                        ],
-                        staticClass: "form-control ",
-                        attrs: { name: "compraProdutorRural", required: "" },
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.form,
-                              "compraProdutorRural",
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      _vm._l(_vm.simnao, function(item) {
-                        return _c("option", { domProps: { value: item.id } }, [
-                          _vm._v(_vm._s(item.texto))
-                        ])
-                      }),
-                      0
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-12" }),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "form-group col-md-3" }, [
-                    _c("label", { attrs: { for: "" } }, [
-                      _vm._v(" Descontar funrural do total faturado")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.form.descontarFunRuralTotal,
-                            expression: "form.descontarFunRuralTotal"
-                          }
-                        ],
-                        staticClass: "form-control ",
-                        attrs: { name: "descontarFunRuralTotal", required: "" },
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.form,
-                              "descontarFunRuralTotal",
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      _vm._l(_vm.simnao, function(item) {
-                        return _c("option", { domProps: { value: item.id } }, [
-                          _vm._v(_vm._s(item.texto))
-                        ])
-                      }),
-                      0
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "form-group col-md-3" }, [
-                    _c("label", { attrs: { for: "" } }, [
-                      _vm._v(" Tipo % Aprox. Trib.")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.form.tipoAproxTrib,
-                            expression: "form.tipoAproxTrib"
-                          }
-                        ],
-                        staticClass: "form-control ",
-                        attrs: { name: "tipoAproxTrib", required: "" },
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.form,
-                              "tipoAproxTrib",
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      _vm._l(_vm.tipoAproxTrib, function(item) {
-                        return _c("option", { domProps: { value: item.id } }, [
-                          _vm._v(_vm._s(item.texto))
-                        ])
-                      }),
-                      0
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _vm.form.tipoAproxTrib == "F"
-                    ? _c("div", { staticClass: "form-group col-md-2" }, [
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "tab-pane fade",
+                    attrs: {
+                      id: "tabIPI",
+                      role: "tabpanel",
+                      "aria-labelledby": "home-tab"
+                    }
+                  },
+                  [
+                    _c("IPI", {
+                      attrs: {
+                        estados: _vm.estados,
+                        formularios: _vm.regras.IPI,
+                        formulariopai: _vm.form
+                      }
+                    })
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "tab-pane fade",
+                    attrs: {
+                      id: "tabPIS",
+                      role: "tabpanel",
+                      "aria-labelledby": "home-tab"
+                    }
+                  },
+                  [
+                    _c("PIS", {
+                      attrs: {
+                        estados: _vm.estados,
+                        formularios: _vm.regras.PIS,
+                        formulariopai: _vm.form
+                      }
+                    })
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "tab-pane fade",
+                    attrs: {
+                      id: "tabCOFINS",
+                      role: "tabpanel",
+                      "aria-labelledby": "home-tab"
+                    }
+                  },
+                  [
+                    _c("COFINS", {
+                      attrs: {
+                        estados: _vm.estados,
+                        formularios: _vm.regras.COFINS,
+                        formulariopai: _vm.form
+                      }
+                    })
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "tab-pane fade",
+                    attrs: {
+                      id: "tabII",
+                      role: "tabpanel",
+                      "aria-labelledby": "home-tab"
+                    }
+                  },
+                  [
+                    _c("II", {
+                      attrs: {
+                        estados: _vm.estados,
+                        formularios: _vm.regras.II,
+                        formulariopai: _vm.form
+                      }
+                    })
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "tab-pane fade",
+                    attrs: {
+                      id: "tabISSQN",
+                      role: "tabpanel",
+                      "aria-labelledby": "home-tab"
+                    }
+                  },
+                  [
+                    _c("ISSQN", {
+                      attrs: {
+                        estados: _vm.estados,
+                        formularios: _vm.regras.ISSQN,
+                        formulariopai: _vm.form
+                      }
+                    })
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "tab-pane fade ",
+                    attrs: {
+                      id: "outros",
+                      role: "tabpanel",
+                      "aria-labelledby": "profile-tab"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "form-group col-md-3" }, [
                         _c("label", { attrs: { for: "" } }, [
-                          _vm._v(" Tributos (%) ")
+                          _vm._v("Presumido no cálculo do PIS/COFINS ")
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.form.presumidoCalculoPisCofins,
+                                expression: "form.presumidoCalculoPisCofins"
+                              }
+                            ],
+                            staticClass: "form-control ",
+                            attrs: {
+                              name: "presumidoCalculoPisCofins",
+                              required: ""
+                            },
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.form,
+                                  "presumidoCalculoPisCofins",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          _vm._l(_vm.simnao, function(item) {
+                            return _c(
+                              "option",
+                              { domProps: { value: item.id } },
+                              [_vm._v(_vm._s(item.texto))]
+                            )
+                          }),
+                          0
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group col-md-3" }, [
+                        _c("label", { attrs: { for: "" } }, [
+                          _vm._v("Somar outras despesas ")
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.form.somarOutrasDespesas,
+                                expression: "form.somarOutrasDespesas"
+                              }
+                            ],
+                            staticClass: "form-control ",
+                            attrs: {
+                              name: "somarOutrasDespesas",
+                              required: ""
+                            },
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.form,
+                                  "somarOutrasDespesas",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          _vm._l(_vm.simnao, function(item) {
+                            return _c(
+                              "option",
+                              { domProps: { value: item.id } },
+                              [_vm._v(_vm._s(item.texto))]
+                            )
+                          }),
+                          0
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-12" }),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group col-md-3" }, [
+                        _c("label", { attrs: { for: "" } }, [
+                          _vm._v(" Alíquota funrural (%) ")
                         ]),
                         _vm._v(" "),
                         _c("input", {
@@ -28655,13 +28485,13 @@ var render = function() {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.form.tributos,
-                              expression: "form.tributos"
+                              value: _vm.form.aliquotaFunrural,
+                              expression: "form.aliquotaFunrural"
                             }
                           ],
                           staticClass: "form-control",
-                          attrs: { type: "text", name: "tributos" },
-                          domProps: { value: _vm.form.tributos },
+                          attrs: { type: "text", name: "aliquotaFunrural" },
+                          domProps: { value: _vm.form.aliquotaFunrural },
                           on: {
                             input: function($event) {
                               if ($event.target.composing) {
@@ -28669,204 +28499,403 @@ var render = function() {
                               }
                               _vm.$set(
                                 _vm.form,
-                                "tributos",
+                                "aliquotaFunrural",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group col-md-3" }, [
+                        _c("label", { attrs: { for: "" } }, [
+                          _vm._v(" Compra de produtor rural")
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.form.compraProdutorRural,
+                                expression: "form.compraProdutorRural"
+                              }
+                            ],
+                            staticClass: "form-control ",
+                            attrs: {
+                              name: "compraProdutorRural",
+                              required: ""
+                            },
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.form,
+                                  "compraProdutorRural",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          _vm._l(_vm.simnao, function(item) {
+                            return _c(
+                              "option",
+                              { domProps: { value: item.id } },
+                              [_vm._v(_vm._s(item.texto))]
+                            )
+                          }),
+                          0
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-12" }),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group col-md-3" }, [
+                        _c("label", { attrs: { for: "" } }, [
+                          _vm._v(" Descontar funrural do total faturado")
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.form.descontarFunRuralTotal,
+                                expression: "form.descontarFunRuralTotal"
+                              }
+                            ],
+                            staticClass: "form-control ",
+                            attrs: {
+                              name: "descontarFunRuralTotal",
+                              required: ""
+                            },
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.form,
+                                  "descontarFunRuralTotal",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          _vm._l(_vm.simnao, function(item) {
+                            return _c(
+                              "option",
+                              { domProps: { value: item.id } },
+                              [_vm._v(_vm._s(item.texto))]
+                            )
+                          }),
+                          0
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group col-md-3" }, [
+                        _c("label", { attrs: { for: "" } }, [
+                          _vm._v(" Tipo % Aprox. Trib.")
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.form.tipoAproxTrib,
+                                expression: "form.tipoAproxTrib"
+                              }
+                            ],
+                            staticClass: "form-control ",
+                            attrs: { name: "tipoAproxTrib", required: "" },
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.form,
+                                  "tipoAproxTrib",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          _vm._l(_vm.tipoAproxTrib, function(item) {
+                            return _c(
+                              "option",
+                              { domProps: { value: item.id } },
+                              [_vm._v(_vm._s(item.texto))]
+                            )
+                          }),
+                          0
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _vm.form.tipoAproxTrib == "F"
+                        ? _c("div", { staticClass: "form-group col-md-2" }, [
+                            _c("label", { attrs: { for: "" } }, [
+                              _vm._v(" Tributos (%) ")
+                            ]),
+                            _vm._v(" "),
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "money",
+                                  rawName: "v-money",
+                                  value: _vm.money,
+                                  expression: "money"
+                                },
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.form.tributos,
+                                  expression: "form.tributos"
+                                }
+                              ],
+                              staticClass: "form-control",
+                              attrs: { type: "text", name: "tributos" },
+                              domProps: { value: _vm.form.tributos },
+                              on: {
+                                input: function($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.form,
+                                    "tributos",
+                                    $event.target.value
+                                  )
+                                }
+                              }
+                            })
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group col-md-3" }, [
+                        _c("label", { attrs: { for: "" } }, [
+                          _vm._v(" Tipo desconto ")
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.form.tipoDesconto,
+                                expression: "form.tipoDesconto"
+                              }
+                            ],
+                            staticClass: "form-control ",
+                            attrs: { name: "tipoDesconto", required: "" },
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.form,
+                                  "tipoDesconto",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          _vm._l(_vm.tipoDesconto, function(item) {
+                            return _c(
+                              "option",
+                              { domProps: { value: item.id } },
+                              [_vm._v(_vm._s(item.texto))]
+                            )
+                          }),
+                          0
+                        )
+                      ])
+                    ])
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "tab-pane fade",
+                    attrs: {
+                      id: "retencao",
+                      role: "tabpanel",
+                      "aria-labelledby": "retencao-tab"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "form-group col-md-3" }, [
+                        _c("label", { attrs: { for: "" } }, [
+                          _vm._v(" Possui retenção de impostos")
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.form.RetencaoImpostos,
+                                expression: "form.RetencaoImpostos"
+                              }
+                            ],
+                            staticClass: "form-control ",
+                            attrs: { name: "RetencaoImpostos", required: "" },
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.form,
+                                  "RetencaoImpostos",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          _vm._l(_vm.simnao, function(item) {
+                            return _c(
+                              "option",
+                              { domProps: { value: item.id } },
+                              [_vm._v(_vm._s(item.texto))]
+                            )
+                          }),
+                          0
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group col-md-2" }, [
+                        _c("label", { attrs: { for: "" } }, [
+                          _vm._v(" Alíquota CSLL retido %")
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "money",
+                              rawName: "v-money",
+                              value: _vm.money,
+                              expression: "money"
+                            },
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.form.AliquotaCSLL,
+                              expression: "form.AliquotaCSLL"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { type: "text", name: "AliquotaCSLL" },
+                          domProps: { value: _vm.form.AliquotaCSLL },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.form,
+                                "AliquotaCSLL",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group col-md-2" }, [
+                        _c("label", { attrs: { for: "" } }, [
+                          _vm._v(" Alíquota IR retido %")
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "money",
+                              rawName: "v-money",
+                              value: _vm.money,
+                              expression: "money"
+                            },
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.form.AliquotaIRRetido,
+                              expression: "form.AliquotaIRRetido"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { type: "text", name: "AliquotaIRRetido" },
+                          domProps: { value: _vm.form.AliquotaIRRetido },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.form,
+                                "AliquotaIRRetido",
                                 $event.target.value
                               )
                             }
                           }
                         })
                       ])
-                    : _vm._e(),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "form-group col-md-3" }, [
-                    _c("label", { attrs: { for: "" } }, [
-                      _vm._v(" Tipo desconto ")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.form.tipoDesconto,
-                            expression: "form.tipoDesconto"
-                          }
-                        ],
-                        staticClass: "form-control ",
-                        attrs: { name: "tipoDesconto", required: "" },
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.form,
-                              "tipoDesconto",
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      _vm._l(_vm.tipoDesconto, function(item) {
-                        return _c("option", { domProps: { value: item.id } }, [
-                          _vm._v(_vm._s(item.texto))
-                        ])
-                      }),
-                      0
-                    )
-                  ])
-                ])
-              ]
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "tab-pane fade",
-                attrs: {
-                  id: "retencao",
-                  role: "tabpanel",
-                  "aria-labelledby": "retencao-tab"
-                }
-              },
-              [
-                _c("div", { staticClass: "row" }, [
-                  _c("div", { staticClass: "form-group col-md-3" }, [
-                    _c("label", { attrs: { for: "" } }, [
-                      _vm._v(" Possui retenção de impostos")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.form.RetencaoImpostos,
-                            expression: "form.RetencaoImpostos"
-                          }
-                        ],
-                        staticClass: "form-control ",
-                        attrs: { name: "RetencaoImpostos", required: "" },
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.form,
-                              "RetencaoImpostos",
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      _vm._l(_vm.simnao, function(item) {
-                        return _c("option", { domProps: { value: item.id } }, [
-                          _vm._v(_vm._s(item.texto))
-                        ])
-                      }),
-                      0
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "form-group col-md-2" }, [
-                    _c("label", { attrs: { for: "" } }, [
-                      _vm._v(" Alíquota CSLL retido %")
-                    ]),
-                    _vm._v(" "),
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "money",
-                          rawName: "v-money",
-                          value: _vm.money,
-                          expression: "money"
-                        },
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.form.AliquotaCSLL,
-                          expression: "form.AliquotaCSLL"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      attrs: { type: "text", name: "AliquotaCSLL" },
-                      domProps: { value: _vm.form.AliquotaCSLL },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
-                          }
-                          _vm.$set(
-                            _vm.form,
-                            "AliquotaCSLL",
-                            $event.target.value
-                          )
-                        }
-                      }
-                    })
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "form-group col-md-2" }, [
-                    _c("label", { attrs: { for: "" } }, [
-                      _vm._v(" Alíquota IR retido %")
-                    ]),
-                    _vm._v(" "),
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "money",
-                          rawName: "v-money",
-                          value: _vm.money,
-                          expression: "money"
-                        },
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.form.AliquotaIRRetido,
-                          expression: "form.AliquotaIRRetido"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      attrs: { type: "text", name: "AliquotaIRRetido" },
-                      domProps: { value: _vm.form.AliquotaIRRetido },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
-                          }
-                          _vm.$set(
-                            _vm.form,
-                            "AliquotaIRRetido",
-                            $event.target.value
-                          )
-                        }
-                      }
-                    })
-                  ])
-                ])
+                    ])
+                  ]
+                )
               ]
             )
-          ]
-        ),
+          : _vm._e(),
         _vm._v(" "),
         _vm._m(9),
         _vm._v(" "),
@@ -46903,7 +46932,8 @@ var selectCount = 1;
 Vue.mixin({
   methods: {
     mulSe: function mulSe(valor, lista) {
-      return lista.indexOf(valor) > -1;
+      var Nvalor = parseInt(valor);
+      return lista.indexOf(Nvalor) > -1;
     },
     textoSelect: function textoSelect($this) {
       return $this.options[$this.selectedIndex].innerText;
