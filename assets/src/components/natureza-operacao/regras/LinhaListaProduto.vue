@@ -3,25 +3,25 @@
 	<div class="col-12 row">
 		<div class="col-3">
 			<select class="form-control " v-model="item.tipo">
-				<option value="NCM">NCM</option>
-				<option value="Produto">Produto</option>
-				<option value="GrupoProdutos">Grupo de produtos</option>
+				<option value="ncm">NCM</option>
+				<option value="produto">Produto</option>
+				<option value="grupoProduto">Grupo de produtos</option>
 			</select>
 		</div>
 
-		<div class="col-8" v-show="item.tipo == 'NCM'">
+		<div class="col-8" v-show="item.tipo == 'ncm'">
 			<select  ref="buscaNCM" class="form-control" v-model="item.ncm">
 				<option v-if="item.ncmText!=''" :value="item.ncm">{{item.ncmText}}</option>
 			</select>
 		</div>
 
-		<div class="col-8" v-show="item.tipo == 'Produto'" >
+		<div class="col-8" v-show="item.tipo == 'produto'" >
 			<select ref="buscaProduto" v-model="item.produto">
 				<option v-if="item.produtoText!=''" :value="item.produto">{{item.produtoText}}</option>
 			</select>
 		</div>
 
-		<div class="col-8" v-show="item.tipo == 'GrupoProdutos'">
+		<div class="col-8" v-show="item.tipo == 'grupoProduto'">
 			<select  ref="buscaGrupoProdutos" v-model="item.grupoProdutos">
 				<option v-if="item.grupoProdutosText!=''" :value="item.grupoProdutos">{{item.grupoProdutosText}}</option>
 			</select>
@@ -40,11 +40,12 @@ export default {
 	data() {
 		return {
 			mostrar:false,
-			tipoProduto:'NCM',
 			valorNCM:''
 		};
 	},
 	mounted() {
+		Vue.set(this.item,'tipo', this.item.tipo.toLowerCase());	
+
 		var $this = this;
 		$(function() {
 

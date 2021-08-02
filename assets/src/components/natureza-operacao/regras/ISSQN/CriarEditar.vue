@@ -1,5 +1,5 @@
 <template>
-		<div class="modal-content"><!-- BODY -->
+	<div class="modal-content"><!-- BODY -->
 
 		<div class="modal-header"><!-- HEADER -->
 			<h5 class="modal-title">{{ titulo }}</h5>
@@ -111,11 +111,11 @@
 	</div><!-- FIM BODY -->
 
 
-<div class="modal-footer col-12 text-right"> <!-- FOOTER -->
-	<button type="button" class="btn btn-primary" 
-	name="Opcao" value="salvar" @click="validarForm()"><i class="fas fa-save"></i> Salvar</button>
-	<a href="#" v-on:click="$emit('close')" class="btn btn-secondary">Cancelar</a>
-</div><!-- FIM FOOTER -->
+	<div class="modal-footer col-12 text-right"> <!-- FOOTER -->
+		<button type="button" class="btn btn-primary" 
+		name="Opcao" value="salvar" @click="validarForm()"><i class="fas fa-save"></i> Salvar</button>
+		<a href="#" v-on:click="$emit('close')" class="btn btn-secondary">Cancelar</a>
+	</div><!-- FIM FOOTER -->
 
 </div><!-- FIM CONTENT -->
 </template>
@@ -148,7 +148,7 @@ export default {
 		var $this = this;
 		this.produtoCont = this.form.produtos.length;
 
-		
+		console.log(this.form.situacaoTributaria);
 		
 	},
 	methods: {
@@ -158,7 +158,35 @@ export default {
 		},
 		removeProduto(key){
 			let index = this.buscarIndexArray(this.form.produtos,'id',key);
-			this.form.produtos.splice(index, 1);
+			var produto = this.form.produtos[index];
+
+			if (produto.cad) {
+				this.form.produtos.splice(index, 1);
+			}else{
+				var $this = this;
+				alertify
+				.confirm(
+					"alerta",
+					"Tem certeza que deseja excluir esse parametro?",
+					function () {
+						axios
+						.get("/ajax/excluir-vinculo-produto-natureza-operacao?id="+produto.id+"&&regra=ISSQN")
+						.then((response) => {
+							if (response.data.resultado) {
+								alertify.success(response.data.msg);
+								$this.form.produtos.splice(index, 1);
+							} else {
+								alertify.error(response.data.msg);
+							}
+						});
+					},
+					function () {}
+					)
+				.set("labels", { ok: "Sim", cancel: "Cancelar" })
+				.set("closable", true)
+				.set("basic", false)
+				.closeOthers();
+			}
 		},
 		validarForm(){
 			var resultado = this.validarFormulario('#formRegra');

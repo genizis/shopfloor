@@ -135,7 +135,35 @@ export default {
 		},
 		removeProduto(key){
 			let index = this.buscarIndexArray(this.form.produtos,'id',key);
-			this.form.produtos.splice(index, 1);
+			var produto = this.form.produtos[index];
+
+			if (produto.cad) {
+				this.form.produtos.splice(index, 1);
+			}else{
+				var $this = this;
+				alertify
+				.confirm(
+					"alerta",
+					"Tem certeza que deseja excluir esse parametro?",
+					function () {
+						axios
+						.get("/ajax/excluir-vinculo-produto-natureza-operacao?id="+produto.id+"&&regra=PIS")
+						.then((response) => {
+							if (response.data.resultado) {
+								alertify.success(response.data.msg);
+								$this.form.produtos.splice(index, 1);
+							} else {
+								alertify.error(response.data.msg);
+							}
+						});
+					},
+					function () {}
+					)
+				.set("labels", { ok: "Sim", cancel: "Cancelar" })
+				.set("closable", true)
+				.set("basic", false)
+				.closeOthers();
+			}
 		},
 		validarForm(){
 			var resultado = this.validarFormulario('#formRegra');

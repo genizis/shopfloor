@@ -93,7 +93,17 @@ $route['usuarios/novo-usuario']['POST'] =  'UsuariosController/inserirUsuario';
 
 //Rotas Natureza de Operação
 $route['natureza-operacao']['GET'] =  'EmpresaController/listarNaturezaOperacao';
+$route['natureza-operacao'] =  'EmpresaController/listarNaturezaOperacao';
+$route['natureza-operacao/(:num)']['GET'] =  'EmpresaController/listarNaturezaOperacao';
+
 $route['natureza-operacao/nova']['GET'] =  'EmpresaController/formNaturezaOperacao';
+$route['natureza-operacao/nova']['POST'] =  'EmpresaController/inserirNaturezaOperacao';
+$route['natureza-operacao/editar/(:any)']['GET'] = 'EmpresaController/formEditarNaturezaOperacao/$1';
+
+
+$route['natureza-operacao/excluir-natureza'] = 'EmpresaController/excluirNaturezaOperacao';
+
+$route['natureza-operacao/ajax/(:any)']['GET'] = 'EmpresaController/ajaxeditarNaturezaOperacao/$1';
 
 //Rotas Financeiro
 $route['conta/nova-conta']['GET'] =  'FinanceiroController/formConta';
@@ -527,7 +537,8 @@ $route['ajax/busca-tipo-produto-filtro']['GET'] = 'AjaxController/getTipoProduto
 
 $route['ajax/busca-estado']['GET'] = 'AjaxController/getEstado';
 
+$route['ajax/excluir-vinculo-produto-natureza-operacao']['GET'] = 'AjaxController/excluirVinculoProdutoNaturezaOperacao';
 
 
-
+$route['ajax/excluir-regra-natureza-operacao']['GET'] = 'AjaxController/excluirRegraProdutoNaturezaOperacao';
 

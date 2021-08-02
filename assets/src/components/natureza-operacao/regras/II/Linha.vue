@@ -31,10 +31,12 @@ export default {
 	},
 	mounted() {
 		//Se cadastro
-		if(this.idcont!=1)	this.abrirModal();
+		if(this.idcont!=1  && this.form.cad==true)	this.abrirModal();
 
-		Vue.set(this.form,'situacaoTributaria', '02');
-	
+		if(this.form.cad){
+
+			Vue.set(this.form,'situacaoTributaria', 2);
+		}
 	},
 	methods: {
 		valorCodigo(cod, lista){

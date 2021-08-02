@@ -104,7 +104,7 @@ class AjaxController extends CI_Controller {
     }
 
     public function getTipoProdutosFiltro(){
-
+        $this->load->model('tipoProduto');
         $filtro = $this->input->get('filtro');
 
         echo json_encode($this->tipoProduto->getTipoProduto( $filtro ));
@@ -138,4 +138,29 @@ class AjaxController extends CI_Controller {
         echo $this->cliente->selectClienteOption($codCliente);
 
     }
+
+    public function excluirVinculoProdutoNaturezaOperacao(){
+        $this->load->model('NaturezaOperacao');
+        $id = $this->input->get('id');
+        $regra = $this->input->get('regra');
+        $resultado = $this->NaturezaOperacao->deleteProdutos($id, $regra);
+
+        echo json_encode([
+            'resultado' => $resultado,
+            'msg' => $resultado?'Excluido com sucesso':'Erro ao excluir'
+        ]);
+
+    }
+    public function excluirRegraProdutoNaturezaOperacao()
+    {
+       $this->load->model('NaturezaOperacao');
+       $id = $this->input->get('id');
+       $regra = $this->input->get('regra');
+       $resultado = $this->NaturezaOperacao->deleteRegras($id, $regra);
+
+       echo json_encode([
+        'resultado' => $resultado,
+        'msg' => $resultado?'Excluido com sucesso':'Erro ao excluir'
+    ]);
+   }
 }

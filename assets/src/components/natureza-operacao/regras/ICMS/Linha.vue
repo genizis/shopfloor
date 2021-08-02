@@ -36,15 +36,17 @@ export default {
 	},
 	mounted() {
 		//Se cadastro
-		if(this.idcont!=1)	this.abrirModal();
-
-		Vue.set(this.form,'CodigoSituacaoOperacao', 400);
-		Vue.set(this.form,'situacaoTributaria', 50);
-		Vue.set(this.form,'ModalidadeBC', 3);
-		Vue.set(this.form,'stribModalidadeBC', 4);
-		Vue.set(this.form,'CFOP', 120);
-		Vue.set(this.form,'paTipoTributacao', 'N');
-		
+	
+		if(this.idcont!=1 && this.form.cad==true)	this.abrirModal();
+		if(this.form.cad){
+			Vue.set(this.form,'CodigoSituacaoOperacao', 400);
+			Vue.set(this.form,'situacaoTributaria', 50);
+			Vue.set(this.form,'ModalidadeBC', 3);
+			Vue.set(this.form,'stribModalidadeBC', 4);
+			Vue.set(this.form,'CFOP', 120);
+			Vue.set(this.form,'paTipoTributacao', 'N');
+		}
+	
 	},
 	methods: {
 		valorCodigo(cod, lista){

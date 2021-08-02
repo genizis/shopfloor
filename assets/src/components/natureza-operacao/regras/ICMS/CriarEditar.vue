@@ -260,8 +260,7 @@ mulSe(form.situacaoTributaria,[60])">
 	<div class="col-3" v-if="form.paTipoTributacao == 'N'">
 		<label>Alíquota do FCP (%)
 		</label>
-		<input type="text" class="form-control" v-model="form.paAliquota
-		" v-money="money">
+		<input type="text" class="form-control" v-model="form.paAliquotaFCP" v-money="money">
 	</div>
 
 </div>
@@ -349,9 +348,6 @@ export default {
 	mounted() {
 		var $this = this;
 		this.produtoCont = this.form.produtos.length;
-
-		
-		
 	},
 	methods: {
 		addProduto(){
@@ -360,7 +356,35 @@ export default {
 		},
 		removeProduto(key){
 			let index = this.buscarIndexArray(this.form.produtos,'id',key);
-			this.form.produtos.splice(index, 1);
+			var produto = this.form.produtos[index];
+
+			if (produto.cad) {
+				this.form.produtos.splice(index, 1);
+			}else{
+				var $this = this;
+				alertify
+				.confirm(
+					"alerta",
+					"Tem certeza que deseja excluir esse parametro?",
+					function () {
+						axios
+						.get("/ajax/excluir-vinculo-produto-natureza-operacao?id="+produto.id+"&&regra=ICMS")
+						.then((response) => {
+							if (response.data.resultado) {
+								alertify.success(response.data.msg);
+								$this.form.produtos.splice(index, 1);
+							} else {
+								alertify.error(response.data.msg);
+							}
+						});
+					},
+					function () {}
+					)
+				.set("labels", { ok: "Sim", cancel: "Cancelar" })
+				.set("closable", true)
+				.set("basic", false)
+				.closeOthers();
+			}
 		},
 		validarForm(){
 			var resultado = this.validarFormulario('#formRegra');

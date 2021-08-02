@@ -32,12 +32,14 @@ export default {
 	},
 	mounted() {
 		//Se cadastro
-		if(this.idcont!=1)	this.abrirModal();
+		if(this.idcont!=1  && this.form.cad==true)	this.abrirModal();
 
-		Vue.set(this.form,'situacaoTributaria', '01');
-		Vue.set(this.form,'Base', '100.00');
-		Vue.set(this.form,'Aliquota', 0);
-	
+		if(this.form.cad){
+			Vue.set(this.form,'situacaoTributaria', '01');
+			Vue.set(this.form,'Base', '100.00');
+			Vue.set(this.form,'Aliquota', 0);
+		}
+		
 	},
 	methods: {
 		valorCodigo(cod, lista){

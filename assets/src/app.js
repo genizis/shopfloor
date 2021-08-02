@@ -43,52 +43,52 @@ import axios from 'axios';
          var id = 'undefined';
          var modal = $this.closest(".container");
          if (modal != null && modal != "undefined") {
-           if (typeof $(modal).attr('id') == "undefined") {
-             $(modal).attr('id', 'selectmodalid' + selectCount);
-          }
-          id = $(modal).attr('id');
-       }
+          if (typeof $(modal).attr('id') == "undefined") {
+           $(modal).attr('id', 'selectmodalid' + selectCount);
+        }
+        id = $(modal).attr('id');
+     }
 
-       return id;
-    },
-    selectAjaxDinamico($this, placeholder, url, callbackLista ) {
-      if (typeof $($this).attr('data-select2-id') != "undefined") return false;
-      var parente = this.idAleatorio($this);
+     return id;
+  },
+  selectAjaxDinamico($this, placeholder, url, callbackLista ) {
+   if (typeof $($this).attr('data-select2-id') != "undefined") return false;
+   var parente = this.idAleatorio($this);
 
-      if (typeof $($this).attr('title') == "undefined") $($this).attr('title', placeholder);
+   if (typeof $($this).attr('title') == "undefined") $($this).attr('title', placeholder);
 
-      if (typeof parente == "undefined") {
-       parente = "";
-    } else {
-       parente = $("#" + parente);
-    }
+   if (typeof parente == "undefined") {
+     parente = "";
+  } else {
+     parente = $("#" + parente);
+  }
 
-    $this.select2({
-       placeholder: $($this).attr('title'),
-       allowClear: true,
-       language: {
-        "noResults": function() {
+  $this.select2({
+     placeholder: $($this).attr('title'),
+     allowClear: true,
+     language: {
+       "noResults": function() {
          return 'Buscar...';
       }
    },
    ajax: {
-     dataType: 'json',
-     url: function(params) {
+    dataType: 'json',
+    url: function(params) {
       return url+'?filtro=' + params.term;
    },
    processResults: function(data) {
       return {
-       results: jQuery.map(data, function(item) {
-        return callbackLista(item)
-     })
-    };
- }
+        results: jQuery.map(data, function(item) {
+          return callbackLista(item)
+       })
+     };
+  }
 
 },
 dropdownParent: parente,
 });
- },
- data(data) {
+},
+data(data) {
    return window.moment(data).format('DD/MM/YYYY')
 },
 selecionarRadio(classe, valor){
@@ -96,18 +96,23 @@ selecionarRadio(classe, valor){
 
    $radios.filter('[value='+valor+']').prop('checked', true);
 },
-catchErro(error){
+catchErro(error, status){
    alertify.closeAll();
-
+   //console.log(error.response.data.msg);
    if (error.response) {
-      alertify.error(error.response.data.message);
-      console.log(error.response.status);
-      console.log(error.response.headers);
+     // alertify.error(error.response.data.msg);
+
+     Vue.set(this.status,'erro', error.response.data.msg);
+
+     // console.log(error.response.status);
+      //console.log(error.response.headers);
    } else if (error.request) {
-      console.log(error.request);
-   } else {
-      console.log('Error', error.message);
+     // console.log(error.request);
+  } else {
+      //console.log('Error', error.message);
    }
+
+
 
 },
 paginacaoPagina(url){
@@ -208,29 +213,29 @@ validarFormulario(form){
 
          });
         // console.log($(this));
-         var data = $(this).attr('data-required');
-         var label = $("label[for='" + $(this).attr('id') + "']").html();
-         var title = $(this).attr('title');
-         var placeholder = $(this).attr('placeholder');
-         var id = $(this).attr('id');
+        var data = $(this).attr('data-required');
+        var label = $("label[for='" + $(this).attr('id') + "']").html();
+        var title = $(this).attr('title');
+        var placeholder = $(this).attr('placeholder');
+        var id = $(this).attr('id');
 
-         var nomeCampo = '';
+        var nomeCampo = '';
 
-         if (typeof data != "undefined") {
-            nomeCampo = data;
-         } else if (typeof label != "undefined") {
-            nomeCampo = label;
-         } else if (typeof title != "undefined") {
-            nomeCampo = title;
-         } else if (typeof placeholder != "undefined") {
-            nomeCampo = placeholder;
-         } else {
-            nomeCampo = idTask;
-         }
-
-         campos += '<br> <b>' + nomeCampo + '</b>';
+        if (typeof data != "undefined") {
+         nomeCampo = data;
+      } else if (typeof label != "undefined") {
+         nomeCampo = label;
+      } else if (typeof title != "undefined") {
+         nomeCampo = title;
+      } else if (typeof placeholder != "undefined") {
+         nomeCampo = placeholder;
+      } else {
+         nomeCampo = idTask;
       }
-   });
+
+      campos += '<br> <b>' + nomeCampo + '</b>';
+   }
+});
    if (campos != '') {
       alertify.confirm('Atenção!', 'Os seguinte campos precisam ser preenchidos corretamentes: ' + campos + '</b> ', function() {
 
@@ -241,6 +246,32 @@ validarFormulario(form){
    }
    return true;
 
+},
+getFormData(formData, data, previousKey) {
+  if (data instanceof Object) {
+    Object.keys(data).forEach(key => {
+      const value = data[key];
+      if (value instanceof Object && !Array.isArray(value)) {
+        return this.getFormData(formData, value, key);
+     }
+     if (previousKey) {
+        key = `${previousKey}[${key}]`;
+     }
+     if (Array.isArray(value)) {
+      var cont = 0;
+        value.forEach(val => {
+         cont++;
+          if (val instanceof Object) {
+
+             return this.getFormData(formData, val, key+'['+cont+']');
+          }else
+          formData.append(`${key}[]`, val);
+       });
+     } else {
+        formData.append(key, value);
+     }
+  });
+ }
 },
 setSessao(key,value){
    this.$session.set(key, value);
@@ -274,5 +305,5 @@ Vue.component('natureza-operacao-form', require('./components/natureza-operacao/
  */
 
  const app = new Vue({
-  el: '#app',
-});
+    el: '#app',
+ });

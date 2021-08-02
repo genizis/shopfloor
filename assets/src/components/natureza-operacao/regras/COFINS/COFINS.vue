@@ -29,12 +29,6 @@
 			<a href="#" class="pointer" @click="addRegra">Adicionar Regra <i class="fas fa-plus"></i></a>
 		</div>
 
-		<div class="form-group col-md-3">
-			<label for="IncluirFreteBase">
-				Incluir frete na base do IPI 
-			</label>
-			<input type="checkbox" id="IncluirFreteBase" v-model="formulariopai.IncluirFreteBase"  name="IncluirFreteBase">
-		</div>
 	</div>
 </template>
 
@@ -88,7 +82,12 @@ export default {
 	},
 	mounted() {
 		//Se cadastro 
-		this.addRegra();
+		if(this.formulariopai.cadastro){//Se cadastro 
+			this.addRegra();
+		}else{
+			this.regraCont++;
+		} 
+
 		$(document).ready(function() {
 			$('.collapse').collapse();
 		});
@@ -102,6 +101,7 @@ export default {
 				id:'cad'+this.regraCont,
 				idcont:this.regraCont,
 				form:{
+					cad:true, 
 					estados:[],
 					produtos:[]
 				}
@@ -110,7 +110,36 @@ export default {
 		},
 		removeRegra(key){
 			let index = this.buscarIndexArray(this.formularios,'id',key);
-			this.formularios.splice(index, 1);
+			var item = this.formularios[index];
+
+			var $this = this;
+			if (item.cad) {
+				$this.formularios.splice(index, 1);
+			}else{
+				var $this = this;
+				alertify
+				.confirm(
+					"alerta",
+					"Tem certeza que deseja excluir essa regra?",
+					function () {
+						axios
+						.get("/ajax/excluir-regra-natureza-operacao?id="+item.form.id+"&&regra=COFINS")
+						.then((response) => {
+							if (response.data.resultado) {
+								alertify.success(response.data.msg);
+								$this.formularios.splice(index, 1);
+							} else {
+								alertify.error(response.data.msg);
+							}
+						});
+					},
+					function () {}
+					)
+				.set("labels", { ok: "Sim", cancel: "Cancelar" })
+				.set("closable", true)
+				.set("basic", false)
+				.closeOthers();
+			}
 		}
 
 	},    components: { Linha }

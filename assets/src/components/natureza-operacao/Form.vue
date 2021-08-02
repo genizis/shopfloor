@@ -1,5 +1,8 @@
 <template>
 	<form method="POST" ref="formVinculo" @submit="cadastrarEditar" enctype="multipart/form-data">
+
+		<Validacao :status="status"></Validacao>
+
 		<div class="form-row">   
 			<div class="form-group col-md-12">
 				<label for="">Descrição <span class="text-danger">*</span></label>
@@ -43,7 +46,7 @@
 
 			<div class="form-group col-md-3">
 				<label for="faturada">Faturada</label>
-				<input type="checkbox" id="faturada" v-model="form.faturada" name="faturada">
+				<input type="checkbox" id="faturada" value="1" v-model="form.faturada" name="faturada">
 
 			</div>
 
@@ -51,7 +54,7 @@
 				<label for="consumidorFinal">
 					Consumidor final
 				</label>
-				<input type="checkbox" id="consumidorFinal" v-model="form.consumidorFinal"  name="consumidorFinal">
+				<input type="checkbox" id="consumidorFinal" value="1" v-model="form.consumidorFinal"  name="consumidorFinal">
 
 			</div>
 
@@ -60,7 +63,7 @@
 				<label for="operacaoDevolucao">
 					Operação de devolução
 				</label>
-				<input type="checkbox" id="operacaoDevolucao" v-model="form.operacaoDevolucao" name="operacaoDevolucao">
+				<input type="checkbox" id="operacaoDevolucao" value="1" v-model="form.operacaoDevolucao" name="operacaoDevolucao">
 
 			</div>
 
@@ -68,7 +71,7 @@
 				<label for="atualizarPrecoUltimaCompra">
 					Atualizar preço de última compra do produto
 				</label>
-				<input type="checkbox" id="atualizarPrecoUltimaCompra" v-model="form.atualizarPrecoUltimaCompra" name="atualizarPrecoUltimaCompra">
+				<input type="checkbox" id="atualizarPrecoUltimaCompra" value="1" v-model="form.atualizarPrecoUltimaCompra" name="atualizarPrecoUltimaCompra">
 
 			</div>
 
@@ -268,7 +271,7 @@
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary"
 						name="Opcao" value="salvar"><i class="fas fa-save"></i> Salvar</button>
-						<a href="/"
+						<a href="/natureza-operacao"
 						class="btn btn-secondary">Cancelar</a>
 					</div>
 				</div>
@@ -287,14 +290,17 @@ import II from './regras/II/II';
 import ISSQN from './regras/ISSQN/ISSQN';
 import ListaVariaveis from './ListaVariaveis';
 
+import Validacao from '../util/Validacao';
+
 import {VMoney} from 'v-money';
 
 export default {
-	props: ['input_name'],
+	props: ['id'],
 	data() {
 		return {
 			mostrar:false,
 			estados:[],
+			status:[],
 			money: {
 				decimal: '.',
 				thousands: '',
@@ -318,7 +324,8 @@ export default {
 				RetencaoImpostos:0,
 				AliquotaCSLL:0,
 				AliquotaIRRetido:0,
-				tributos:0
+				tributos:0,
+				cadastro:!this.id
 			},
 			tipo:[
 			{id:0, texto:"Saída"},
@@ -358,11 +365,30 @@ export default {
 				COFINS:[],
 				II:[],
 				ISSQN:[]
-			}
+			},
+			objeto:[],
+			regraCont:2
 		};
 	},
 	mounted() {
 		var $this = this;
+
+		if (this.id) {
+			axios.get('/natureza-operacao/ajax/'+this.id) //Buscar natureza
+			.then((response) => {
+				this.objeto = response.data;
+				$.each(response.data, function( index, element) {
+					if (element instanceof Object) {
+						$this.addRegra(index,element)
+					}else{
+						$this.form[index] = element;
+					}
+					
+				});
+
+				//console.log($this.regras);
+			});
+		}
 
 		axios.get('/ajax/busca-estado') //Buscar estados
 		.then((response) => {
@@ -370,6 +396,21 @@ export default {
 		});
 	},
 	methods: {
+		addRegra(index,listaCadastrada){
+			var $this = this;
+			$.each(listaCadastrada, function( indexli, lista) {
+				//lista['estados'] = [];
+				//lista['produtos'] = [];
+				$this.regraCont++;
+				$this.regras[index].push({
+					cad:false, 
+					id:'cad'+$this.regraCont,
+					idcont:$this.regraCont,
+					form:lista
+				});
+			});
+
+		},
 		abrirModalVariaveis(){
 			var $this = this;
 			this.$modal.show(
@@ -386,53 +427,47 @@ export default {
 		},
 		cadastrarEditar(e){
 			e.preventDefault();
-
-			this.regras.ICMS.forEach((regra, index) => {//Lista regras ICMS
-				console.log(regra.form);
-				$.each(regra.form, function( indexcampo, campo ) {
-					
-					console.log(indexcampo+' - ');
-					console.log(campo);
-					
-				});
-			});
-
-
-			return false;
-
+			var $this = this;
 			var alerta = alertify.alert('<div class="text-center">Enviando informações... <br>'
 				+'<i class="fa fa-refresh fa-spin fa-3x fa-fw"></i><br> Aguarde... </div>').set('closable', false).set('basic', true);
 			var $this = this;
 			let formData = new FormData(this.$refs.formVinculo);
+			if($this.id) formData.append('id', $this.id);
 
-			if($this.objeto) formData.append('id', $this.objeto.id);
+			//Regras
+				$.each(this.regras, function( indexList, listaregras) {//Lista regras ICMS
 
-			formData.append('empresa_id', $this.empresaid);
+					$.each(listaregras, function( index, regra) {
+						var nome = indexList+'['+index+']';
+						//console.log(nome);
+						$this.getFormData(formData, regra.form,nome);
+					});
+				});
 
-			var url = '/admin/empresas/adicionalProduto/create';
-			axios.post(url
-				,formData
-				,{
-					headers: {
-						'Content-Type': 'multipart/form-data'
+				var url = '/natureza-operacao/nova';
+
+				axios.post(url
+					,formData
+					,{
+						headers: {
+							'Content-Type': 'multipart/form-data'
+						}
 					}
-				}
-				)
-			.then((response) => {
-				if (response.data.resultado) {
-					alertify.success(response.data.msg);
-					$this.funcaocallback();
-					if(!$this.objeto){
-						$this.$refs.resetmodal.click();
-					}
-					$this.$emit('close');
+					)
+				.then((response) => {
+					//console.log(response.data);
+					if (response.data.resultado) {
+						Vue.set(this.status,'sucesso', response.data.msg);	
+					//$this.funcaocallback();
+					window.location = '/natureza-operacao/editar/'+response.data.id;
 				}else{
-					alertify.error(response.data.msg);
+					Vue.set(this.status,'erro', response.data.msg);
 				}
 				alertify.closeAll();
-			})
-		}
-	},    components: { ICMS, IPI, PIS, COFINS, II, ISSQN }
-	, directives: {money: VMoney}
-}
-</script>
+			}).catch((error)=>this.catchErro(error,this.status));
+
+			}
+		},    components: { ICMS, IPI, PIS, COFINS, II, ISSQN, Validacao }
+		, directives: {money: VMoney}
+	}
+	</script>

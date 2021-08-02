@@ -1962,8 +1962,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _regras_II_II__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./regras/II/II */ "./src/components/natureza-operacao/regras/II/II.vue");
 /* harmony import */ var _regras_ISSQN_ISSQN__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./regras/ISSQN/ISSQN */ "./src/components/natureza-operacao/regras/ISSQN/ISSQN.vue");
 /* harmony import */ var _ListaVariaveis__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ListaVariaveis */ "./src/components/natureza-operacao/ListaVariaveis.vue");
-/* harmony import */ var v_money__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! v-money */ "./node_modules/v-money/dist/v-money.js");
-/* harmony import */ var v_money__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(v_money__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var _util_Validacao__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../util/Validacao */ "./src/components/util/Validacao.vue");
+/* harmony import */ var v_money__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! v-money */ "./node_modules/v-money/dist/v-money.js");
+/* harmony import */ var v_money__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(v_money__WEBPACK_IMPORTED_MODULE_8__);
 //
 //
 //
@@ -2243,6 +2244,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+
 
 
 
@@ -2252,11 +2257,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ['input_name'],
+  props: ['id'],
   data: function data() {
     return {
       mostrar: false,
       estados: [],
+      status: [],
       money: {
         decimal: '.',
         thousands: '',
@@ -2282,7 +2288,8 @@ __webpack_require__.r(__webpack_exports__);
         RetencaoImpostos: 0,
         AliquotaCSLL: 0,
         AliquotaIRRetido: 0,
-        tributos: 0
+        tributos: 0,
+        cadastro: !this.id
       },
       tipo: [{
         id: 0,
@@ -2354,19 +2361,50 @@ __webpack_require__.r(__webpack_exports__);
         COFINS: [],
         II: [],
         ISSQN: []
-      }
+      },
+      objeto: [],
+      regraCont: 2
     };
   },
   mounted: function mounted() {
     var _this = this;
 
     var $this = this;
+
+    if (this.id) {
+      axios.get('/natureza-operacao/ajax/' + this.id) //Buscar natureza
+      .then(function (response) {
+        _this.objeto = response.data;
+        $.each(response.data, function (index, element) {
+          if (element instanceof Object) {
+            $this.addRegra(index, element);
+          } else {
+            $this.form[index] = element;
+          }
+        }); //console.log($this.regras);
+      });
+    }
+
     axios.get('/ajax/busca-estado') //Buscar estados
     .then(function (response) {
       _this.estados = response.data;
     });
   },
   methods: {
+    addRegra: function addRegra(index, listaCadastrada) {
+      var $this = this;
+      $.each(listaCadastrada, function (indexli, lista) {
+        //lista['estados'] = [];
+        //lista['produtos'] = [];
+        $this.regraCont++;
+        $this.regras[index].push({
+          cad: false,
+          id: 'cad' + $this.regraCont,
+          idcont: $this.regraCont,
+          form: lista
+        });
+      });
+    },
     abrirModalVariaveis: function abrirModalVariaveis() {
       var $this = this;
       this.$modal.show(_ListaVariaveis__WEBPACK_IMPORTED_MODULE_6__["default"], {
@@ -2378,41 +2416,41 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     cadastrarEditar: function cadastrarEditar(e) {
+      var _this2 = this;
+
       e.preventDefault();
-      this.regras.ICMS.forEach(function (regra, index) {
-        //Lista regras ICMS
-        console.log(regra.form);
-        $.each(regra.form, function (indexcampo, campo) {
-          console.log(indexcampo + ' - ');
-          console.log(campo);
-        });
-      });
-      return false;
+      var $this = this;
       var alerta = alertify.alert('<div class="text-center">Enviando informações... <br>' + '<i class="fa fa-refresh fa-spin fa-3x fa-fw"></i><br> Aguarde... </div>').set('closable', false).set('basic', true);
       var $this = this;
       var formData = new FormData(this.$refs.formVinculo);
-      if ($this.objeto) formData.append('id', $this.objeto.id);
-      formData.append('empresa_id', $this.empresaid);
-      var url = '/admin/empresas/adicionalProduto/create';
+      if ($this.id) formData.append('id', $this.id); //Regras
+
+      $.each(this.regras, function (indexList, listaregras) {
+        //Lista regras ICMS
+        $.each(listaregras, function (index, regra) {
+          var nome = indexList + '[' + index + ']'; //console.log(nome);
+
+          $this.getFormData(formData, regra.form, nome);
+        });
+      });
+      var url = '/natureza-operacao/nova';
       axios.post(url, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       }).then(function (response) {
+        //console.log(response.data);
         if (response.data.resultado) {
-          alertify.success(response.data.msg);
-          $this.funcaocallback();
+          Vue.set(_this2.status, 'sucesso', response.data.msg); //$this.funcaocallback();
 
-          if (!$this.objeto) {
-            $this.$refs.resetmodal.click();
-          }
-
-          $this.$emit('close');
+          window.location = '/natureza-operacao/editar/' + response.data.id;
         } else {
-          alertify.error(response.data.msg);
+          Vue.set(_this2.status, 'erro', response.data.msg);
         }
 
         alertify.closeAll();
+      })["catch"](function (error) {
+        return _this2.catchErro(error, _this2.status);
       });
     }
   },
@@ -2422,10 +2460,11 @@ __webpack_require__.r(__webpack_exports__);
     PIS: _regras_PIS_PIS__WEBPACK_IMPORTED_MODULE_2__["default"],
     COFINS: _regras_COFINS_COFINS__WEBPACK_IMPORTED_MODULE_3__["default"],
     II: _regras_II_II__WEBPACK_IMPORTED_MODULE_4__["default"],
-    ISSQN: _regras_ISSQN_ISSQN__WEBPACK_IMPORTED_MODULE_5__["default"]
+    ISSQN: _regras_ISSQN_ISSQN__WEBPACK_IMPORTED_MODULE_5__["default"],
+    Validacao: _util_Validacao__WEBPACK_IMPORTED_MODULE_7__["default"]
   },
   directives: {
-    money: v_money__WEBPACK_IMPORTED_MODULE_7__["VMoney"]
+    money: v_money__WEBPACK_IMPORTED_MODULE_8__["VMoney"]
   }
 });
 
@@ -2587,12 +2626,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['estados', 'formularios', 'formulariopai'],
@@ -2705,7 +2738,13 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     //Se cadastro 
-    this.addRegra();
+    if (this.formulariopai.cadastro) {
+      //Se cadastro 
+      this.addRegra();
+    } else {
+      this.regraCont++;
+    }
+
     $(document).ready(function () {
       $('.collapse').collapse();
     });
@@ -2718,6 +2757,7 @@ __webpack_require__.r(__webpack_exports__);
         id: 'cad' + this.regraCont,
         idcont: this.regraCont,
         form: {
+          cad: true,
           estados: [],
           produtos: []
         }
@@ -2725,7 +2765,27 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeRegra: function removeRegra(key) {
       var index = this.buscarIndexArray(this.formularios, 'id', key);
-      this.formularios.splice(index, 1);
+      var item = this.formularios[index];
+      var $this = this;
+
+      if (item.cad) {
+        $this.formularios.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir essa regra?", function () {
+          axios.get("/ajax/excluir-regra-natureza-operacao?id=" + item.form.id + "&&regra=COFINS").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.formularios.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     }
   },
   components: {
@@ -2890,7 +2950,26 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeProduto: function removeProduto(key) {
       var index = this.buscarIndexArray(this.form.produtos, 'id', key);
-      this.form.produtos.splice(index, 1);
+      var produto = this.form.produtos[index];
+
+      if (produto.cad) {
+        this.form.produtos.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir esse parametro?", function () {
+          axios.get("/ajax/excluir-vinculo-produto-natureza-operacao?id=" + produto.id + "&&regra=COFINS").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.form.produtos.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     },
     validarForm: function validarForm() {
       var resultado = this.validarFormulario('#formRegra');
@@ -2950,10 +3029,13 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     //Se cadastro
-    if (this.idcont != 1) this.abrirModal();
-    Vue.set(this.form, 'situacaoTributaria', '01');
-    Vue.set(this.form, 'Base', '100.00');
-    Vue.set(this.form, 'Aliquota', 0);
+    if (this.idcont != 1 && this.form.cad == true) this.abrirModal();
+
+    if (this.form.cad) {
+      Vue.set(this.form, 'situacaoTributaria', '01');
+      Vue.set(this.form, 'Base', '100.00');
+      Vue.set(this.form, 'Aliquota', 0);
+    }
   },
   methods: {
     valorCodigo: function valorCodigo(cod, lista) {
@@ -2996,7 +3078,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var v_money__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(v_money__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _LinhaListaProduto__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../LinhaListaProduto */ "./src/components/natureza-operacao/regras/LinhaListaProduto.vue");
 /* harmony import */ var _LinhaListaEstado__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../LinhaListaEstado */ "./src/components/natureza-operacao/regras/LinhaListaEstado.vue");
-//
 //
 //
 //
@@ -3406,7 +3487,26 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeProduto: function removeProduto(key) {
       var index = this.buscarIndexArray(this.form.produtos, 'id', key);
-      this.form.produtos.splice(index, 1);
+      var produto = this.form.produtos[index];
+
+      if (produto.cad) {
+        this.form.produtos.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir esse parametro?", function () {
+          axios.get("/ajax/excluir-vinculo-produto-natureza-operacao?id=" + produto.id + "&&regra=ICMS").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.form.produtos.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     },
     validarForm: function validarForm() {
       var resultado = this.validarFormulario('#formRegra');
@@ -3540,8 +3640,13 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
-    //Se cadastro 
-    this.addRegra();
+    if (this.formulariopai.cadastro) {
+      //Se cadastro 
+      this.addRegra();
+    } else {
+      this.regraCont++;
+    }
+
     $(document).ready(function () {
       $('.collapse').collapse();
     });
@@ -3554,6 +3659,7 @@ __webpack_require__.r(__webpack_exports__);
         id: 'cad' + this.regraCont,
         idcont: this.regraCont,
         form: {
+          cad: true,
           estados: [],
           produtos: []
         }
@@ -3561,7 +3667,27 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeRegra: function removeRegra(key) {
       var index = this.buscarIndexArray(this.formularios, 'id', key);
-      this.formularios.splice(index, 1);
+      var item = this.formularios[index];
+      var $this = this;
+
+      if (item.cad) {
+        $this.formularios.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir essa regra?", function () {
+          axios.get("/ajax/excluir-regra-natureza-operacao?id=" + item.form.id + "&&regra=ICMS").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.formularios.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     }
   },
   components: {
@@ -3617,13 +3743,16 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     //Se cadastro
-    if (this.idcont != 1) this.abrirModal();
-    Vue.set(this.form, 'CodigoSituacaoOperacao', 400);
-    Vue.set(this.form, 'situacaoTributaria', 50);
-    Vue.set(this.form, 'ModalidadeBC', 3);
-    Vue.set(this.form, 'stribModalidadeBC', 4);
-    Vue.set(this.form, 'CFOP', 120);
-    Vue.set(this.form, 'paTipoTributacao', 'N');
+    if (this.idcont != 1 && this.form.cad == true) this.abrirModal();
+
+    if (this.form.cad) {
+      Vue.set(this.form, 'CodigoSituacaoOperacao', 400);
+      Vue.set(this.form, 'situacaoTributaria', 50);
+      Vue.set(this.form, 'ModalidadeBC', 3);
+      Vue.set(this.form, 'stribModalidadeBC', 4);
+      Vue.set(this.form, 'CFOP', 120);
+      Vue.set(this.form, 'paTipoTributacao', 'N');
+    }
   },
   methods: {
     valorCodigo: function valorCodigo(cod, lista) {
@@ -3804,7 +3933,26 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeProduto: function removeProduto(key) {
       var index = this.buscarIndexArray(this.form.produtos, 'id', key);
-      this.form.produtos.splice(index, 1);
+      var produto = this.form.produtos[index];
+
+      if (produto.cad) {
+        this.form.produtos.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir esse parametro?", function () {
+          axios.get("/ajax/excluir-vinculo-produto-natureza-operacao?id=" + produto.id + "&&regra=II").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.form.produtos.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     },
     validarForm: function validarForm() {
       var resultado = this.validarFormulario('#formRegra');
@@ -3863,12 +4011,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['estados', 'formularios', 'formulariopai'],
@@ -3878,17 +4020,22 @@ __webpack_require__.r(__webpack_exports__);
       regras: [],
       regraCont: 0,
       situacaoTributaria: [{
-        id: '01',
+        id: 1,
         texto: 'Tributado'
       }, {
-        id: '02',
+        id: 2,
         texto: 'Não tributado'
       }]
     };
   },
   mounted: function mounted() {
-    //Se cadastro 
-    this.addRegra();
+    if (this.formulariopai.cadastro) {
+      //Se cadastro 
+      this.addRegra();
+    } else {
+      this.regraCont++;
+    }
+
     $(document).ready(function () {
       $('.collapse').collapse();
     });
@@ -3901,6 +4048,7 @@ __webpack_require__.r(__webpack_exports__);
         id: 'cad' + this.regraCont,
         idcont: this.regraCont,
         form: {
+          cad: true,
           estados: [],
           produtos: []
         }
@@ -3908,7 +4056,27 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeRegra: function removeRegra(key) {
       var index = this.buscarIndexArray(this.formularios, 'id', key);
-      this.formularios.splice(index, 1);
+      var item = this.formularios[index];
+      var $this = this;
+
+      if (item.cad) {
+        $this.formularios.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir essa regra?", function () {
+          axios.get("/ajax/excluir-regra-natureza-operacao?id=" + item.form.id + "&&regra=II").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.formularios.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     }
   },
   components: {
@@ -3959,8 +4127,11 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     //Se cadastro
-    if (this.idcont != 1) this.abrirModal();
-    Vue.set(this.form, 'situacaoTributaria', '02');
+    if (this.idcont != 1 && this.form.cad == true) this.abrirModal();
+
+    if (this.form.cad) {
+      Vue.set(this.form, 'situacaoTributaria', 2);
+    }
   },
   methods: {
     valorCodigo: function valorCodigo(cod, lista) {
@@ -4150,7 +4321,26 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeProduto: function removeProduto(key) {
       var index = this.buscarIndexArray(this.form.produtos, 'id', key);
-      this.form.produtos.splice(index, 1);
+      var produto = this.form.produtos[index];
+
+      if (produto.cad) {
+        this.form.produtos.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir esse parametro?", function () {
+          axios.get("/ajax/excluir-vinculo-produto-natureza-operacao?id=" + produto.id + "&&regra=IPI").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.form.produtos.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     },
     validarForm: function validarForm() {
       var resultado = this.validarFormulario('#formRegra');
@@ -4262,8 +4452,13 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
-    //Se cadastro 
-    this.addRegra();
+    if (this.formulariopai.cadastro) {
+      //Se cadastro 
+      this.addRegra();
+    } else {
+      this.regraCont++;
+    }
+
     $(document).ready(function () {
       $('.collapse').collapse();
     });
@@ -4276,6 +4471,7 @@ __webpack_require__.r(__webpack_exports__);
         id: 'cad' + this.regraCont,
         idcont: this.regraCont,
         form: {
+          cad: true,
           estados: [],
           produtos: []
         }
@@ -4283,7 +4479,27 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeRegra: function removeRegra(key) {
       var index = this.buscarIndexArray(this.formularios, 'id', key);
-      this.formularios.splice(index, 1);
+      var item = this.formularios[index];
+      var $this = this;
+
+      if (item.cad) {
+        $this.formularios.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir essa regra?", function () {
+          axios.get("/ajax/excluir-regra-natureza-operacao?id=" + item.form.id + "&&regra=IPI").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.formularios.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     }
   },
   components: {
@@ -4335,11 +4551,14 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     //Se cadastro
-    if (this.idcont != 1) this.abrirModal();
-    Vue.set(this.form, 'situacaoTributaria', '');
-    Vue.set(this.form, 'CodEnquadramento', 999);
-    Vue.set(this.form, 'Base', '100.00');
-    Vue.set(this.form, 'Aliquota', 0);
+    if (this.idcont != 1 && this.form.cad == true) this.abrirModal();
+
+    if (this.form.cad) {
+      Vue.set(this.form, 'situacaoTributaria', '');
+      Vue.set(this.form, 'CodEnquadramento', 999);
+      Vue.set(this.form, 'Base', '100.00');
+      Vue.set(this.form, 'Aliquota', 0);
+    }
   },
   methods: {
     valorCodigo: function valorCodigo(cod, lista) {
@@ -4535,6 +4754,7 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var $this = this;
     this.produtoCont = this.form.produtos.length;
+    console.log(this.form.situacaoTributaria);
   },
   methods: {
     addProduto: function addProduto() {
@@ -4547,7 +4767,26 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeProduto: function removeProduto(key) {
       var index = this.buscarIndexArray(this.form.produtos, 'id', key);
-      this.form.produtos.splice(index, 1);
+      var produto = this.form.produtos[index];
+
+      if (produto.cad) {
+        this.form.produtos.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir esse parametro?", function () {
+          axios.get("/ajax/excluir-vinculo-produto-natureza-operacao?id=" + produto.id + "&&regra=ISSQN").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.form.produtos.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     },
     validarForm: function validarForm() {
       var resultado = this.validarFormulario('#formRegra');
@@ -4610,11 +4849,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['estados', 'formularios', 'formulariopai'],
@@ -4624,20 +4858,25 @@ __webpack_require__.r(__webpack_exports__);
       regras: [],
       regraCont: 0,
       situacaoTributaria: [{
-        id: '00',
+        id: 0,
         texto: 'Tributado'
       }, {
-        id: '01',
+        id: 1,
         texto: 'Isento'
       }, {
-        id: '02',
+        id: 2,
         texto: 'Outra situação'
       }]
     };
   },
   mounted: function mounted() {
-    //Se cadastro 
-    this.addRegra();
+    if (this.formulariopai.cadastro) {
+      //Se cadastro 
+      this.addRegra();
+    } else {
+      this.regraCont++;
+    }
+
     $(document).ready(function () {
       $('.collapse').collapse();
     });
@@ -4650,6 +4889,7 @@ __webpack_require__.r(__webpack_exports__);
         id: 'cad' + this.regraCont,
         idcont: this.regraCont,
         form: {
+          cad: true,
           estados: [],
           produtos: []
         }
@@ -4657,7 +4897,27 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeRegra: function removeRegra(key) {
       var index = this.buscarIndexArray(this.formularios, 'id', key);
-      this.formularios.splice(index, 1);
+      var item = this.formularios[index];
+      var $this = this;
+
+      if (item.cad) {
+        $this.formularios.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir essa regra?", function () {
+          axios.get("/ajax/excluir-regra-natureza-operacao?id=" + item.form.id + "&&regra=ISSQN").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.formularios.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     }
   },
   components: {
@@ -4709,12 +4969,15 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     //Se cadastro
-    if (this.idcont != 1) this.abrirModal();
-    Vue.set(this.form, 'situacaoTributaria', '01');
-    Vue.set(this.form, 'Base', '100.00');
-    Vue.set(this.form, 'Aliquota', 0);
-    Vue.set(this.form, 'DescontarISS', 0);
-    Vue.set(this.form, 'ReterISS', 0);
+    if (this.idcont != 1 && this.form.cad == true) this.abrirModal();
+
+    if (this.form.cad) {
+      Vue.set(this.form, 'situacaoTributaria', 1);
+      Vue.set(this.form, 'Base', '100.00');
+      Vue.set(this.form, 'Aliquota', 0);
+      Vue.set(this.form, 'DescontarISS', 0);
+      Vue.set(this.form, 'ReterISS', 0);
+    }
   },
   methods: {
     valorCodigo: function valorCodigo(cod, lista) {
@@ -4829,11 +5092,11 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       mostrar: false,
-      tipoProduto: 'NCM',
       valorNCM: ''
     };
   },
   mounted: function mounted() {
+    Vue.set(this.item, 'tipo', this.item.tipo.toLowerCase());
     var $this = this;
     $(function () {
       $($this.$refs.buscaNCM).change(function (event) {
@@ -5030,7 +5293,26 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeProduto: function removeProduto(key) {
       var index = this.buscarIndexArray(this.form.produtos, 'id', key);
-      this.form.produtos.splice(index, 1);
+      var produto = this.form.produtos[index];
+
+      if (produto.cad) {
+        this.form.produtos.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir esse parametro?", function () {
+          axios.get("/ajax/excluir-vinculo-produto-natureza-operacao?id=" + produto.id + "&&regra=PIS").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.form.produtos.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     },
     validarForm: function validarForm() {
       var resultado = this.validarFormulario('#formRegra');
@@ -5090,10 +5372,13 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     //Se cadastro
-    if (this.idcont != 1) this.abrirModal();
-    Vue.set(this.form, 'situacaoTributaria', '01');
-    Vue.set(this.form, 'Base', '100.00');
-    Vue.set(this.form, 'Aliquota', 0);
+    if (this.idcont != 1 && this.form.cad == true) this.abrirModal();
+
+    if (this.form.cad) {
+      Vue.set(this.form, 'situacaoTributaria', '01');
+      Vue.set(this.form, 'Base', '100.00');
+      Vue.set(this.form, 'Aliquota', 0);
+    }
   },
   methods: {
     valorCodigo: function valorCodigo(cod, lista) {
@@ -5133,11 +5418,6 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Linha__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Linha */ "./src/components/natureza-operacao/regras/PIS/Linha.vue");
-//
-//
-//
-//
-//
 //
 //
 //
@@ -5284,8 +5564,13 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
-    //Se cadastro 
-    this.addRegra();
+    if (this.formulariopai.cadastro) {
+      //Se cadastro 
+      this.addRegra();
+    } else {
+      this.regraCont++;
+    }
+
     $(document).ready(function () {
       $('.collapse').collapse();
     });
@@ -5298,6 +5583,7 @@ __webpack_require__.r(__webpack_exports__);
         id: 'cad' + this.regraCont,
         idcont: this.regraCont,
         form: {
+          cad: true,
           estados: [],
           produtos: []
         }
@@ -5305,12 +5591,73 @@ __webpack_require__.r(__webpack_exports__);
     },
     removeRegra: function removeRegra(key) {
       var index = this.buscarIndexArray(this.formularios, 'id', key);
-      this.formularios.splice(index, 1);
+      var item = this.formularios[index];
+      var $this = this;
+
+      if (item.cad) {
+        $this.formularios.splice(index, 1);
+      } else {
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir essa regra?", function () {
+          axios.get("/ajax/excluir-regra-natureza-operacao?id=" + item.form.id + "&&regra=PIS").then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.formularios.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
     }
   },
   components: {
     Linha: _Linha__WEBPACK_IMPORTED_MODULE_0__["default"]
   }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./src/components/util/Validacao.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/util/Validacao.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ['status'],
+  data: function data() {
+    return {};
+  },
+  mounted: function mounted() {},
+  methods: {
+    excluirMsg: function excluirMsg(msg) {
+      Vue.set(this.status, msg, null);
+    }
+  } //,    components: { Cabecalho,ListaContato,Conversa}
+
 });
 
 /***/ }),
@@ -27400,6 +27747,8 @@ var render = function() {
       on: { submit: _vm.cadastrarEditar }
     },
     [
+      _c("Validacao", { attrs: { status: _vm.status } }),
+      _vm._v(" "),
       _c("div", { staticClass: "form-row" }, [
         _c("div", { staticClass: "form-group col-md-12" }, [
           _vm._m(0),
@@ -27615,10 +27964,15 @@ var render = function() {
                 expression: "form.faturada"
               }
             ],
-            attrs: { type: "checkbox", id: "faturada", name: "faturada" },
+            attrs: {
+              type: "checkbox",
+              id: "faturada",
+              value: "1",
+              name: "faturada"
+            },
             domProps: {
               checked: Array.isArray(_vm.form.faturada)
-                ? _vm._i(_vm.form.faturada, null) > -1
+                ? _vm._i(_vm.form.faturada, "1") > -1
                 : _vm.form.faturada
             },
             on: {
@@ -27627,7 +27981,7 @@ var render = function() {
                   $$el = $event.target,
                   $$c = $$el.checked ? true : false
                 if (Array.isArray($$a)) {
-                  var $$v = null,
+                  var $$v = "1",
                     $$i = _vm._i($$a, $$v)
                   if ($$el.checked) {
                     $$i < 0 && _vm.$set(_vm.form, "faturada", $$a.concat([$$v]))
@@ -27664,11 +28018,12 @@ var render = function() {
             attrs: {
               type: "checkbox",
               id: "consumidorFinal",
+              value: "1",
               name: "consumidorFinal"
             },
             domProps: {
               checked: Array.isArray(_vm.form.consumidorFinal)
-                ? _vm._i(_vm.form.consumidorFinal, null) > -1
+                ? _vm._i(_vm.form.consumidorFinal, "1") > -1
                 : _vm.form.consumidorFinal
             },
             on: {
@@ -27677,7 +28032,7 @@ var render = function() {
                   $$el = $event.target,
                   $$c = $$el.checked ? true : false
                 if (Array.isArray($$a)) {
-                  var $$v = null,
+                  var $$v = "1",
                     $$i = _vm._i($$a, $$v)
                   if ($$el.checked) {
                     $$i < 0 &&
@@ -27715,11 +28070,12 @@ var render = function() {
             attrs: {
               type: "checkbox",
               id: "operacaoDevolucao",
+              value: "1",
               name: "operacaoDevolucao"
             },
             domProps: {
               checked: Array.isArray(_vm.form.operacaoDevolucao)
-                ? _vm._i(_vm.form.operacaoDevolucao, null) > -1
+                ? _vm._i(_vm.form.operacaoDevolucao, "1") > -1
                 : _vm.form.operacaoDevolucao
             },
             on: {
@@ -27728,7 +28084,7 @@ var render = function() {
                   $$el = $event.target,
                   $$c = $$el.checked ? true : false
                 if (Array.isArray($$a)) {
-                  var $$v = null,
+                  var $$v = "1",
                     $$i = _vm._i($$a, $$v)
                   if ($$el.checked) {
                     $$i < 0 &&
@@ -27769,11 +28125,12 @@ var render = function() {
                 attrs: {
                   type: "checkbox",
                   id: "atualizarPrecoUltimaCompra",
+                  value: "1",
                   name: "atualizarPrecoUltimaCompra"
                 },
                 domProps: {
                   checked: Array.isArray(_vm.form.atualizarPrecoUltimaCompra)
-                    ? _vm._i(_vm.form.atualizarPrecoUltimaCompra, null) > -1
+                    ? _vm._i(_vm.form.atualizarPrecoUltimaCompra, "1") > -1
                     : _vm.form.atualizarPrecoUltimaCompra
                 },
                 on: {
@@ -27782,7 +28139,7 @@ var render = function() {
                       $$el = $event.target,
                       $$c = $$el.checked ? true : false
                     if (Array.isArray($$a)) {
-                      var $$v = null,
+                      var $$v = "1",
                         $$i = _vm._i($$a, $$v)
                       if ($$el.checked) {
                         $$i < 0 &&
@@ -28601,7 +28958,8 @@ var render = function() {
       ]),
       _vm._v(" "),
       _vm._m(10)
-    ]
+    ],
+    1
   )
 }
 var staticRenderFns = [
@@ -28805,7 +29163,10 @@ var staticRenderFns = [
             _vm._v(" "),
             _c(
               "a",
-              { staticClass: "btn btn-secondary", attrs: { href: "/" } },
+              {
+                staticClass: "btn btn-secondary",
+                attrs: { href: "/natureza-operacao" }
+              },
               [_vm._v("Cancelar")]
             )
           ])
@@ -29086,61 +29447,6 @@ var render = function() {
         },
         [_vm._v("Adicionar Regra "), _c("i", { staticClass: "fas fa-plus" })]
       )
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-3" }, [
-      _c("label", { attrs: { for: "IncluirFreteBase" } }, [
-        _vm._v("\n\t\t\tIncluir frete na base do IPI \n\t\t")
-      ]),
-      _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.formulariopai.IncluirFreteBase,
-            expression: "formulariopai.IncluirFreteBase"
-          }
-        ],
-        attrs: {
-          type: "checkbox",
-          id: "IncluirFreteBase",
-          name: "IncluirFreteBase"
-        },
-        domProps: {
-          checked: Array.isArray(_vm.formulariopai.IncluirFreteBase)
-            ? _vm._i(_vm.formulariopai.IncluirFreteBase, null) > -1
-            : _vm.formulariopai.IncluirFreteBase
-        },
-        on: {
-          change: function($event) {
-            var $$a = _vm.formulariopai.IncluirFreteBase,
-              $$el = $event.target,
-              $$c = $$el.checked ? true : false
-            if (Array.isArray($$a)) {
-              var $$v = null,
-                $$i = _vm._i($$a, $$v)
-              if ($$el.checked) {
-                $$i < 0 &&
-                  _vm.$set(
-                    _vm.formulariopai,
-                    "IncluirFreteBase",
-                    $$a.concat([$$v])
-                  )
-              } else {
-                $$i > -1 &&
-                  _vm.$set(
-                    _vm.formulariopai,
-                    "IncluirFreteBase",
-                    $$a.slice(0, $$i).concat($$a.slice($$i + 1))
-                  )
-              }
-            } else {
-              _vm.$set(_vm.formulariopai, "IncluirFreteBase", $$c)
-            }
-          }
-        }
-      })
     ])
   ])
 }
@@ -31017,8 +31323,8 @@ var render = function() {
                         {
                           name: "model",
                           rawName: "v-model",
-                          value: _vm.form.paAliquota,
-                          expression: "form.paAliquota\n\t\t"
+                          value: _vm.form.paAliquotaFCP,
+                          expression: "form.paAliquotaFCP"
                         },
                         {
                           name: "money",
@@ -31029,13 +31335,17 @@ var render = function() {
                       ],
                       staticClass: "form-control",
                       attrs: { type: "text" },
-                      domProps: { value: _vm.form.paAliquota },
+                      domProps: { value: _vm.form.paAliquotaFCP },
                       on: {
                         input: function($event) {
                           if ($event.target.composing) {
                             return
                           }
-                          _vm.$set(_vm.form, "paAliquota", $event.target.value)
+                          _vm.$set(
+                            _vm.form,
+                            "paAliquotaFCP",
+                            $event.target.value
+                          )
                         }
                       }
                     })
@@ -31768,61 +32078,6 @@ var render = function() {
         },
         [_vm._v("Adicionar Regra "), _c("i", { staticClass: "fas fa-plus" })]
       )
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-3" }, [
-      _c("label", { attrs: { for: "IncluirFreteBase" } }, [
-        _vm._v("\n\t\t\tIncluir frete na base do IPI \n\t\t")
-      ]),
-      _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.formulariopai.IncluirFreteBase,
-            expression: "formulariopai.IncluirFreteBase"
-          }
-        ],
-        attrs: {
-          type: "checkbox",
-          id: "IncluirFreteBase",
-          name: "IncluirFreteBase"
-        },
-        domProps: {
-          checked: Array.isArray(_vm.formulariopai.IncluirFreteBase)
-            ? _vm._i(_vm.formulariopai.IncluirFreteBase, null) > -1
-            : _vm.formulariopai.IncluirFreteBase
-        },
-        on: {
-          change: function($event) {
-            var $$a = _vm.formulariopai.IncluirFreteBase,
-              $$el = $event.target,
-              $$c = $$el.checked ? true : false
-            if (Array.isArray($$a)) {
-              var $$v = null,
-                $$i = _vm._i($$a, $$v)
-              if ($$el.checked) {
-                $$i < 0 &&
-                  _vm.$set(
-                    _vm.formulariopai,
-                    "IncluirFreteBase",
-                    $$a.concat([$$v])
-                  )
-              } else {
-                $$i > -1 &&
-                  _vm.$set(
-                    _vm.formulariopai,
-                    "IncluirFreteBase",
-                    $$a.slice(0, $$i).concat($$a.slice($$i + 1))
-                  )
-              }
-            } else {
-              _vm.$set(_vm.formulariopai, "IncluirFreteBase", $$c)
-            }
-          }
-        }
-      })
     ])
   ])
 }
@@ -32474,11 +32729,12 @@ var render = function() {
         attrs: {
           type: "checkbox",
           id: "IncluirFreteBase",
+          value: "1",
           name: "IncluirFreteBase"
         },
         domProps: {
           checked: Array.isArray(_vm.formulariopai.IncluirFreteBase)
-            ? _vm._i(_vm.formulariopai.IncluirFreteBase, null) > -1
+            ? _vm._i(_vm.formulariopai.IncluirFreteBase, "1") > -1
             : _vm.formulariopai.IncluirFreteBase
         },
         on: {
@@ -32487,7 +32743,7 @@ var render = function() {
               $$el = $event.target,
               $$c = $$el.checked ? true : false
             if (Array.isArray($$a)) {
-              var $$v = null,
+              var $$v = "1",
                 $$i = _vm._i($$a, $$v)
               if ($$el.checked) {
                 $$i < 0 &&
@@ -33199,61 +33455,6 @@ var render = function() {
         },
         [_vm._v("Adicionar Regra "), _c("i", { staticClass: "fas fa-plus" })]
       )
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-3" }, [
-      _c("label", { attrs: { for: "IncluirFreteBase" } }, [
-        _vm._v("\n\t\t\tIncluir frete na base do IPI \n\t\t")
-      ]),
-      _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.formulariopai.IncluirFreteBase,
-            expression: "formulariopai.IncluirFreteBase"
-          }
-        ],
-        attrs: {
-          type: "checkbox",
-          id: "IncluirFreteBase",
-          name: "IncluirFreteBase"
-        },
-        domProps: {
-          checked: Array.isArray(_vm.formulariopai.IncluirFreteBase)
-            ? _vm._i(_vm.formulariopai.IncluirFreteBase, null) > -1
-            : _vm.formulariopai.IncluirFreteBase
-        },
-        on: {
-          change: function($event) {
-            var $$a = _vm.formulariopai.IncluirFreteBase,
-              $$el = $event.target,
-              $$c = $$el.checked ? true : false
-            if (Array.isArray($$a)) {
-              var $$v = null,
-                $$i = _vm._i($$a, $$v)
-              if ($$el.checked) {
-                $$i < 0 &&
-                  _vm.$set(
-                    _vm.formulariopai,
-                    "IncluirFreteBase",
-                    $$a.concat([$$v])
-                  )
-              } else {
-                $$i > -1 &&
-                  _vm.$set(
-                    _vm.formulariopai,
-                    "IncluirFreteBase",
-                    $$a.slice(0, $$i).concat($$a.slice($$i + 1))
-                  )
-              }
-            } else {
-              _vm.$set(_vm.formulariopai, "IncluirFreteBase", $$c)
-            }
-          }
-        }
-      })
     ])
   ])
 }
@@ -33546,11 +33747,11 @@ var render = function() {
           }
         },
         [
-          _c("option", { attrs: { value: "NCM" } }, [_vm._v("NCM")]),
+          _c("option", { attrs: { value: "ncm" } }, [_vm._v("NCM")]),
           _vm._v(" "),
-          _c("option", { attrs: { value: "Produto" } }, [_vm._v("Produto")]),
+          _c("option", { attrs: { value: "produto" } }, [_vm._v("Produto")]),
           _vm._v(" "),
-          _c("option", { attrs: { value: "GrupoProdutos" } }, [
+          _c("option", { attrs: { value: "grupoProduto" } }, [
             _vm._v("Grupo de produtos")
           ])
         ]
@@ -33564,8 +33765,8 @@ var render = function() {
           {
             name: "show",
             rawName: "v-show",
-            value: _vm.item.tipo == "NCM",
-            expression: "item.tipo == 'NCM'"
+            value: _vm.item.tipo == "ncm",
+            expression: "item.tipo == 'ncm'"
           }
         ],
         staticClass: "col-8"
@@ -33620,8 +33821,8 @@ var render = function() {
           {
             name: "show",
             rawName: "v-show",
-            value: _vm.item.tipo == "Produto",
-            expression: "item.tipo == 'Produto'"
+            value: _vm.item.tipo == "produto",
+            expression: "item.tipo == 'produto'"
           }
         ],
         staticClass: "col-8"
@@ -33675,8 +33876,8 @@ var render = function() {
           {
             name: "show",
             rawName: "v-show",
-            value: _vm.item.tipo == "GrupoProdutos",
-            expression: "item.tipo == 'GrupoProdutos'"
+            value: _vm.item.tipo == "grupoProduto",
+            expression: "item.tipo == 'grupoProduto'"
           }
         ],
         staticClass: "col-8"
@@ -34327,61 +34528,6 @@ var render = function() {
         },
         [_vm._v("Adicionar Regra "), _c("i", { staticClass: "fas fa-plus" })]
       )
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-3" }, [
-      _c("label", { attrs: { for: "IncluirFreteBase" } }, [
-        _vm._v("\n\t\t\tIncluir frete na base do IPI \n\t\t")
-      ]),
-      _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.formulariopai.IncluirFreteBase,
-            expression: "formulariopai.IncluirFreteBase"
-          }
-        ],
-        attrs: {
-          type: "checkbox",
-          id: "IncluirFreteBase",
-          name: "IncluirFreteBase"
-        },
-        domProps: {
-          checked: Array.isArray(_vm.formulariopai.IncluirFreteBase)
-            ? _vm._i(_vm.formulariopai.IncluirFreteBase, null) > -1
-            : _vm.formulariopai.IncluirFreteBase
-        },
-        on: {
-          change: function($event) {
-            var $$a = _vm.formulariopai.IncluirFreteBase,
-              $$el = $event.target,
-              $$c = $$el.checked ? true : false
-            if (Array.isArray($$a)) {
-              var $$v = null,
-                $$i = _vm._i($$a, $$v)
-              if ($$el.checked) {
-                $$i < 0 &&
-                  _vm.$set(
-                    _vm.formulariopai,
-                    "IncluirFreteBase",
-                    $$a.concat([$$v])
-                  )
-              } else {
-                $$i > -1 &&
-                  _vm.$set(
-                    _vm.formulariopai,
-                    "IncluirFreteBase",
-                    $$a.slice(0, $$i).concat($$a.slice($$i + 1))
-                  )
-              }
-            } else {
-              _vm.$set(_vm.formulariopai, "IncluirFreteBase", $$c)
-            }
-          }
-        }
-      })
     ])
   ])
 }
@@ -34407,6 +34553,88 @@ var staticRenderFns = [
     ])
   }
 ]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/components/util/Validacao.vue?vue&type=template&id=8a6a6322&":
+/*!********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/util/Validacao.vue?vue&type=template&id=8a6a6322& ***!
+  \********************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", {}, [
+    _vm.status.erro && _vm.status.erro != null
+      ? _c(
+          "div",
+          {
+            staticClass: "alert alert-danger alert-dismissible fade show",
+            attrs: { id: "alert", role: "alert" }
+          },
+          [
+            _c(
+              "button",
+              {
+                staticClass: "close",
+                attrs: { type: "button" },
+                on: {
+                  click: function($event) {
+                    return _vm.excluirMsg("erro")
+                  }
+                }
+              },
+              [_vm._v("×")]
+            ),
+            _vm._v(" "),
+            _c("strong", [_vm._v("Atenção!")]),
+            _vm._v(" "),
+            _c("span", { domProps: { innerHTML: _vm._s(_vm.status.erro) } })
+          ]
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.status.sucesso && _vm.status.sucesso != null
+      ? _c(
+          "div",
+          {
+            staticClass: "alert alert-success alert-dismissible fade show",
+            attrs: { id: "alert", role: "alert" }
+          },
+          [
+            _c(
+              "button",
+              {
+                staticClass: "close",
+                attrs: { type: "button" },
+                on: {
+                  click: function($event) {
+                    return _vm.excluirMsg("sucesso")
+                  }
+                }
+              },
+              [_vm._v("×")]
+            ),
+            _vm._v(" "),
+            _c("strong", [_vm._v("Muito bem!")]),
+            _vm._v(" "),
+            _c("span", { domProps: { innerHTML: _vm._s(_vm.status.sucesso) } })
+          ]
+        )
+      : _vm._e()
+  ])
+}
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -46740,17 +46968,15 @@ Vue.mixin({
       var $radios = $(classe);
       $radios.filter('[value=' + valor + ']').prop('checked', true);
     },
-    catchErro: function catchErro(error) {
-      alertify.closeAll();
+    catchErro: function catchErro(error, status) {
+      alertify.closeAll(); //console.log(error.response.data.msg);
 
       if (error.response) {
-        alertify.error(error.response.data.message);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      } else if (error.request) {
-        console.log(error.request);
-      } else {
-        console.log('Error', error.message);
+        // alertify.error(error.response.data.msg);
+        Vue.set(this.status, 'erro', error.response.data.msg); // console.log(error.response.status);
+        //console.log(error.response.headers);
+      } else if (error.request) {// console.log(error.request);
+      } else {//console.log('Error', error.message);
       }
     },
     paginacaoPagina: function paginacaoPagina(url) {
@@ -46909,6 +47135,36 @@ Vue.mixin({
       }
 
       return true;
+    },
+    getFormData: function getFormData(formData, data, previousKey) {
+      var _this = this;
+
+      if (data instanceof Object) {
+        Object.keys(data).forEach(function (key) {
+          var value = data[key];
+
+          if (value instanceof Object && !Array.isArray(value)) {
+            return _this.getFormData(formData, value, key);
+          }
+
+          if (previousKey) {
+            key = "".concat(previousKey, "[").concat(key, "]");
+          }
+
+          if (Array.isArray(value)) {
+            var cont = 0;
+            value.forEach(function (val) {
+              cont++;
+
+              if (val instanceof Object) {
+                return _this.getFormData(formData, val, key + '[' + cont + ']');
+              } else formData.append("".concat(key, "[]"), val);
+            });
+          } else {
+            formData.append(key, value);
+          }
+        });
+      }
     },
     setSessao: function setSessao(key, value) {
       this.$session.set(key, value);
@@ -48458,6 +48714,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PIS_vue_vue_type_template_id_f5e17870___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PIS_vue_vue_type_template_id_f5e17870___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./src/components/util/Validacao.vue":
+/*!*******************************************!*\
+  !*** ./src/components/util/Validacao.vue ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Validacao_vue_vue_type_template_id_8a6a6322___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Validacao.vue?vue&type=template&id=8a6a6322& */ "./src/components/util/Validacao.vue?vue&type=template&id=8a6a6322&");
+/* harmony import */ var _Validacao_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Validacao.vue?vue&type=script&lang=js& */ "./src/components/util/Validacao.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _Validacao_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Validacao_vue_vue_type_template_id_8a6a6322___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _Validacao_vue_vue_type_template_id_8a6a6322___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/components/util/Validacao.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/components/util/Validacao.vue?vue&type=script&lang=js&":
+/*!********************************************************************!*\
+  !*** ./src/components/util/Validacao.vue?vue&type=script&lang=js& ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Validacao_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./Validacao.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./src/components/util/Validacao.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Validacao_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/components/util/Validacao.vue?vue&type=template&id=8a6a6322&":
+/*!**************************************************************************!*\
+  !*** ./src/components/util/Validacao.vue?vue&type=template&id=8a6a6322& ***!
+  \**************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Validacao_vue_vue_type_template_id_8a6a6322___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./Validacao.vue?vue&type=template&id=8a6a6322& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./src/components/util/Validacao.vue?vue&type=template&id=8a6a6322&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Validacao_vue_vue_type_template_id_8a6a6322___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Validacao_vue_vue_type_template_id_8a6a6322___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

@@ -131,187 +131,206 @@ class Produto extends CI_Model{
 
     }
 
-    public function getNCMFiltro($filtro){
+    public function getNCMID($id){
 
         $this->db->select('ncm.*');
         $this->db->from('ncm');
-        $this->db->or_like('ncm.desc_ncm',$filtro);
+        $this->db->where('ncm.cod_ncm',$id);
 
-        return $query = $this->db->get()->result();
-
+        return $query = $this->db->get()->row();;
     }
 
-    public function getCest(){
-
-        $this->db->select('cest.*');
-        $this->db->from('cest');
-
-        return $query = $this->db->get()->result();
-
-    }
-
-    public function getProdutoComprado(){
-        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
-
-        $this->db->select('produto.*, tipo_produto.origem_produto');
-        $this->db->from('produto');
-        $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
-        $this->db->where('tipo_produto.origem_produto', '2');
-
-        return $query = $this->db->get()->result();
-
-    }
-
-    public function getProdutoEstruturaComponente($codProduto = null, $listaComponente = null){
-        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
-
-        $this->db->select('produto.*, tipo_produto.origem_produto');
-        $this->db->from('produto');
-        $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
-        $this->db->where('produto.cod_produto !=', $codProduto);
-
-        // Não permitir selecionar o item que já está na lista de componentes
-        if($listaComponente != null){
-            foreach ($listaComponente as $key => $componente){
-                $this->db->where('produto.cod_produto !=', $componente->cod_produto_componente);
-            }
-        }
-
-        return $query = $this->db->get()->result();
-
-    }
-
-    public function getProdutoInventario($listaProduto = null){
-        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
-
-        $this->db->select('produto.*');
-        $this->db->from('produto');
-
-        // Não permitir selecionar o item que já está na lista de componentes
-        if($listaProduto != null){
-            foreach ($listaProduto as $key => $produto){
-                $this->db->where('produto.cod_produto !=', $produto->cod_produto);
-            }
-        }
-
-        return $query = $this->db->get()->result();
-
-    }
-
-    public function getProdutoRequisicaoMaterial($listaProduto = null){
-        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
-
-        $this->db->select('produto.*');
-        $this->db->from('produto');
-
-        // Não permitir selecionar o item que já está na lista de componentes
-        if($listaProduto != null){
-            foreach ($listaProduto as $key => $produto){
-                $this->db->where('produto.cod_produto !=', $produto->cod_produto);
-            }
-        }
-
-        return $query = $this->db->get()->result();
-
-    }
-
-    public function getProdutoOrdem($codProduto = null, $listaComponente = null){
-        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
-
-        $this->db->select('produto.*, tipo_produto.origem_produto');
-        $this->db->from('produto');
-        $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
-        $this->db->where('produto.cod_produto !=', $codProduto);
-
-        // Não permitir selecionar o item que já está na lista de componentes
-        if($listaComponente != null){
-            foreach ($listaComponente as $key => $componente){
-                $this->db->where('produto.cod_produto !=', $componente->cod_produto);
-            }
-        }
-
-        return $query = $this->db->get()->result();
-
-    }
-
-    public function getProdutoVenda($listaVenda = null){
-        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
-
-        //Join para pegar a origem do produto
-        $this->db->select('produto.*, tipo_produto.origem_produto');
-        $this->db->from('produto');
-        $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
-
-        // Não permitir selecionar o item que já está na lista de componentes
-        if($listaVenda != null){
-            foreach ($listaVenda as $key => $venda){
-                $this->db->where('produto.cod_produto !=', $venda->cod_produto);
-            }
-        }
-
-        return $query = $this->db->get()->result();
-
-    }
-
-    public function buscaProduto($codProduto = null){
-        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
-
-        $this->db->select('produto.cod_produto, produto.nome_produto, produto.cod_unidade_medida, produto.custo_medio, produto.preco_venda, tipo_produto.nome_tipo_produto');
-        $this->db->from('produto');
-        $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
-        $this->db->where('produto.cod_produto', $codProduto);
-        
-        return $query = $this->db->get()->row();
-    }
-
-    public function selectProduto($codProduto = null){
-
-        $produto = $this->buscaProduto($codProduto);
-
-        $custoMedio = number_format($produto->custo_medio, 2, ',', '.');
-        $precoVenda = number_format($produto->preco_venda, 2, ',', '.');
-
-        $input = "{$produto->cod_unidade_medida}|{$produto->nome_tipo_produto}|{$custoMedio}|{$precoVenda}";
-
-        return $input;
-
-    }    
-
-    public function buscaComponenteProd($seqComponente = null){
-        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
-
-        $this->db->select('componente_ordem_producao.*, produto.cod_produto, produto.nome_produto, produto.cod_unidade_medida, tipo_produto.nome_tipo_produto');
-        $this->db->from('componente_ordem_producao');
-        $this->db->join('produto', 'produto.cod_produto = componente_ordem_producao.cod_produto');
-        $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
-        $this->db->where('componente_ordem_producao.seq_componente_producao', $seqComponente);
-        
-        return $query = $this->db->get()->row();
-    }  
-
-    public function selectComponenteProd($seqComponente = null){
-        $this->load->model('Engenharia', 'engenharia', true);
-
-        $componente = $this->buscaComponenteProd($seqComponente);
-        $quantConsumo = number_format($componente->quant_consumo, 3, ',', '.');
-
-        $input = "{$componente->seq_componente_producao}|{$componente->cod_produto} - {$componente->nome_produto}|{$componente->cod_unidade_medida}|{$componente->nome_tipo_produto}|{$quantConsumo}";
-
-        return $input;
-
-    }
-    
-    public function buscaProdutoFiltro($filtro){
+    public function getProdutoID($id){
        $this->db->from('produto');
-       $this->db->select('produto.*');
-       
-       $this->db->or_like('produto.nome_produto', $filtro);
+       $this->db->select('produto.cod_produto as id, produto.nome_produto as descricao');
+
+       $this->db->where('produto.cod_produto', $id);
        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
-       return $query = $this->db->get()->result();
+       return $query = $this->db->get()->row();
    } 
 
 
-   public function buscaProdutoVenda($seqProdutoVenda = null){
+   public function getNCMFiltro($filtro){
+
+    $this->db->select('ncm.*');
+    $this->db->from('ncm');
+    $this->db->or_like('ncm.desc_ncm',$filtro);
+
+    return $query = $this->db->get()->result();
+
+}
+
+public function getCest(){
+
+    $this->db->select('cest.*');
+    $this->db->from('cest');
+
+    return $query = $this->db->get()->result();
+
+}
+
+public function getProdutoComprado(){
+    $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+
+    $this->db->select('produto.*, tipo_produto.origem_produto');
+    $this->db->from('produto');
+    $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
+    $this->db->where('tipo_produto.origem_produto', '2');
+
+    return $query = $this->db->get()->result();
+
+}
+
+public function getProdutoEstruturaComponente($codProduto = null, $listaComponente = null){
+    $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+
+    $this->db->select('produto.*, tipo_produto.origem_produto');
+    $this->db->from('produto');
+    $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
+    $this->db->where('produto.cod_produto !=', $codProduto);
+
+        // Não permitir selecionar o item que já está na lista de componentes
+    if($listaComponente != null){
+        foreach ($listaComponente as $key => $componente){
+            $this->db->where('produto.cod_produto !=', $componente->cod_produto_componente);
+        }
+    }
+
+    return $query = $this->db->get()->result();
+
+}
+
+public function getProdutoInventario($listaProduto = null){
+    $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+
+    $this->db->select('produto.*');
+    $this->db->from('produto');
+
+        // Não permitir selecionar o item que já está na lista de componentes
+    if($listaProduto != null){
+        foreach ($listaProduto as $key => $produto){
+            $this->db->where('produto.cod_produto !=', $produto->cod_produto);
+        }
+    }
+
+    return $query = $this->db->get()->result();
+
+}
+
+public function getProdutoRequisicaoMaterial($listaProduto = null){
+    $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+
+    $this->db->select('produto.*');
+    $this->db->from('produto');
+
+        // Não permitir selecionar o item que já está na lista de componentes
+    if($listaProduto != null){
+        foreach ($listaProduto as $key => $produto){
+            $this->db->where('produto.cod_produto !=', $produto->cod_produto);
+        }
+    }
+
+    return $query = $this->db->get()->result();
+
+}
+
+public function getProdutoOrdem($codProduto = null, $listaComponente = null){
+    $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+
+    $this->db->select('produto.*, tipo_produto.origem_produto');
+    $this->db->from('produto');
+    $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
+    $this->db->where('produto.cod_produto !=', $codProduto);
+
+        // Não permitir selecionar o item que já está na lista de componentes
+    if($listaComponente != null){
+        foreach ($listaComponente as $key => $componente){
+            $this->db->where('produto.cod_produto !=', $componente->cod_produto);
+        }
+    }
+
+    return $query = $this->db->get()->result();
+
+}
+
+public function getProdutoVenda($listaVenda = null){
+    $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+
+        //Join para pegar a origem do produto
+    $this->db->select('produto.*, tipo_produto.origem_produto');
+    $this->db->from('produto');
+    $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
+
+        // Não permitir selecionar o item que já está na lista de componentes
+    if($listaVenda != null){
+        foreach ($listaVenda as $key => $venda){
+            $this->db->where('produto.cod_produto !=', $venda->cod_produto);
+        }
+    }
+
+    return $query = $this->db->get()->result();
+
+}
+
+public function buscaProduto($codProduto = null){
+    $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+
+    $this->db->select('produto.cod_produto, produto.nome_produto, produto.cod_unidade_medida, produto.custo_medio, produto.preco_venda, tipo_produto.nome_tipo_produto');
+    $this->db->from('produto');
+    $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
+    $this->db->where('produto.cod_produto', $codProduto);
+
+    return $query = $this->db->get()->row();
+}
+
+public function selectProduto($codProduto = null){
+
+    $produto = $this->buscaProduto($codProduto);
+
+    $custoMedio = number_format($produto->custo_medio, 2, ',', '.');
+    $precoVenda = number_format($produto->preco_venda, 2, ',', '.');
+
+    $input = "{$produto->cod_unidade_medida}|{$produto->nome_tipo_produto}|{$custoMedio}|{$precoVenda}";
+
+    return $input;
+
+}    
+
+public function buscaComponenteProd($seqComponente = null){
+    $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+
+    $this->db->select('componente_ordem_producao.*, produto.cod_produto, produto.nome_produto, produto.cod_unidade_medida, tipo_produto.nome_tipo_produto');
+    $this->db->from('componente_ordem_producao');
+    $this->db->join('produto', 'produto.cod_produto = componente_ordem_producao.cod_produto');
+    $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
+    $this->db->where('componente_ordem_producao.seq_componente_producao', $seqComponente);
+
+    return $query = $this->db->get()->row();
+}  
+
+public function selectComponenteProd($seqComponente = null){
+    $this->load->model('Engenharia', 'engenharia', true);
+
+    $componente = $this->buscaComponenteProd($seqComponente);
+    $quantConsumo = number_format($componente->quant_consumo, 3, ',', '.');
+
+    $input = "{$componente->seq_componente_producao}|{$componente->cod_produto} - {$componente->nome_produto}|{$componente->cod_unidade_medida}|{$componente->nome_tipo_produto}|{$quantConsumo}";
+
+    return $input;
+
+}
+
+public function buscaProdutoFiltro($filtro){
+   $this->db->from('produto');
+   $this->db->select('produto.*');
+
+   $this->db->or_like('produto.nome_produto', $filtro);
+   $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+   return $query = $this->db->get()->result();
+} 
+
+
+public function buscaProdutoVenda($seqProdutoVenda = null){
     $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
 
     $this->db->select('produto_venda.*, produto.cod_produto, produto.nome_produto, produto.cod_unidade_medida, tipo_produto.nome_tipo_produto');
