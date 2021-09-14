@@ -101,7 +101,7 @@
 	</div><!-- FIM FOOTER -->
 
 </div><!-- FIM CONTENT -->
-</div>
+
 </template>
 
 <script>
