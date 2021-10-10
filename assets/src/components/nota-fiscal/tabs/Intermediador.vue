@@ -5,36 +5,36 @@
     </div>
 
     <div class="form-group col-md-3">
-      <label for="intermediador.intermediador">Intermediador </label>
+      <label for="intermediador">Intermediador </label>
       <input
         type="checkbox"
         class=""
         value="1"
-        name="intermediador.intermediador"
-        id="intermediador.intermediador"
-        v-model="form.intermediador.intermediador"
+        name="intermediador"
+        id="intermediador"
+        v-model="form.intermediador"
       />
     </div>
 
-    <div class="form-group col-md-3" v-if="form.intermediador.intermediador==1">
+    <div class="form-group col-md-3" v-if="form.intermediador==1">
       <label for="">CNPJ </label>
       <input
         type="text"
         maxlength="15"
         class="form-control"
-        name="intermediador.CNPJ"
-        v-model="form.intermediador.CNPJ"
+        name="intermediadorCNPJ"
+        v-model="form.intermediadorCNPJ"
       />
     </div>
 
-    <div class="form-group col-md-3" v-if="form.intermediador.intermediador==1">
+    <div class="form-group col-md-3" v-if="form.intermediador==1">
       <label for="">Identificação no intermediador </label>
       <input
         type="text"
         maxlength="255"
         class="form-control"
-        name="intermediador.identificacao"
-        v-model="form.intermediador.identificacao"
+        name="intermediadorID"
+        v-model="form.intermediadorID"
       />
     </div>
   </div>
@@ -47,11 +47,13 @@ export default {
     return {};
   },
   mounted() {
+/*
     this.form.intermediador = {
       intermediador: false,
       CNPJ: "",
       identificacao: "",
     };
+    */
   },
   methods: {}, //,    components: {}
 };

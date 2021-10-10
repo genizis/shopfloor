@@ -61,14 +61,20 @@
     </div>
 
     <div class="form-group col-md-4">
-      <label for="">Natureza de operação SELECT2</label>
-      <input
-        type="text"
-        class="form-control"
-        maxlength="200"
+      <label for="">Natureza de operação</label>
+
+      <select
+        ref="buscaNatureza"
         name="FKIDnaturezaOperacao"
         v-model="form.FKIDnaturezaOperacao"
-      />
+      >
+        <option
+          v-if="form.FKIDnaturezaOperacaoText != ''"
+          :value="form.FKIDnaturezaOperacao"
+        >
+          {{ form.FKIDnaturezaOperacaoText }}
+        </option>
+      </select>
     </div>
 
     <div class="form-group col-md-2">
@@ -82,12 +88,11 @@
       />
     </div>
 
-    <div class="form-group col-md-1">
+    <div class="form-group col-md-2">
       <label for="">Hora de emissão </label>
       <input
         type="time"
         class="form-control"
-
         name="horaEmissao"
         v-model="form.horaEmissao"
       />
@@ -98,13 +103,12 @@
       <input
         type="date"
         class="form-control"
-       
         name="dataSaida"
         v-model="form.dataSaida"
       />
     </div>
 
-    <div class="form-group col-md-1">
+    <div class="form-group col-md-2">
       <label for="">Hora saída </label>
       <input
         type="time"
@@ -180,6 +184,7 @@ export default {
   props: ["form"],
   data() {
     return {
+      listaNatureza: [],
       tipoSaida: [
         { id: "exp", texto: "Exportação" },
         { id: "imp", texto: "Importação de XML" },
@@ -211,8 +216,44 @@ export default {
     };
   },
   mounted() {
-   
+    var $this = this;
+    $(function () {
+      $($this.$refs.buscaNatureza).change(function (event) {
+        $this.form.FKIDnaturezaOperacaoText = $this.textoSelect(this);
+        $this.form.FKIDnaturezaOperacao = $(this).val();
+
+        $this.buscarNaturezaOperacao();
+      });
+
+      $this.selectAjaxDinamico(
+        $($this.$refs.buscaNatureza),
+        "Buscar natureza da operacao...",
+        "/ajax/busca-natureza-operacao-filtro",
+        (item) => {
+          $this.listaNatureza[item.id] = item;
+          return {
+            text: item.descricao,
+            id: item.id,
+          };
+        }
+      );
+    });
   },
-  methods: {}, //,    components: {}
+  methods: {
+    buscarNaturezaOperacao() {
+      const item = this.listaNatureza[this.form.FKIDnaturezaOperacao];
+
+      Vue.set(
+        this.form,
+        "informacoesAdicionais_informacoesComplementaresFiscoNatureza",
+        item.InformacoesAdicionais
+      );
+      Vue.set(
+        this.form,
+        "informacoesAdicionais_informacoesComplementaresNatureza",
+        item.InformacoesComplementares
+      );
+    },
+  }, //,    components: {}
 };
 </script>

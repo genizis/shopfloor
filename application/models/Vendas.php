@@ -563,6 +563,25 @@ class Vendas extends CI_Model{
 
     }
 
+    public function getProdutoFaturadoPorFaturamento($idFaturamento){
+        $this->db->where('produto.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+        $this->db->where('movimentos_estoque.id_empresa', getDadosUsuarioLogado()['id_empresa']); 
+
+        $this->db->select('movimentos_estoque.*, faturamento_pedido.cod_faturamento_pedido, produto.nome_produto, 
+                           produto.cod_unidade_medida, tipo_produto.nome_tipo_produto, produto.cod_ncm, produto.cod_origem,
+                           produto.cod_cest');
+        $this->db->from('movimentos_estoque');
+        $this->db->join('produto', 'produto.cod_produto = movimentos_estoque.cod_produto');
+        $this->db->join('tipo_produto', 'tipo_produto.cod_tipo_produto = produto.cod_tipo_produto');
+        $this->db->join('faturamento_pedido', 'faturamento_pedido.cod_faturamento_pedido = movimentos_estoque.id_origem');
+        $this->db->where('movimentos_estoque.origem_movimento', '3');
+        $this->db->where('faturamento_pedido.cod_faturamento_pedido', $idFaturamento);
+        $this->db->where('faturamento_pedido.estornado', 0);
+        $this->db->order_by('movimentos_estoque.cod_movimento_estoque', 'desc');  
+        
+        return $query = $this->db->get()->result();
+
+    }
     public function getMovimentos($SeqProdutoVenda = null){  
         
         $this->db->where('movimentos_produto_venda.seq_produto_venda', $SeqProdutoVenda); 
@@ -572,15 +591,21 @@ class Vendas extends CI_Model{
     }
 
     public function getFaturamentosPorPedido($NumPedidoVenda){  
+        $this->load->model('NotaFiscal');
 
-        $this->db->select('faturamento_pedido.*');
+        $this->db->select('faturamento_pedido.*,'.$this->NotaFiscal->table.'.id as notaFiscal');
         $this->db->select('(select sum(movimentos_estoque.valor_movimento)
                               from movimentos_estoque
                              where movimentos_estoque.origem_movimento = 3
                                and movimentos_estoque.tipo_movimento = 2
                                and movimentos_estoque.id_origem = faturamento_pedido.cod_faturamento_pedido) valor_total');
-        $this->db->from('faturamento_pedido');        
+        $this->db->from('faturamento_pedido');     
+        
+        
         $this->db->where('faturamento_pedido.num_pedido_venda', $NumPedidoVenda);
+
+        $this->db->join($this->NotaFiscal->table, $this->NotaFiscal->table . '.FKIDfaturamentoPedido = faturamento_pedido.cod_faturamento_pedido', 'left');
+        
         $this->db->where('faturamento_pedido.estornado ', 0);
 
         return $query = $this->db->get()->result();

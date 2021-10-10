@@ -9,8 +9,8 @@
       <input
         type="integer"
         class="form-control"
-        name="pagamento.condicaoPagamento"
-        v-model="form.pagamento.condicaoPagamento"
+        name="pagamento_condicaoPagamento"
+        v-model="form.pagamento_condicaoPagamento"
       />
     </div>
 
@@ -19,19 +19,24 @@
       <input
         type="integer"
         class="form-control"
-        name="pagamento.FKIDCategoria"
-        v-model="form.pagamento.FKIDCategoria"
+        name="pagamento_FKIDCategoria"
+        v-model="form.pagamento_FKIDCategoria"
       />
     </div>
 
-    <div class="col-12">
-      <hr />
-      <h6>Itens</h6>
-      <hr />
-    </div>
+    <Item
+      v-for="item in form.pagamentoItens"
+      :key="item.keyCont"
+      :money="money"
+      :item="item"
+      @remover="remover"
+    />
 
-    <Item v-for="item in form.pagamento.itens" :key="item.id" :money="money" :item="item" />
-  
+    <div class="col-12 text-right">
+      <a @click="novo()" href="#" class="pointer"
+        >Adicionar Novo Pagamento <i class="fas fa-plus"></i
+      ></a>
+    </div>
   </div>
 </template>
 
@@ -39,29 +44,86 @@
 import Item from "./Item.vue";
 
 export default {
-  props: ["form","money"],
+  props: ["form", "money"],
   data() {
-    return {};
-  },
-  mounted() {
-    this.form.pagamento = {
-      condicaoPagamento: "",
-      FKIDCategoria:"",
-      itens: [
-        {
-          dias: "",
-          data: "",
-          valor: "",
-          pagamento: "",
-          FKIDFormaPagamento: "",
-          observacao: "",
-          id: "",
-          cad: false,
-        },
-      ],
+    return {
+      keyCont: 999,
     };
   },
-  methods: {},
+  mounted() {
+     if ( typeof this.form.pagamentoItens.length =='undefined' )
+      this.form.pagamentoItens = [
+      ];
+
+    /*this.form.pagamento_condicaoPagamento = "";
+    this.form.pagamento_FKIDCategoria = "";
+    this.form.pagamentoItens = [
+      {
+        dias: "",
+        data: "",
+        valor: "",
+        pagamento: "",
+        FKIDFormaPagamento: "",
+        observacao: "",
+        id: "",
+        cad: false,
+      },
+    ];
+*/
+  },
+  methods: {
+    remover(item) {
+      var $this = this;
+      if (item.cad) {
+        let index = this.buscarIndexArray(
+          this.form.pagamentoItens,
+          "keyCont",
+          item.keyCont
+        );
+        $this.form.pagamentoItens.splice(index, 1);
+      } else {
+        var index = this.buscarIndexArray(
+          this.form.pagamentoItens,
+          "id",
+          item.id
+        );
+        var $this = this;
+        alertify
+          .confirm(
+            "alerta",
+            "Tem certeza que deseja excluir essa regra?",
+            function () {
+              axios
+                .get("/ajax/excluir-nota-fiscal-parcela?id=" + item.id)
+                .then((response) => {
+                  if (response.data.resultado) {
+                    alertify.success(response.data.msg);
+                    $this.form.pagamentoItens.splice(index, 1);
+                  } else {
+                    alertify.error(response.data.msg);
+                  }
+                });
+            },
+            function () {}
+          )
+          .set("labels", { ok: "Sim", cancel: "Cancelar" })
+          .set("closable", true)
+          .set("basic", false)
+          .closeOthers();
+      }
+    },
+    novo() {
+      this.form.pagamentoItens.push({
+        dias: "",
+        data: "",
+        valor: "",
+        pagamento: "",
+        FKIDFormaPagamento: "",
+        keyCont: this.keyCont++,
+        cad: true,
+      });
+    },
+  },
   components: { Item },
 };
 </script>

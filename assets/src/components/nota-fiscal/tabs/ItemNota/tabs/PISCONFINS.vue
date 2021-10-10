@@ -1,10 +1,10 @@
 <template>
-  <div class="row">
+  <div class="row mt-2">
     <div class="form-group col-md-12">
       <label for="">Situação tributária do PIS </label>
       <select
         class="form-control"
-        v-model="item.pis.situacaoTributaria"
+        v-model="item.pis_situacaoTributaria"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -24,7 +24,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.pis.basePIS"
+        v-model="item.pis_basePIS"
       />
     </div>
 
@@ -34,7 +34,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.pis.valorBase"
+        v-model="item.pis_valorBase"
       />
     </div>
 
@@ -44,7 +44,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.pis.aliqPIS"
+        v-model="item.pis_aliqPIS"
       />
     </div>
 
@@ -54,7 +54,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.pis.valorPIS"
+        v-model="item.pis_valorPIS"
       />
     </div>
 
@@ -64,7 +64,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.pis.valorFixoPIS"
+        v-model="item.pis_valorFixoPIS"
       />
     </div>
 
@@ -74,7 +74,7 @@
         type="text"
         class="form-control"
         maxlength="500"
-        v-model="item.pis.informacoesComp"
+        v-model="item.pis_informacoesComp"
       />
     </div>
 
@@ -84,7 +84,7 @@
         type="text"
         maxlength="500"
         class="form-control"
-        v-model="item.pis.informacoesCompIF"
+        v-model="item.pis_informacoesCompIF"
       />
     </div>
 
@@ -92,7 +92,7 @@
       <label for="">Situação tributária do COFINS </label>
       <select
         class="form-control"
-        v-model="item.confis.situacaoTributaria"
+        v-model="item.confis_situacaoTributaria"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -109,7 +109,7 @@
     <div
       class="form-group col-md-4"
       v-if="
-        mulSeText(item.confis.situacaoTributaria, [
+        mulSeText(item.confis_situacaoTributaria, [
           '3',
           '4',
           '5',
@@ -125,7 +125,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.confis.baseCONFIS"
+        v-model="item.confis_baseCONFIS"
       />
     </div>
 
@@ -135,14 +135,14 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.confis.valorCONFIS"
+        v-model="item.confis_valorCONFIS"
       />
     </div>
 
     <div
       class="form-group col-md-4"
       v-if="
-        mulSeText(item.confis.situacaoTributaria, [
+        mulSeText(item.confis_situacaoTributaria, [
           '4',
           '5',
           '6',
@@ -157,7 +157,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.confis.valorBaseCONFIS"
+        v-model="item.confis_valorBaseCONFIS"
       />
     </div>
 
@@ -167,7 +167,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.confis.aliqCONFIS"
+        v-model="item.confis_aliqCONFIS"
       />
     </div>
 
@@ -177,7 +177,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.confis.valorFixoCONFIS"
+        v-model="item.confis_valorFixoCONFIS"
       />
     </div>
 
@@ -187,7 +187,7 @@
         type="text"
         class="form-control"
         maxlength="500"
-        v-model="item.confis.informacoesComp"
+        v-model="item.confis_informacoesComp"
       />
     </div>
 
@@ -199,7 +199,7 @@
         type="text"
         maxlength="500"
         class="form-control"
-        v-model="item.confis.informacoesCompIF"
+        v-model="item.confis_informacoesCompIF"
       />
     </div>
   </div>
@@ -321,13 +321,7 @@ export default {
     };
   },
   mounted() {    
-    Vue.set(this.item, "pis", {
-      situacaoTributaria: "",
-    });
-
-    Vue.set(this.item, "confis", {
-      situacaoTributaria: "",
-    });
+   
   },
   methods: {}, //,    components: {}
   directives: { money: VMoney },

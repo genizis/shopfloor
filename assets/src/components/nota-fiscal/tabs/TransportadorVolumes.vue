@@ -10,8 +10,8 @@
         type="text"
         class="form-control"
         maxlength="255"
-        name="transportador.nome"
-        v-model="form.transportador.nome"
+        name="transportador_nome"
+        v-model="form.transportador_nome"
       />
     </div>
 
@@ -19,8 +19,8 @@
       <label for="">Frete por conta </label>
       <select
         class="form-control"
-        name="transportador.freteConta"
-        v-model="form.transportador.freteConta"
+        name="transportador_freteConta"
+        v-model="form.transportador_freteConta"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -36,8 +36,8 @@
         type="text"
         class="form-control"
         maxlength="10"
-        name="transportador.placaVeiculo"
-        v-model="form.transportador.placaVeiculo"
+        name="transportador_placaVeiculo"
+        v-model="form.transportador_placaVeiculo"
       />
     </div>
 
@@ -46,8 +46,8 @@
 
       <select
         class="form-control"
-        name="transportador.UFveiculo"
-        v-model="form.transportador.UFveiculo"
+        name="transportador_UFveiculo"
+        v-model="form.transportador_UFveiculo"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -63,8 +63,8 @@
         type="text"
         class="form-control"
         maxlength="50"
-        name="transportador.RNTC"
-        v-model="form.transportador.RNTC"
+        name="transportador_RNTC"
+        v-model="form.transportador_RNTC"
       />
     </div>
 
@@ -74,8 +74,8 @@
         type="text"
         class="form-control"
         maxlength="15"
-        name="transportador.CNPJCPF"
-        v-model="form.transportador.CNPJCPF"
+        name="transportador_CNPJCPF"
+        v-model="form.transportador_CNPJCPF"
       />
     </div>
 
@@ -85,8 +85,8 @@
         type="text"
         class="form-control"
         maxlength="100"
-        name="transportador.inscricaoEstadual"
-        v-model="form.transportador.inscricaoEstadual"
+        name="transportador_inscricaoEstadual"
+        v-model="form.transportador_inscricaoEstadual"
       />
     </div>
 
@@ -95,8 +95,8 @@
 
       <select
         class="form-control"
-        name="transportador.UF"
-        v-model="form.transportador.UF"
+        name="transportador_UF"
+        v-model="form.transportador_UF"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -112,8 +112,8 @@
         type="text"
         class="form-control"
         maxlength="255"
-        name="transportador.municipio"
-        v-model="form.transportador.municipio"
+        name="transportador_municipio"
+        v-model="form.transportador_municipio"
       />
     </div>
 
@@ -123,8 +123,8 @@
         type="text"
         class="form-control"
         maxlength="255"
-        name="transportador.endereco"
-        v-model="form.transportador.endereco"
+        name="transportador_endereco"
+        v-model="form.transportador_endereco"
       />
     </div>
 
@@ -133,8 +133,8 @@
       <input
         type="number"
         class="form-control"
-        name="transportador.quantidade"
-        v-model="form.transportador.quantidade"
+        name="transportador_quantidade"
+        v-model="form.transportador_quantidade"
       />
     </div>
 
@@ -144,8 +144,8 @@
         type="text"
         class="form-control"
         maxlength="100"
-        name="transportador.especie"
-        v-model="form.transportador.especie"
+        name="transportador_especie"
+        v-model="form.transportador_especie"
       />
     </div>
 
@@ -155,8 +155,8 @@
         type="text"
         class="form-control"
         maxlength="100"
-        name="transportador.marca"
-        v-model="form.transportador.marca"
+        name="transportador_marca"
+        v-model="form.transportador_marca"
       />
     </div>
 
@@ -165,8 +165,8 @@
       <input
         type="text"
         class="form-control"
-        name="transportador.numero"
-        v-model="form.transportador.numero"
+        name="transportador_numero"
+        v-model="form.transportador_numero"
       />
     </div>
 
@@ -176,8 +176,8 @@
         type="text"
         class="form-control"
          maxlength="10"
-        name="transportador.presoBruto"
-        v-model="form.transportador.presoBruto"
+        name="transportador_presoBruto"
+        v-model="form.transportador_presoBruto"
       />
     </div>
 
@@ -187,8 +187,8 @@
         type="text"
         class="form-control"
         maxlength="10"
-        name="transportador.pesoLiquido"
-        v-model="form.transportador.pesoLiquido"
+        name="transportador_pesoLiquido"
+        v-model="form.transportador_pesoLiquido"
       />
     </div>
 
@@ -198,20 +198,20 @@
         type="text"
         class="form-control"
          maxlength="100"
-        name="transportador.logistica"
-        v-model="form.transportador.logistica"
+        name="transportador_logistica"
+        v-model="form.transportador_logistica"
       />
     </div>
 
     <div class="form-group col-md-3">
-      <label for="transportador.enderecoEntregaDiferente">Endereço de entrega diferente da cobrança </label>
+      <label for="transportador_enderecoEntregaDiferente">Endereço de entrega diferente da cobrança </label>
       <input
         type="checkbox"
         class=""
         value="1"
-        id="transportador.enderecoEntregaDiferente"
-        name="transportador.enderecoEntregaDiferente"
-        v-model="form.transportador.enderecoEntregaDiferente"
+        id="transportador_enderecoEntregaDiferente"
+        name="transportador_enderecoEntregaDiferente"
+        v-model="form.transportador_enderecoEntregaDiferente"
       />
     </div>
   </div>
@@ -236,6 +236,7 @@ export default {
     };
   },
   mounted() {
+    /*
     this.form.transportador = {
       nome: "",
       freteConta: "",
@@ -256,6 +257,7 @@ export default {
       logistica: "",
       enderecoEntregaDiferente: false,
     };
+    */
   },
   methods: {}, //,    components: {}
 };

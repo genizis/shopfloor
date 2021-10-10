@@ -1,25 +1,30 @@
 <template>
   <div class="col-12 row">
-    <div class="form-group col-md-3">
-      <label for="">Contato FKIDContato</label>
+    <div class="form-group col-md-4">
+      <label for="">Contato</label>
       <input
         type="integer"
         class="form-control"
-        name="item.FKIDContato"
+        sname="item.FKIDContato"
         v-model="item.FKIDContato"
       />
     </div>
 
-    <div class="form-group col-md-3">
+    <div class="form-group col-md-4">
       <label for="">CPF/CNPJ </label>
       <input
         type="text"
         class="form-control"
         maxlength="20"
-        name="item.CPFCNPJ"
+        sname="item.CPFCNPJ"
         v-model="item.CPFCNPJ"
       />
     </div>
+
+    <div class=" div-excluir text-right">
+      <i @click="remover" class="fas fa-trash pointer red"></i>
+    </div>
+
   </div>
 </template>
 
@@ -32,6 +37,10 @@ export default {
     };
   },
   mounted() {},
-  methods: {},
+  methods: {
+     remover(){
+      this.$emit('remover',this.item);
+    }
+  },
 };
 </script>

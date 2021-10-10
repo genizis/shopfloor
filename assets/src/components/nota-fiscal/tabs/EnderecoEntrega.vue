@@ -1,5 +1,5 @@
 <template>
-  <div class="row col-12" v-show="form.transportador.enderecoEntregaDiferente==1">
+  <div class="row col-12" v-show="form.transportador_enderecoEntregaDiferente==1">
     <div class="col-12">
       <h5>Endereço de entrega</h5>
     </div>
@@ -9,8 +9,8 @@
       <input
         type="text"
         class="form-control"
-        name="enderecoEntrega.nome"
-        v-model="form.enderecoEntrega.nome"
+        name="enderecoEntrega_nome"
+        v-model="form.enderecoEntrega_nome"
       />
     </div>
 
@@ -20,8 +20,8 @@
         type="text"
         maxlength="10"
         class="form-control"
-        name="enderecoEntrega.cep"
-        v-model="form.enderecoEntrega.cep"
+        name="enderecoEntrega_cep"
+        v-model="form.enderecoEntrega_cep"
       />
     </div>
 
@@ -30,8 +30,8 @@
 
       <select
         class="form-control"
-        name="enderecoEntrega.UF"
-        v-model="form.enderecoEntrega.UF"
+        name="enderecoEntrega_UF"
+        v-model="form.enderecoEntrega_UF"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -47,8 +47,8 @@
         type="text"
         maxlength="255"
         class="form-control"
-        name="enderecoEntrega.municipio"
-        v-model="form.enderecoEntrega.municipio"
+        name="enderecoEntrega_municipio"
+        v-model="form.enderecoEntrega_municipio"
       />
     </div>
 
@@ -58,8 +58,8 @@
         type="text"
         maxlength="255"
         class="form-control"
-        name="enderecoEntrega.endereco"
-        v-model="form.enderecoEntrega.endereco"
+        name="enderecoEntrega_endereco"
+        v-model="form.enderecoEntrega_endereco"
       />
     </div>
 
@@ -69,8 +69,8 @@
         type="text"
         maxlength="50"
         class="form-control"
-        name="enderecoEntrega.numero"
-        v-model="form.enderecoEntrega.numero"
+        name="enderecoEntrega_numero"
+        v-model="form.enderecoEntrega_numero"
       />
     </div>
 
@@ -80,8 +80,8 @@
         type="text"
         maxlength="255"
         class="form-control"
-        name="enderecoEntrega.bairro"
-        v-model="form.enderecoEntrega.bairro"
+        name="enderecoEntrega_bairro"
+        v-model="form.enderecoEntrega_bairro"
       />
     </div>
 
@@ -91,8 +91,8 @@
         type="text"
         maxlength="255"
         class="form-control"
-        name="enderecoEntrega.complemento"
-        v-model="form.enderecoEntrega.complemento"
+        name="enderecoEntrega_complemento"
+        v-model="form.enderecoEntrega_complemento"
       />
     </div>
 
@@ -102,8 +102,8 @@
         type="text"
         maxlength="255"
         class="form-control"
-        name="enderecoEntrega.pais"
-        v-model="form.enderecoEntrega.pais"
+        name="enderecoEntrega_pais"
+        v-model="form.enderecoEntrega_pais"
       />
     </div>
   </div>

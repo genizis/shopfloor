@@ -1,10 +1,10 @@
 <template>
-  <div class="row">
+  <div class="row mt-2">
     <div class="form-group col-md-4">
       <label for=""> Presumido no cálculo do PIS/COFINS </label>
      <select
         class="form-control"
-        v-model="item.outros.presumidoCalculo"
+        v-model="item.outros_presumidoCalculo"
         placeholder="Selecione..."
       >
         <option :value="itemS.id" :key="key" v-for="(itemS, key) in simNao">
@@ -20,7 +20,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.outros.aliqFunrural"
+        v-model="item.outros_aliqFunrural"
       />
     </div>
 
@@ -29,7 +29,7 @@
 
       <select
         class="form-control"
-        v-model="item.outros.tipoItem"
+        v-model="item.outros_tipoItem"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -46,7 +46,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.outros.baseComissao"
+        v-model="item.outros_baseComissao"
       />
     </div>
     <div class="form-group col-md-4">
@@ -55,7 +55,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.outros.aliquotaComissao"
+        v-model="item.outros_aliquotaComissao"
       />
     </div>
     <div class="form-group col-md-4">
@@ -65,7 +65,7 @@
         readonly
         class="form-control"
         v-money="money"
-        v-model="item.outros.valorComissao"
+        v-model="item.outros_valorComissao"
       />
     </div>
 
@@ -74,7 +74,7 @@
       <input
         type="number"
         class="form-control"
-        v-model="item.outros.numeroPedido"
+        v-model="item.outros_numeroPedido"
       />
     </div>
 
@@ -83,7 +83,7 @@
       <input
         type="number"
         class="form-control"
-        v-model="item.outros.nrItemPedido"
+        v-model="item.outros_nrItemPedido"
       />
     </div>
 
@@ -93,7 +93,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.outros.aproxTrib"
+        v-model="item.outros_aproxTrib"
       />
     </div>
     <div class="form-group col-md-4">
@@ -102,7 +102,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.outros.valorAproxTrib"
+        v-model="item.outros_valorAproxTrib"
       />
     </div>
 
@@ -111,7 +111,7 @@
       <input
         type="number"
         class="form-control"
-        v-model="item.outros.unidadeTributaria"
+        v-model="item.outros_unidadeTributaria"
       />
     </div>
 
@@ -121,7 +121,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.outros.quantidadeTributaria"
+        v-model="item.outros_quantidadeTributaria"
       />
     </div>
 
@@ -132,7 +132,7 @@
         class="form-control"
         v-money="money"
         readonly
-        v-model="item.outros.valorUnitario"
+        v-model="item.outros_valorUnitario"
       />
     </div>
 
@@ -143,7 +143,7 @@
         class="form-control"
         v-money="money"
         readonly
-        v-model="item.outros.valorOutrasDespesas"
+        v-model="item.outros_valorOutrasDespesas"
       />
     </div>
   </div>
@@ -177,9 +177,7 @@ export default {
     };
   },
   mounted() {
-    Vue.set(this.item, "outros", {
-      presumidoCalculo: 1,
-    });
+  
   },
   methods: {}, //,    components: {}
   directives: { money: VMoney },

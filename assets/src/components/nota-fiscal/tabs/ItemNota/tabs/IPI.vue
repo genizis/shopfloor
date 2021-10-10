@@ -1,10 +1,10 @@
 <template>
-  <div class="row">
+  <div class="row mt-2">
     <div class="form-group col-md-4">
       <label for=""> Situação tributária do IPI </label>
       <select
         class="form-control"
-        v-model="item.ipi.situacaoTributaria"
+        v-model="item.ipi_situacaoTributaria"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -24,7 +24,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.ipi.aliqIPI"
+        v-model="item.ipi_aliqIPI"
       />
     </div>
 
@@ -34,7 +34,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.ipi.baseIPI"
+        v-model="item.ipi_baseIPI"
       />
     </div>
 
@@ -44,7 +44,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.ipi.valorBaseIPI"
+        v-model="item.ipi_valorBaseIPI"
       />
     </div>
 
@@ -54,7 +54,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.ipi.valorIPI"
+        v-model="item.ipi_valorIPI"
       />
     </div>
 
@@ -62,7 +62,7 @@
       <label for="">Cód Enquad. IPI </label>
       <select
         class="form-control"
-        v-model="item.ipi.codEnquad"
+        v-model="item.ipi_codEnquad"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -74,12 +74,12 @@
 
     <div class="form-group col-md-4">
       <label for="">Código exceção da TIPI </label>
-      <input type="text" class="form-control" v-model="item.ipi.codExcecaoTIPI" />
+      <input type="text" class="form-control" v-model="item.ipi_codExcecaoTIPI" />
     </div>
 
     <div class="form-group col-md-12">
       <label for="">Informações complementares do IPI </label>
-      <input type="text" class="form-control" v-model="item.ipi.informacoesComp" />
+      <input type="text" class="form-control" v-model="item.ipi_informacoesComp" />
     </div>
 
     <div class="form-group col-md-12">
@@ -87,7 +87,7 @@
       <input
         type="text"
         class="form-control"
-        v-model="item.ipi.informacoesCompIF"
+        v-model="item.ipi_informacoesCompIF"
       />
     </div>
   </div>
@@ -249,16 +249,17 @@ export default {
     Vue.set(this.item, "ipi", {
       situacaoTributaria: "",
     });
- 
-    Vue.set(this.item.ipi, "situacaoTributaria", "");
-    Vue.set(this.item.ipi, "baseIPI", "");
-    Vue.set(this.item.ipi, "valorBaseIPI", "");
-    Vue.set(this.item.ipi, "valorIPI", "");
-    Vue.set(this.item.ipi, "codEnquad", "");
-    Vue.set(this.item.ipi, "codExcecaoTIPI", "");
-    Vue.set(this.item.ipi, "informacoesComp", "");
-    Vue.set(this.item.ipi, "informacoesCompIF", "");
-  },
+ /*
+    Vue.set(this.item.ipi_"situacaoTributaria", "");
+    Vue.set(this.item.ipi_ "baseIPI", "");
+    Vue.set(this.item.ipi_ "valorBaseIPI", "");
+    Vue.set(this.item.ipi_ "valorIPI", "");
+    Vue.set(this.item.ipi_ "codEnquad", "");
+    Vue.set(this.item.ipi_ "codExcecaoTIPI", "");
+    Vue.set(this.item.ipi_ "informacoesComp", "");
+    Vue.set(this.item.ipi_ "informacoesCompIF", "");
+*/
+},
   methods: {}, //,    components: {}
   directives: { money: VMoney },
 };

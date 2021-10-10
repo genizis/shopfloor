@@ -4,17 +4,17 @@
       <h5>Itens da nota fiscal</h5>
     </div>
     <div class="col-12">
-      <table class="table table-sm">
-        <thead>
+      <table class="table">
+        <thead class="thead-light text-center">
           <tr>
-            <td>Produto ou serviço</td>
-            <td>Código</td>
-            <td>Un</td>
-            <td>Qtde</td>
-            <td>Preço un</td>
-            <td>NCM</td>
-            <td></td>
-            <td></td>
+            <th>Produto ou serviço</th>
+            <th>Código</th>
+            <th>Un</th>
+            <th>Qte</th>
+            <th>Preço un</th>
+            <th>NCM</th>
+            <th></th>
+            <th></th>
           </tr>
         </thead>
 
@@ -43,14 +43,7 @@ export default {
     return {};
   },
   mounted() {
-    this.form.itensNota = [
-      {
-        id: "",
-        cad: "",
-        FKIDContato: "",
-        CPFCNPJ: "",
-      },
-    ];
+   //this.form.itensNota = [];
   },
   methods: {},
   components: { Item },

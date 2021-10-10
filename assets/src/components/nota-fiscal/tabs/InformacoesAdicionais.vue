@@ -10,8 +10,8 @@
         type="text"
         maxlength="255"
         class="form-control"
-        name="informacoesAdicionais.numeroLojaVirtual"
-        v-model="form.informacoesAdicionais.numeroLojaVirtual"
+        name="informacoesAdicionais_numeroLojaVirtual"
+        v-model="form.informacoesAdicionais_numeroLojaVirtual"
       />
     </div>
 
@@ -21,8 +21,8 @@
         type="text"
         maxlength="255"
         class="form-control"
-        name="informacoesAdicionais.origemLojaVirtual"
-        v-model="form.informacoesAdicionais.origemLojaVirtual"
+        name="informacoesAdicionais_origemLojaVirtual"
+        v-model="form.informacoesAdicionais_origemLojaVirtual"
       />
     </div>
 
@@ -32,8 +32,8 @@
         type="text"
         maxlength="255"
         class="form-control"
-        name="informacoesAdicionais.origemCanalVenda"
-        v-model="form.informacoesAdicionais.origemCanalVenda"
+        name="informacoesAdicionais_origemCanalVenda"
+        v-model="form.informacoesAdicionais_origemCanalVenda"
       />
     </div>
 
@@ -42,8 +42,8 @@
       <textarea
         type="text"
         class="form-control"
-        name="informacoesAdicionais.informacoesComplementares"
-        v-model="form.informacoesAdicionais.informacoesComplementares"
+        name="informacoesAdicionais_informacoesComplementares"
+        v-model="form.informacoesAdicionais_informacoesComplementares"
       >
       </textarea>
     </div>
@@ -54,8 +54,8 @@
         type="text"
         class="form-control"
         readonly
-        name="informacoesAdicionais.informacoesComplementaresNatureza"
-        v-model="form.informacoesAdicionais.informacoesComplementaresNatureza"
+        name="informacoesAdicionais_informacoesComplementaresNatureza"
+        v-model="form.informacoesAdicionais_informacoesComplementaresNatureza"
       >
       </textarea>
     </div>
@@ -68,9 +68,9 @@
         type="text"
         class="form-control"
         readonly
-        name="informacoesAdicionais.informacoesComplementaresFiscoNatureza"
+        name="informacoesAdicionais_informacoesComplementaresFiscoNatureza"
         v-model="
-          form.informacoesAdicionais.informacoesComplementaresFiscoNatureza
+          form.informacoesAdicionais_informacoesComplementaresFiscoNatureza
         "
       >
       </textarea>

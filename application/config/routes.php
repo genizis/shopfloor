@@ -99,11 +99,17 @@ $route['natureza-operacao/(:num)']['GET'] =  'EmpresaController/listarNaturezaOp
 $route['natureza-operacao/nova']['GET'] =  'EmpresaController/formNaturezaOperacao';
 $route['natureza-operacao/nova']['POST'] =  'EmpresaController/inserirNaturezaOperacao';
 $route['natureza-operacao/editar/(:any)']['GET'] = 'EmpresaController/formEditarNaturezaOperacao/$1';
-
-
 $route['natureza-operacao/excluir-natureza'] = 'EmpresaController/excluirNaturezaOperacao';
-
 $route['natureza-operacao/ajax/(:any)']['GET'] = 'EmpresaController/ajaxeditarNaturezaOperacao/$1';
+
+//Rotas Nota fiscal
+$route['nota-fiscal/nova']['GET'] =  'NotaFiscalController/formNotaFiscal';
+$route['nota-fiscal/nova']['POST'] =  'NotaFiscalController/inserirNotaFiscal';
+
+$route['nota-fiscal/api/produtos-faturamento']['GET'] =  'NotaFiscalController/getProdutoFaturamento';
+$route['nota-fiscal/api/lista-faturamento']['GET'] =  'NotaFiscalController/getNotaFiscalIDFaturamento';
+
+
 
 //Rotas Financeiro
 $route['conta/nova-conta']['GET'] =  'FinanceiroController/formConta';
@@ -535,10 +541,18 @@ $route['ajax/busca-produto-filtro']['GET'] = 'AjaxController/getProdutosFiltro';
 
 $route['ajax/busca-tipo-produto-filtro']['GET'] = 'AjaxController/getTipoProdutosFiltro';
 
+$route['ajax/busca-natureza-operacao-filtro']['GET'] = 'AjaxController/getNaturezaOperacao';
+
 $route['ajax/busca-estado']['GET'] = 'AjaxController/getEstado';
 
 $route['ajax/excluir-vinculo-produto-natureza-operacao']['GET'] = 'AjaxController/excluirVinculoProdutoNaturezaOperacao';
 
 
 $route['ajax/excluir-regra-natureza-operacao']['GET'] = 'AjaxController/excluirRegraProdutoNaturezaOperacao';
+
+
+$route['ajax/excluir-nota-fiscal-pessoa-autorizada']['GET'] = 'AjaxController/excluirNotaFiscalPessoasAutorizadas';
+
+
+$route['ajax/excluir-nota-fiscal-parcela']['GET'] = 'AjaxController/excluirNotaFiscalPagamentoParcela';
 

@@ -590,12 +590,15 @@ class VendasController extends CI_Controller {
         }
     }
 
+ 
+
     public function editFaturamentoPedido($numPedidoVenda){
 
         $listaEmpresa = $this->empresa->getEmpresaPorCodigo(getDadosUsuarioLogado()['id_empresa']);
         $listaPedido = $this->venda->getPedidoVendaAprovPorCodigo($numPedidoVenda);
         $listaCliente = $this->cliente->getClientePorCodigo($listaPedido->cod_cliente);
         $listaFaturamento = $this->venda->getFaturamentosPorPedido($numPedidoVenda);
+     
         $listaProdutosPedido = $this->venda->getProdutoPorPedido($numPedidoVenda);
         $listaProdutoFaturado = $this->venda->getProdutoFaturadoPorPedido($numPedidoVenda);
         $listaConta = $this->financeiro->getContaAtivaRel();
@@ -607,7 +610,6 @@ class VendasController extends CI_Controller {
 
         if($listaPedido == null){
             redirect(base_url('vendas/atendimento-pedido'));
-            
         }else{ 
 
             $dados = array(
@@ -627,7 +629,8 @@ class VendasController extends CI_Controller {
                 'menu' => 'Vendas'
                 
             );
-
+            //var_dump($listaProdutoFaturado);
+            
             $this->load->view('vendas/novo-faturamento-pedido', $dados);
         }
 

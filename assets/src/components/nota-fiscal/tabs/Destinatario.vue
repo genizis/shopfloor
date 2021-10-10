@@ -10,8 +10,8 @@
         type="text"
         class="form-control"
         maxlength="255"
-        name="destinatario.nomeContato"
-        v-model="form.destinatario.nomeContato"
+        name="destinatario_nomeContato"
+        v-model="form.destinatario_nomeContato"
       />
     </div>
 
@@ -19,8 +19,8 @@
       <label for="">Tipo da pessoa </label>
       <select
         class="form-control"
-        name="destinatario.tipoPessoa"
-        v-model="form.destinatario.tipoPessoa"
+        name="destinatario_tipoPessoa"
+        v-model="form.destinatario_tipoPessoa"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -32,56 +32,56 @@
 
     <div
       class="form-group col-md-3"
-      v-show="form.destinatario.tipoPessoa == 'f'"
+      v-show="form.destinatario_tipoPessoa == 'f'"
     >
-      <label for="">CPF MASKCPF</label>
+      <label for="">CPF</label>
       <input
         type="text"
         class="form-control"
         maxlength="20"
-        name="destinatario.cpf"
-        v-model="form.destinatario.cpf"
+        name="destinatario_cpf"
+        v-model="form.destinatario_cpf"
       />
     </div>
 
     <div
       class="form-group col-md-3"
-      v-show="form.destinatario.tipoPessoa == 'j'"
+      v-show="form.destinatario_tipoPessoa == 'j'"
     >
       <label for="">CNPJ </label>
       <input
         type="text"
         class="form-control"
         maxlength="18"
-        name="destinatario.cnpj"
-        v-model="form.destinatario.cnpj"
+        name="destinatario_cnpj"
+        v-model="form.destinatario_cnpj"
       />
     </div>
 
     <div
       class="form-group col-md-3"
-      v-show="form.destinatario.tipoPessoa == 'e'"
+      v-show="form.destinatario_tipoPessoa == 'e'"
     >
       <label for="">País </label>
       <input
         type="text"
         class="form-control"
         maxlength="100"
-        name="destinatario.pais"
-        v-model="form.destinatario.pais"
+        name="destinatario_pais"
+        v-model="form.destinatario_pais"
       />
     </div>
 
     <div
       class="form-group col-md-3"
-      v-show="form.destinatario.tipoPessoa == 'e'"
+      v-show="form.destinatario_tipoPessoa == 'e'"
     >
       <label for="">Contribuinte </label>
 
       <select
         class="form-control"
-        name="destinatario.contribuinte"
-        v-model="form.destinatario.contribuinte"
+        name="destinatario_contribuinte"
+        v-model="form.destinatario_contribuinte"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -92,37 +92,37 @@
     </div>
 
     <div class="form-group col-md-3">
-      Contribuinte = 2 valor “ISENTO”
+   
       <label for="">Inscrição Estadual </label>
       <input
         type="text"
         class="form-control"
         maxlength="100"
-        name="destinatario.inscricaoEstadual"
-        v-model="form.destinatario.inscricaoEstadual"
+        name="destinatario_inscricaoEstadual"
+        v-model="form.destinatario_inscricaoEstadual"
       />
     </div>
 
     <div class="form-group col-md-3">
-      <label for="destinatario.consumidorFinal">Consumidor final </label>
+      <label for="destinatario_consumidorFinal">Consumidor final </label>
       <input
         type="checkbox"
         class=""
         value="1"
-        name="destinatario.consumidorFinal"
-        id="destinatario.consumidorFinal"
-        v-model="form.destinatario.consumidorFinal"
+        name="destinatario_consumidorFinal"
+        id="destinatario_consumidorFinal"
+        v-model="form.destinatario_consumidorFinal"
       />
     </div>
 
     <div class="form-group col-md-3">
-      <label for="">CEP </label> Buscar endereço pelo CEP
+      <label for="">CEP </label>
       <input
         type="text"
         class="form-control"
         maxlength="10"
-        name="destinatario.cep"
-        v-model="form.destinatario.cep"
+        name="destinatario_cep"
+        v-model="form.destinatario_cep"
       />
     </div>
 
@@ -131,8 +131,8 @@
 
       <select
         class="form-control"
-        name="destinatario.UF"
-        v-model="form.destinatario.UF"
+        name="destinatario_UF"
+        v-model="form.destinatario_UF"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -148,8 +148,8 @@
         type="text"
         class="form-control"
         maxlength="255"
-        name="destinatario.municipio"
-        v-model="form.destinatario.municipio"
+        name="destinatario_municipio"
+        v-model="form.destinatario_municipio"
       />
     </div>
 
@@ -159,8 +159,8 @@
         type="text"
         class="form-control"
         maxlength="255"
-        name="destinatario.bairro"
-        v-model="form.destinatario.bairro"
+        name="destinatario_bairro"
+        v-model="form.destinatario_bairro"
       />
     </div>
 
@@ -170,8 +170,8 @@
         type="text"
         class="form-control"
         maxlength="255"
-        name="destinatario.endereco"
-        v-model="form.destinatario.endereco"
+        name="destinatario_endereco"
+        v-model="form.destinatario_endereco"
       />
     </div>
 
@@ -181,8 +181,8 @@
         type="text"
         class="form-control"
         maxlength="20"
-        name="destinatario.numero"
-        v-model="form.destinatario.numero"
+        name="destinatario_numero"
+        v-model="form.destinatario_numero"
       />
     </div>
 
@@ -192,8 +192,8 @@
         type="text"
         class="form-control"
         maxlength="255"
-        name="destinatario.complemento"
-        v-model="form.destinatario.complemento"
+        name="destinatario_complemento"
+        v-model="form.destinatario_complemento"
       />
     </div>
 
@@ -203,8 +203,8 @@
         type="text"
         class="form-control"
         maxlength="15"
-        name="destinatario.foneFax"
-        v-model="form.destinatario.foneFax"
+        name="destinatario_foneFax"
+        v-model="form.destinatario_foneFax"
       />
     </div>
 
@@ -214,19 +214,19 @@
         type="email"
         class="form-control"
         maxlength="255"
-        name="destinatario.email"
-        v-model="form.destinatario.email"
+        name="destinatario_email"
+        v-model="form.destinatario_email"
       />
     </div>
 
     <div class="form-group col-md-3">
-      <label for="">Vendedor </label> FKIDVendedor
+      <label for="">Vendedor </label>
       <input
         type="text"
         class="form-control"
         maxlength="255"
-        name="destinatario.vendedor"
-        v-model="form.destinatario.vendedor"
+        name="destinatario_vendedor"
+        v-model="form.destinatario_vendedor"
       />
     </div>
   </div>
@@ -258,6 +258,7 @@ export default {
     };
   },
   mounted() {
+    /*
     this.form.destinatario = {
       nomeContato: "",
       tipoPessoa: "",
@@ -278,6 +279,7 @@ export default {
       email: "",
       vendedor: "",
     };
+*/
   },
   methods: {}, //,    components: { Cabecalho,ListaContato,Conversa}
 };

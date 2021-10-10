@@ -12,8 +12,8 @@
         class="form-control"
         v-money="money"
         :readonly="form.calculoimposto.calculoAutomatico"
-        name="retencoes.minimoRetencao"
-        v-model="form.retencoes.minimoRetencao"
+        name="retencoes_minimoRetencao"
+        v-model="form.retencoes_minimoRetencao"
       />
     </div>
 
@@ -25,8 +25,8 @@
         class="form-control"
         v-money="money"
         :readonly="form.calculoimposto.calculoAutomatico"
-        name="retencoes.baseRetencao"
-        v-model="form.retencoes.baseRetencao"
+        name="retencoes_baseRetencao"
+        v-model="form.retencoes_baseRetencao"
       />
     </div>
 
@@ -38,8 +38,8 @@
         class="form-control"
         v-money="money"
         :readonly="form.calculoimposto.calculoAutomatico"
-        name="retencoes.valorIR"
-        v-model="form.retencoes.valorIR"
+        name="retencoes_valorIR"
+        v-model="form.retencoes_valorIR"
       />
     </div>
 
@@ -51,8 +51,8 @@
         class="form-control"
         v-money="money"
         :readonly="form.calculoimposto.calculoAutomatico"
-        name="retencoes.valorCSLL"
-        v-model="form.retencoes.valorCSLL"
+        name="retencoes_valorCSLL"
+        v-model="form.retencoes_valorCSLL"
       />
     </div>
 
@@ -64,8 +64,8 @@
         class="form-control"
         v-money="money"
         :readonly="form.calculoimposto.calculoAutomatico"
-        name="retencoes.valorPISretido"
-        v-model="form.retencoes.valorPISretido"
+        name="retencoes_valorPISretido"
+        v-model="form.retencoes_valorPISretido"
       />
     </div>
 
@@ -77,8 +77,8 @@
         class="form-control"
         v-money="money"
         :readonly="form.calculoimposto.calculoAutomatico"
-        name="retencoes.valorCOFINSRetido"
-        v-model="form.retencoes.valorCOFINSRetido"
+        name="retencoes_valorCOFINSRetido"
+        v-model="form.retencoes_valorCOFINSRetido"
       />
     </div>
 
@@ -89,8 +89,8 @@
         type="text"
         class="form-control"
         v-money="money"
-        name="retencoes.valorISSRetido"
-        v-model="form.retencoes.valorISSRetido"
+        name="retencoes_valorISSRetido"
+        v-model="form.retencoes_valorISSRetido"
       />
     </div>
   </div>
@@ -105,6 +105,7 @@ export default {
     return {};
   },
   mounted() {
+    /*
     this.form.retencoes = {
       minimoRetencao: "",
       baseRetencao: "",
@@ -114,6 +115,7 @@ export default {
       valorCOFINSRetido: "",
       valorISSRetido: "",
     };
+    */
   },
   methods: {},
   directives: { money: VMoney }, //,    components: {}

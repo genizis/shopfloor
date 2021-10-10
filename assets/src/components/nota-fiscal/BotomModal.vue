@@ -6,7 +6,7 @@
 import NotaFiscal from "./Form.vue";
 
 export default {
-  props: ["texto", "tipo", "idTipo","titulo"],
+  props: ["texto", "tipo","titulo","idfaturamento"],
   data() {
     return {
       mostrar: false,
@@ -21,7 +21,7 @@ export default {
         {
           titulo: $this.titulo,
           tipo:$this.tipo,
-          idTipo:$this.idTipo
+          idfaturamento:$this.idfaturamento
         },
         {
           height: "auto",

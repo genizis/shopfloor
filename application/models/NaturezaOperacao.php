@@ -252,6 +252,17 @@ public function getCamposOutrosRegrasTributacao()
   }
   return $campos;
 }
+public function getObjetoTextSelect($descricao){
+    $this->db->where($this->table.'.empresaIDFK', getDadosUsuarioLogado()['id_empresa']);
+
+    $this->db->select($this->table.'.descricao,id,InformacoesComplementares,InformacoesAdicionais');
+    $this->db->from($this->table);
+    $this->db->or_like($this->table.'.descricao', '%'.$descricao.'%');
+
+    $query = $this->db->get()->result();
+
+    return $query;
+} 
 
 public function getObjetoID($id){
     $this->db->where($this->table.'.empresaIDFK', getDadosUsuarioLogado()['id_empresa']);

@@ -5,15 +5,16 @@
     </div>
 
     <div class="form-group col-md-3">
-      <label for="calculoimposto.calculoAutomatico"
+      <label for="calculoimposto_calculoAutomatico"
         >Cálculo automático ligado
       </label>
       <input
         type="checkbox"
         class=""
-        id="calculoimposto.calculoAutomatico"
-        name="calculoimposto.calculoAutomatico"
-        v-model="form.calculoimposto.calculoAutomatico"
+        value="1"
+        id="calculoimposto_calculoAutomatico"
+        name="calculoimposto_calculoAutomatico"
+        v-model="form.calculoimposto_calculoAutomatico"
       />
     </div>
 
@@ -22,10 +23,10 @@
       <input
         type="text"
         class="form-control"
-        name="calculoimposto.baseICMS"
+        name="calculoimposto_baseICMS"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        v-model="form.calculoimposto.baseICMS"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        v-model="form.calculoimposto_baseICMS"
       />
     </div>
 
@@ -35,9 +36,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.valorICMS"
-        v-model="form.calculoimposto.valorICMS"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_valorICMS"
+        v-model="form.calculoimposto_valorICMS"
       />
     </div>
 
@@ -47,9 +48,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.baseICMSST"
-        v-model="form.calculoimposto.baseICMSST"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_baseICMSST"
+        v-model="form.calculoimposto_baseICMSST"
       />
     </div>
 
@@ -59,9 +60,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.valorICMSST"
-        v-model="form.calculoimposto.valorICMSST"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_valorICMSST"
+        v-model="form.calculoimposto_valorICMSST"
       />
     </div>
 
@@ -72,9 +73,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.totalServicos"
-        v-model="form.calculoimposto.totalServicos"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_totalServicos"
+        v-model="form.calculoimposto_totalServicos"
       />
     </div>
 
@@ -85,9 +86,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.totalProdutos"
-        v-model="form.calculoimposto.totalProdutos"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_totalProdutos"
+        v-model="form.calculoimposto_totalProdutos"
       />
     </div>
 
@@ -98,9 +99,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.valorFrete"
-        v-model="form.calculoimposto.valorFrete"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_valorFrete"
+        v-model="form.calculoimposto_valorFrete"
       />
     </div>
 
@@ -111,9 +112,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.valorSeguro"
-        v-model="form.calculoimposto.valorSeguro"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_valorSeguro"
+        v-model="form.calculoimposto_valorSeguro"
       />
     </div>
     <div class="form-group col-md-3">
@@ -123,9 +124,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.outrasDespesas"
-        v-model="form.calculoimposto.outrasDespesas"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_outrasDespesas"
+        v-model="form.calculoimposto_outrasDespesas"
       />
     </div>
     <div class="form-group col-md-3">
@@ -135,9 +136,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.valorIPI"
-        v-model="form.calculoimposto.valorIPI"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_valorIPI"
+        v-model="form.calculoimposto_valorIPI"
       />
     </div>
     <div class="form-group col-md-3">
@@ -147,9 +148,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.valorISSQN"
-        v-model="form.calculoimposto.valorISSQN"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_valorISSQN"
+        v-model="form.calculoimposto_valorISSQN"
       />
     </div>
 
@@ -160,9 +161,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.totalNota"
-        v-model="form.calculoimposto.totalNota"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_totalNota"
+        v-model="form.calculoimposto_totalNota"
       />
     </div>
 
@@ -172,8 +173,8 @@
         type="text"
         class="form-control"
         v-money="money"
-        name="calculoimposto.desconto"
-        v-model="form.calculoimposto.desconto"
+        name="calculoimposto_desconto"
+        v-model="form.calculoimposto_desconto"
       />
     </div>
 
@@ -184,9 +185,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.valorFunrural"
-        v-model="form.calculoimposto.valorFunrural"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_valorFunrural"
+        v-model="form.calculoimposto_valorFunrural"
       />
     </div>
 
@@ -197,9 +198,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.totalFaturado"
-        v-model="form.calculoimposto.totalFaturado"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_totalFaturado"
+        v-model="form.calculoimposto_totalFaturado"
       />
     </div>
 
@@ -209,8 +210,8 @@
       <input
         type="number"
         class="form-control"
-        name="calculoimposto.nItens"
-        v-model="form.calculoimposto.nItens"
+        name="calculoimposto_nItens"
+        v-model="form.calculoimposto_nItens"
       />
     </div>
 
@@ -221,9 +222,9 @@
         type="text"
         class="form-control"
         v-money="money"
-        :readonly="form.calculoimposto.calculoAutomatico"
-        name="calculoimposto.totalAtributos"
-        v-model="form.calculoimposto.totalAtributos"
+        :readonly="form.calculoimposto_calculoAutomatico"
+        name="calculoimposto_totalAtributos"
+        v-model="form.calculoimposto_totalAtributos"
       />
     </div>
   </div>
@@ -238,6 +239,7 @@ export default {
     return {};
   },
   mounted() {
+
     this.form.calculoimposto = {
       calculoAutomatico: false,
       baseICMS: "",
@@ -258,6 +260,7 @@ export default {
       nItens: "",
       totalAtributos: "",
     };
+    
   },
   methods: {},
   directives: { money: VMoney }, //,    components: {}

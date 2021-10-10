@@ -1,93 +1,100 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class AjaxController extends CI_Controller {
+class AjaxController extends CI_Controller
+{
 
-    function __construct(){
+    function __construct()
+    {
         parent::__construct();
 
-        if(usuarioLogado() == false){
+        if (usuarioLogado() == false) {
 
             redirect(base_url("login"), "home", "refresh");
-
         }
     }
 
     //Para uso do Ajax no Form
 
 
-    public function getEstado(){
+    public function getEstado()
+    {
         echo json_encode($this->tabelasauxiliares->getEstado());
     }
 
-    public function getCidades(){
+    public function getCidades()
+    {
 
         $idEstado = $this->input->post('estado');
         echo $this->tabelasauxiliares->selectCidade($idEstado);
-
     }
 
-    public function getMovimentosReporteProducao(){
+    public function getMovimentosReporteProducao()
+    {
 
         $codReporteProducao = $this->input->post('cod_reporte_producao');
         echo $this->producao->selectMovimentosReporteProducao($codReporteProducao);
-
     }
 
-    public function getProduto(){
+    public function getProduto()
+    {
 
         $codProduto = $this->input->post('produto');
         echo $this->produto->selectProduto($codProduto);
-
     }
 
-    public function getCliente(){
+    public function getCliente()
+    {
 
         $codCliente = $this->input->post('cliente');
         echo $this->cliente->selectCliente($codCliente);
-
     }
 
-    public function getVendedor(){
+    public function getVendedor()
+    {
 
         $codVendedor = $this->input->post('vendedor');
         echo $this->vendedor->selectVendedor($codVendedor);
-
     }
 
-    public function getOrdem(){
+    public function getOrdem()
+    {
 
         $numOrdem = $this->input->post('ordem');
         echo $this->compra->selectOrdem($numOrdem);
-
     }
 
-    public function getEstruturaComponentePorCodigo(){
+    public function getEstruturaComponentePorCodigo()
+    {
 
         $seqComponente = $this->input->post('seq_componente');
         echo $this->engenharia->selectEstruturaComponente($seqComponente);
     }
 
-    public function getComponentesOrdem(){
+    public function getComponentesOrdem()
+    {
 
         $seqComponente = $this->input->post('seq_componente_producao');
         echo $this->produto->selectComponenteProd($seqComponente);
     }
 
-    public function getProdutosVenda(){
+    public function getProdutosVenda()
+    {
 
         $seqProdutoVenda = $this->input->post('seq_produto_venda');
         echo $this->produto->selectProdutoVenda($seqProdutoVenda);
     }
 
-    public function getNCM(){
+    public function getNCM()
+    {
 
         $listaNCM = $this->produto->getNCM();
 
         echo json_encode($listaNCM);
     }
 
-    public function getNCMFiltro(){
+    public function getNCMFiltro()
+    {
 
         $filtro = $this->input->get('filtro');
 
@@ -96,22 +103,25 @@ class AjaxController extends CI_Controller {
         echo json_encode($listaNCM);
     }
 
-    public function getProdutosFiltro(){
+    public function getProdutosFiltro()
+    {
 
         $filtro = $this->input->get('filtro');
 
         echo json_encode($this->produto->buscaProdutoFiltro($filtro));
     }
 
-    public function getTipoProdutosFiltro(){
+    public function getTipoProdutosFiltro()
+    {
         $this->load->model('tipoProduto');
         $filtro = $this->input->get('filtro');
 
-        echo json_encode($this->tipoProduto->getTipoProduto( $filtro ));
+        echo json_encode($this->tipoProduto->getTipoProduto($filtro));
     }
 
 
-    public function inserirCliente(){
+    public function inserirCliente()
+    {
 
         $data = [
             'id_empresa' => getDadosUsuarioLogado()['id_empresa'],
@@ -136,10 +146,18 @@ class AjaxController extends CI_Controller {
         $codCliente = $this->cliente->insertCliente($data);
 
         echo $this->cliente->selectClienteOption($codCliente);
+    }
+    public function getNaturezaOperacao()
+    {
+        $this->load->model('NaturezaOperacao');
 
+        $filtro = $this->input->get('filtro');
+        $lista = $this->NaturezaOperacao->getObjetoTextSelect($filtro);
+        echo json_encode($lista);
     }
 
-    public function excluirVinculoProdutoNaturezaOperacao(){
+    public function excluirVinculoProdutoNaturezaOperacao()
+    {
         $this->load->model('NaturezaOperacao');
         $id = $this->input->get('id');
         $regra = $this->input->get('regra');
@@ -147,20 +165,43 @@ class AjaxController extends CI_Controller {
 
         echo json_encode([
             'resultado' => $resultado,
-            'msg' => $resultado?'Excluido com sucesso':'Erro ao excluir'
+            'msg' => $resultado ? 'Excluido com sucesso' : 'Erro ao excluir'
         ]);
-
     }
     public function excluirRegraProdutoNaturezaOperacao()
     {
-       $this->load->model('NaturezaOperacao');
-       $id = $this->input->get('id');
-       $regra = $this->input->get('regra');
-       $resultado = $this->NaturezaOperacao->deleteRegras($id, $regra);
+        $this->load->model('NaturezaOperacao');
+        $id = $this->input->get('id');
+        $regra = $this->input->get('regra');
+        $resultado = $this->NaturezaOperacao->deleteRegras($id, $regra);
 
-       echo json_encode([
-        'resultado' => $resultado,
-        'msg' => $resultado?'Excluido com sucesso':'Erro ao excluir'
-    ]);
-   }
+        echo json_encode([
+            'resultado' => $resultado,
+            'msg' => $resultado ? 'Excluido com sucesso' : 'Erro ao excluir'
+        ]);
+    }
+
+    public function excluirNotaFiscalPessoasAutorizadas()
+    {
+        $this->load->model('NotaFiscalPessoasAutorizadas');
+        $id = $this->input->get('id');
+        $resultado = $this->NotaFiscalPessoasAutorizadas->delete($id);
+
+        echo json_encode([
+            'resultado' => $resultado,
+            'msg' => $resultado ? 'Excluido com sucesso' : 'Erro ao excluir'
+        ]);
+    }
+
+    public function excluirNotaFiscalPagamentoParcela()
+    {
+        $this->load->model('NotaFiscalParcelasPagamento');
+        $id = $this->input->get('id');
+        $resultado = $this->NotaFiscalParcelasPagamento->delete($id);
+
+        echo json_encode([
+            'resultado' => $resultado,
+            'msg' => $resultado ? 'Excluido com sucesso' : 'Erro ao excluir'
+        ]);
+    }
 }

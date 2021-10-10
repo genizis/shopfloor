@@ -191,17 +191,32 @@
                                                                         R$
                                                                         <?= number_format($faturamento->valor_total + $faturamento->valor_frete - $faturamento->valor_desconto, 2, ',', '.') ?>
                                                                     </td>
-                                                                    <td class="text-center text-muted"><span class='badge badge-secondary'>NF Não
-                                                                            Emitida</span></td>
-                                                                    <td class="text-center">
-                                                                        <nota-fiscal-bottom :titulo="'Emitir Nota Fiscal de Venda'" :texto="'Emitir NF'" :tipo="'faturamento'" idTipo="'<?= $faturamento->cod_faturamento_pedido ?>'" :class="'btn btn-outline-teal btn-sm'" />
+                                                                    <td class="text-center text-muted">
 
-
+                                                                        <?php
+                                                                        if ($faturamento->notaFiscal == 0) {
+                                                                            echo ' <span class="badge badge-secondary">
+                                                                                NF Não
+                                                                                Emitida</span>';
+                                                                        } else {
+                                                                            echo ' <span class="badge badge-success">
+                                                                            NF Emitida</span>';
+                                                                        }
+                                                                        ?>
 
                                                                     </td>
-                                                                    <td style="display: none;">
-                                                                        <a href="#" data-toggle="modal" data-target="#emitir-nf<?= $faturamento->cod_faturamento_pedido ?>" type="button" class="btn btn-outline-teal btn-sm">Emitir
-                                                                            NasF</a>
+                                                                    <td class="text-center">
+                                                                        <?php if ($faturamento->notaFiscal != 0) : ?>
+                                                                            <nota-fiscal-bottom :titulo="'Nota Fiscal de Venda'" :texto="'Exibir NF'" :tipo="'faturamento'" :idfaturamento="'<?= $faturamento->cod_faturamento_pedido ?>'" :class="'btn btn-secondary btn-sm'" />
+                                                                            <?php else : ?>
+                                                                            <nota-fiscal-bottom :titulo="'Emitir Nota Fiscal de Venda'" :texto="'Emitir NF'" :tipo="'faturamento'" :idfaturamento="'<?= $faturamento->cod_faturamento_pedido ?>'" :class="'btn btn-outline-teal btn-sm'" />
+                                                                        
+                                                                        <?php endif ?>
+
+                                                                    </td>
+                                                                    <td class="hidden">
+                                                                        <a href="#" data-toggle="modal" data-target="#emitir-nf<?= $faturamento->cod_faturamento_pedido ?>" type="button" class="btn btn-outline-teal btn-sm">
+                                                                            Emitir NasF</a>
 
                                                                     </td>
                                                                 </tr>

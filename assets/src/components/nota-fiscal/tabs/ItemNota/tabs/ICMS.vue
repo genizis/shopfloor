@@ -1,10 +1,13 @@
 <template>
-  <div class="row">
-    <div class="form-group col-md-12">
+  <div class="row mt-2">
+    <div
+      class="form-group col-md-12"
+      v-if="mulSe(form.codigoRegimeTributario, [2, 3])"
+    >
       <label for=""> Situação tributária do ICMS </label>
       <select
         class="form-control"
-        v-model="item.icms.situacaoTributaria"
+        v-model="item.icms_situacaoTributaria"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -18,13 +21,16 @@
       </select>
     </div>
 
-    <div class="form-group col-md-12">
+    <div
+      class="form-group col-md-12"
+      v-if="mulSe(form.codigoRegimeTributario, [1])"
+    >
       <label for="">
         Código de Situação da Operação – Simples Nacional (CSOSN)
       </label>
       <select
         class="form-control"
-        v-model="item.icms.codigoSituacao"
+        v-model="item.icms_codigoSituacao"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -49,7 +55,8 @@
           >Geral</a
         >
       </li>
-      <li class="nav-item">
+
+      <li class="nav-item" v-show="mulSe(item.icms_situacaoTributaria, [10, 30,60,70, 90]) || mulSe(item.icms_codigoSituacao, [201, 203, 500, 900])">
         <a
           class="nav-link"
           id="tabItemST-tab"
@@ -58,8 +65,7 @@
           >Substituição tributaria</a
         >
       </li>
-
-      <li class="nav-item">
+      <li class="nav-item" v-show="mulSe(item.icms_situacaoTributaria, [60]) || mulSe(item.icms_codigoSituacao, [500])">
         <a
           class="nav-link"
           id="tabItemSTR-tab"
@@ -76,7 +82,7 @@
             <label for=""> Origem </label>
             <select
               class="form-control"
-              v-model="item.icms.origem"
+              v-model="item.icms_origem"
               placeholder="Selecione..."
             >
               <option
@@ -89,11 +95,11 @@
             </select>
           </div>
 
-          <div class="form-group col-md-5">
+          <div class="form-group col-md-5" v-if="mulSe(item.icms_situacaoTributaria, [10,20,30]) || mulSe(item.icms_codigoSituacao, [201, 202, 203, 900])">
             <label for=""> Modalidade BC ICMS </label>
             <select
               class="form-control"
-              v-model="item.icms.modalidadeBC"
+              v-model="item.icms_modalidadeBC"
               placeholder="Selecione..."
             >
               <option
@@ -104,158 +110,156 @@
                 {{ itemS.id }} - {{ itemS.texto }}
               </option>
             </select>
-            SituacaoTributaria == 10,20,30 || CSOSN==201, 202, 203, 900
+ 
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if=" mulSe(item.icms_codigoSituacao, [101, 201, 900])" >
             <label for="">% Aplic. Créd </label>
             <input
               type="number"
               class="form-control"
-              v-model="item.icms.aplicCred"
+              v-model="item.icms_aplicCred"
             />
-            CSOSN = 101, 201, 900
+
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4"  v-if="mulSe(item.icms_codigoSituacao, [101, 201, 900])">
             <label for="">Val. Aplic. Créd.</label>
             <input
               type="number"
               class="form-control"
-              v-model="item.icms.valorAplicCred"
+              v-model="item.icms_valorAplicCred"
             />
-            CSOSN = 101, 201, 900
+       
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="item.icms_modalidadeBC == 1 ">
             <label for="">Valor da pauta por un </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.valorPauta"
+              v-model="item.icms_valorPauta"
             />
-            ModalidadeBC = 1
+          
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="mulSe(item.icms_situacaoTributaria, [20, 41, 50, 51,60,70, 90]) || mulSe(item.icms_codigoSituacao, [201, 202, 900])">
             <label for="">Base ICMS </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.baseICMS"
+              v-model="item.icms_baseICMS"
             />
-            SituacaoTributaria = 20, 41, 50, 51,60,70, 90 || CSOSN==201, 202,
-            900
+            
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="mulSe(item.icms_situacaoTributaria, [20, 41, 50, 51,60,70, 90]) || mulSe(item.icms_codigoSituacao, [201, 202, 900])">
             <label for="">Valor Base ICMS </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.valorBaseICMS"
+              v-model="item.icms_valorBaseICMS"
             />
-            SituacaoTributaria = 20, 41, 50, 51,60,70, 90 || CSOSN==201, 202,
-            900
+         
           </div>
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4"  v-if="mulSe(item.icms_situacaoTributaria, [51, 90]) || mulSe(item.icms_codigoSituacao, [900])">
             <label for="">% Dif ICMS </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.difICMS"
+              v-model="item.icms_difICMS"
             />
-            SituacaoTributaria = 51, 90 || CSOSN= 900
+
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="item.icms_situacaoTributaria!=40 && !mulSe(form.codigoRegimeTributario, [1])">
             <label for="">Presumido </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.presumido"
+              v-model="item.icms_presumido"
             />
-            SituacaoTributaria != 40 && <>CSOSN
+           
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="mulSe(item.icms_situacaoTributaria, [10,20,30]) || mulSe(item.icms_codigoSituacao, [201, 202, 203, 900])">
             <label for="">ICMS</label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.ICMS"
+              v-model="item.icms_ICMS"
             />
-            SituacaoTributaria == 10,20,30 || CSOSN==201, 202, 203, 900
+         
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="mulSe(item.icms_situacaoTributaria, [10,20,30]) || mulSe(item.icms_codigoSituacao, [201, 202, 203, 900])">
             <label for="">Valor ICMS </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
               readonly
-              v-model="item.icms.valorICMS"
+              v-model="item.icms_valorICMS"
             />
-            SituacaoTributaria == 10,20,30 || CSOSN==201, 202, 203, 900
+       
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="mulSe(item.icms_situacaoTributaria, [10,20,30])">
             <label for="">Posição de Alíquota </label>
             <input
               type="number"
               class="form-control"
-              v-model="item.icms.posicaoAliquota"
+              v-model="item.icms_posicaoAliquota"
             />
-            SituacaoTributaria == 10,20,30
+  
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="item.icms_situacaoTributaria!=40">
             <label for="">FCP </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.FCP"
+              v-model="item.icms_FCP"
             />
-            SituacaoTributaria != 40
+       
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="item.icms_situacaoTributaria!=40">
             <label for="">Valor FCP </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
               readonly
-              v-model="item.icms.valorFCP"
+              v-model="item.icms_valorFCP"
             />
-            SituacaoTributaria != 40
+          
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="mulSe(item.icms_situacaoTributaria, [20, 30, 40, 41, 50,60,70, 90])">
             <label for="">ICMS desonerado </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.ICMSdesonerado"
+              v-model="item.icms_ICMSdesonerado"
             />
-            SituacaoTributaria = 20, 30, 40, 41, 50,60,70, 90
+
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="mulSe(item.icms_situacaoTributaria, [20, 30, 40, 41, 50,60,70, 90])">
             <label for="">Motivo desoneração </label>
 
             <select
               class="form-control"
-              v-model="item.icms.motivoDesonerado"
+              v-model="item.icms_motivoDesonerado"
               placeholder="Selecione..."
             >
               <option value="">Selecione...</option>
@@ -268,7 +272,7 @@
               </option>
             </select>
 
-            SituacaoTributaria = 20, 30, 40 41, 50,60,70, 90
+
           </div>
 
           <div class="form-group col-md-4">
@@ -276,7 +280,7 @@
             <input
               type="text"
               class="form-control"
-              v-model="item.icms.codigoBeneficio"
+              v-model="item.icms_codigoBeneficio"
             />
           </div>
 
@@ -285,7 +289,7 @@
             <input
               type="text"
               class="form-control"
-              v-model="item.icms.informacoesComplementares"
+              v-model="item.icms_informacoesComplementares"
             />
           </div>
 
@@ -296,20 +300,20 @@
             <input
               type="text"
               class="form-control"
-              v-model="item.icms.informacoesCompIFICMS"
+              v-model="item.icms_informacoesCompIFICMS"
             />
           </div>
         </div>
       </div>
 
       <div class="tab-pane fade" id="tabItemST">
-        SituacaoTributaria = 10, 30,60,70, 90 || CSOSN==201, 203, 500, 900
+       
         <div class="row">
           <div class="form-group col-md-5">
             <label for=""> Modalidade BC ICMS ST </label>
             <select
               class="form-control"
-              v-model="item.icms.STmodalidadeBC"
+              v-model="item.icms_STmodalidadeBC"
               placeholder="Selecione..."
             >
               <option
@@ -322,15 +326,15 @@
             </select>
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="item.icms_STmodalidadeBC==1">
             <label for="">Valor da pauta por un </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.STvalorPauta"
+              v-model="item.icms_STvalorPauta"
             />
-            ModalidadeBC = 1
+            
           </div>
 
           <div class="form-group col-md-4">
@@ -341,7 +345,7 @@
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.STpercentualMargem"
+              v-model="item.icms_STpercentualMargem"
             />
           </div>
 
@@ -351,7 +355,7 @@
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.STbaseICMS"
+              v-model="item.icms_STbaseICMS"
             />
           </div>
 
@@ -362,7 +366,7 @@
               class="form-control"
               v-money="money"
               readonly
-              v-model="item.icms.STvalorBaseICMS"
+              v-model="item.icms_STvalorBaseICMS"
             />
             BANCO
           </div>
@@ -373,7 +377,7 @@
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.STaliqICMS"
+              v-model="item.icms_STaliqICMS"
             />
           </div>
           <div class="form-group col-md-4">
@@ -383,79 +387,79 @@
               class="form-control"
               v-money="money"
               readonly
-              v-model="item.icms.STvalorICMS"
+              v-model="item.icms_STvalorICMS"
             />
           </div>
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="!mulSe(form.codigoRegimeTributario, [1])">
             <label for="">Valor Base PIS ST </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
               readonly
-              v-model="item.icms.STvalorBasePIS"
+              v-model="item.icms_STvalorBasePIS"
             />
-            <>CSOSN
+        
           </div>
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="!mulSe(form.codigoRegimeTributario, [1])">
             <label for="">Alíq. PIS ST </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.STaliqPIS"
+              v-model="item.icms_STaliqPIS"
             />
-            <>CSOSN
+           
           </div>
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="!mulSe(form.codigoRegimeTributario, [1])">
             <label for="">Valor PIS ST </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.STvalorPIS"
+              v-model="item.icms_STvalorPIS"
               readonly
             />
-            <>CSOSN
+        
           </div>
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="!mulSe(form.codigoRegimeTributario, [1])">
             <label for="">Valor Base COFINS ST </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
               readonly
-              v-model="item.icms.STvalorBaseCOFINS"
+              v-model="item.icms_STvalorBaseCOFINS"
             />
-            <>CSOSN
+          
           </div>
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="!mulSe(form.codigoRegimeTributario, [1])">
             <label for="">Alíq. COFINS ST </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.STaliqCOFINS"
+              v-model="item.icms_STaliqCOFINS"
             />
-            <>CSOSN
+           
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="!mulSe(form.codigoRegimeTributario, [1])">
             <label for="">Valor COFINS ST </label>
             <input
               type="text"
               class="form-control"
               v-money="money"
               readonly
-              v-model="item.icms.STvalorCONFIS"
+              v-model="item.icms_STvalorCONFIS"
             />
-            <>CSOSN
+            
           </div>
         </div>
       </div>
 
       <div class="tab-pane fade" id="tabItemSTR">
-        SituacaoTributaria = 60 || CSOSN= 500
+
         <div class="row">
           <div class="form-group col-md-4">
             <label for="">Valor ICMS substituto</label>
@@ -464,7 +468,7 @@
               class="form-control"
               v-money="money"
               readonly
-              v-model="item.icms.STRvalorICMSsub"
+              v-model="item.icms_STRvalorICMSsub"
             />
           </div>
 
@@ -475,19 +479,19 @@
               class="form-control"
               v-money="money"
               readonly
-              v-model="item.icms.STRvalorBaseICMS"
+              v-model="item.icms_STRvalorBaseICMS"
             />
           </div>
 
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-4" v-if="mulSe(form.codigoRegimeTributario, [500])">
             <label for="">% Base ICMS ST Retido</label>
             <input
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.STRbaseICMS"
+              v-model="item.icms_STRbaseICMS"
             />
-            CSOSN= 500
+            
           </div>
 
           <div class="form-group col-md-4">
@@ -496,7 +500,7 @@
               type="text"
               class="form-control"
               v-money="money"
-              v-model="item.icms.STRaliqICMS"
+              v-model="item.icms_STRaliqICMS"
             />
           </div>
 
@@ -507,7 +511,7 @@
               class="form-control"
               v-money="money"
               readonly
-              v-model="item.icms.STRvalorICMS"
+              v-model="item.icms_STRvalorICMS"
             />
           </div>
         </div>
@@ -520,9 +524,8 @@
 <script>
 import { VMoney } from "v-money";
 
-
 export default {
-  props: ["item", "money"],
+  props: ["item", "form", "money"],
   data() {
     return {
       STmodalidadeBC: [
@@ -661,10 +664,7 @@ export default {
     };
   },
   mounted() {
-    Vue.set(this.item, "icms", {
-      situacaoTributaria: "",
-      codigoSituacao: "",
-    });
+  
   },
   methods: {}, //,    components: {}
   directives: { money: VMoney },

@@ -1,5 +1,5 @@
 <template>
-  <div class="row">
+  <div class="row mt-2">
     <div class="form-group col-md-4">
       <label for="">Quantidade </label>
       <input
@@ -14,7 +14,7 @@
       <label for="">Unidade </label>
       <input type="number" class="form-control" v-model="item.unidade" />
     </div>
-
+    <!--
     <div class="form-group col-md-4">
       <label for="">Valor Unitário </label>
       <input
@@ -24,7 +24,7 @@
         v-model="item.valorUnitario"
       />
     </div>
-
+-->
     <div class="form-group col-md-4">
       <label for="">Valor Total </label>
       <input
@@ -75,12 +75,21 @@
     </div>
 
     <div class="form-group col-md-4">
-      <label for="">Natureza da Operacao AUTOCOMPLETE </label>
-      <input
-        type="number"
-        class="form-control"
+      <label for="">Natureza da Operacao </label>
+
+        <select
+        ref="buscaNatureza"
+        name="FKIDNaturezaOperacao"
         v-model="item.FKIDNaturezaOperacao"
-      />
+      >
+        <option
+          v-if="item.FKIDNaturezaOperacaoText != ''"
+          :value="item.FKIDNaturezaOperacao"
+        >
+          {{ item.FKIDNaturezaOperacaoText }}
+        </option>
+      </select>
+
     </div>
 
     <div class="form-group col-md-4">
@@ -164,6 +173,7 @@ export default {
   props: ["item", "money"],
   data() {
     return {
+      listaNatureza:[],
       tipoDesconto: [
         { id: "condicional", texto: "Condicional" },
         { id: "incondicional", texto: "Incondicional" },
@@ -171,6 +181,30 @@ export default {
     };
   },
   mounted() {
+    var $this = this;
+    $(function () {
+      $($this.$refs.buscaNatureza).change(function (event) {
+        $this.item.FKIDNaturezaOperacaoText = $this.textoSelect(this);
+        $this.item.FKIDNaturezaOperacao = $(this).val();
+
+      });
+
+      $this.selectAjaxDinamico(
+        $($this.$refs.buscaNatureza),
+        "Buscar natureza da operacao...",
+        "/ajax/busca-natureza-operacao-filtro",
+        (item) => {
+          $this.listaNatureza[item.id] = item;
+          return {
+            text: item.descricao,
+            id: item.id,
+          };
+        }
+      );
+
+    });
+
+    /*
     Vue.set(this.item, "quantidade", "");
     Vue.set(this.item, "unidade", "");
     Vue.set(this.item, "valorUnitario", "");
@@ -188,6 +222,7 @@ export default {
     Vue.set(this.item, "informacoesComplementares", "");
     Vue.set(this.item, "informacoesCompItem", "");
     Vue.set(this.item, "informacoesCompIFItem", "");
+    */
   },
   methods: {}, //,    components: {}
   directives: { money: VMoney },

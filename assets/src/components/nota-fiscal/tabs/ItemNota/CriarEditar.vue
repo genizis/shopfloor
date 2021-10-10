@@ -19,15 +19,16 @@
       <!-- BODY -->
       <div class="col-12 row">
         <div class="form-group col-md-4">
-          <label for="">Descrição </label>
+          <label for="">Codigo - Descrição </label>
           <input
             type="text"
             class="form-control"
             maxlength="255"
-            v-model="item.descricao"
+            readonly
+            :value="item.codigo + ' - ' + item.descricao"
           />
         </div>
-
+        <!--
         <div class="form-group col-md-4">
           <label for="">Codigo </label>
           <input
@@ -51,10 +52,11 @@
             </option>
           </select>
         </div>
+        -->
       </div>
 
       <ul class="nav nav-tabs col-12" id="myTab" role="tablist">
-        <li class="nav-item">
+        <li class="nav-item ml-3">
           <a
             class="nav-link active"
             id="tabDadosItem-tab"
@@ -74,6 +76,8 @@
             >IPI</a
           >
         </li>
+
+        <!--
         <li class="nav-item">
           <a
             class="nav-link"
@@ -83,6 +87,7 @@
             >ISSQN</a
           >
         </li>
+-->
         <li class="nav-item">
           <a class="nav-link" id="tabPIS-tab" data-toggle="tab" href="#tabPIS"
             >PIS/CONFIS</a
@@ -97,6 +102,7 @@
             >Outros</a
           >
         </li>
+        <!--
         <li class="nav-item">
           <a
             class="nav-link"
@@ -106,6 +112,7 @@
             >Estoque</a
           >
         </li>
+        -->
         <li class="nav-item">
           <a
             class="nav-link"
@@ -126,7 +133,7 @@
         >
           <DadosItem :item="item" :money="money" />
         </div>
-
+        <!--
         <div
           class="tab-pane fade"
           id="tabEstoque"
@@ -135,14 +142,14 @@
         >
           <Estoque :item="item" :money="money" />
         </div>
-
+-->
         <div
           class="tab-pane fade"
           id="tabICMS"
           role="tabpanel"
           aria-labelledby="home-tab"
         >
-          <ICMS :item="item" :money="money" />
+          <ICMS :item="item" :form="form" :money="money" />
         </div>
 
         <div
@@ -194,7 +201,7 @@
         class="btn btn-primary"
         name="Opcao"
         value="salvar"
-        @click="validarForm()"
+        v-on:click="$emit('close')"
       >
         <i class="fas fa-save"></i> Salvar
       </button>
@@ -216,7 +223,7 @@ import PISCONFINS from "./tabs/PISCONFINS.vue";
 import Retencoes from "./tabs/Retencoes.vue";
 
 export default {
-  props: ["form", "titulo", "estados", "form", "item", "money"],
+  props: ["form", "titulo", "estados", "item", "money"],
   data() {
     return {
       tipo: [
@@ -230,9 +237,9 @@ export default {
     Vue.set(this.item, "pis", {});
     Vue.set(this.item, "confis", {});
 
-    Vue.set(this.item, "tipo", "");
-    Vue.set(this.item, "descricao", "");
-    Vue.set(this.item, "codigo", "");
+    Vue.set(this.item, "tipo", "produto");
+    // Vue.set(this.item, "descricao", "");
+    // Vue.set(this.item, "codigo", "");
   },
   methods: {},
   components: {

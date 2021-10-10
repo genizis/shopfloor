@@ -1,6 +1,6 @@
 <template>
   <div class="col-12 row">
-    <div class="form-group col-md-3">
+    <div class="form-group col-md-2">
       <label for="">Dias </label>
       <input
         type="number"
@@ -10,7 +10,7 @@
       />
     </div>
 
-    <div class="form-group col-md-3">
+    <div class="form-group col-md-2">
       <label for="">Data </label>
       <input
         type="date"
@@ -20,7 +20,7 @@
       />
     </div>
 
-    <div class="form-group col-md-3">
+    <div class="form-group col-md-2">
       <label for="">Valor </label>
       <input
         type="text"
@@ -32,7 +32,7 @@
     </div>
 
     <div class="form-group col-md-3">
-      <label for="">Forma FKIDFormaPagamento</label>
+      <label for="">Forma</label>
       <input
         type="text"
         class="form-control"
@@ -50,6 +50,11 @@
         v-model="item.observacao"
       />
     </div>
+
+    <div class=" div-excluir text-right">
+      <i @click="remover()" class="fas fa-trash pointer red" ></i>
+    </div>
+
   </div>
 </template>
 
@@ -57,14 +62,18 @@
 import { VMoney } from "v-money";
 
 export default {
-  props: ["item","money"],
+  props: ["item", "money"],
   data() {
     return {
       mostrar: false,
     };
   },
   mounted() {},
-  methods: {},
+  methods: {
+    remover(){
+      this.$emit('remover',this.item);
+    }
+  },
   directives: { money: VMoney },
 };
 </script>

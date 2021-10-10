@@ -1,13 +1,12 @@
 <template>
-  <tr @click="abrirModal()">
-    <td><input type="text" readonly class="form-control"></td>
-    <td><input type="text" readonly class="form-control"></td>
-    <td><input type="text" readonly class="form-control"></td>
-    <td><input type="text" readonly class="form-control"></td>
-    <td><input type="text" readonly class="form-control"></td>
-    <td><input type="text" readonly class="form-control"></td>
-    <td><input type="text" readonly class="form-control"></td>
-    <td></td>
+  <tr @click="abrirModal()" class="pointer">
+    <th><input type="text" readonly class="form-control" :value="item.descricao"></th>
+    <th><input type="text" readonly class="form-control" :value="item.codigo"></th>
+    <th><input type="text" readonly class="form-control" :value="item.unidade"></th>
+    <th><input type="text" readonly class="form-control" :value="item.quantidade"></th>
+    <th><input type="text" readonly class="form-control" :value="item.valorTotal"></th>
+    <th><input type="text" readonly class="form-control" :value="item.NCM"></th>
+   <th> <i class="fas fa-edit"></i></th>
   </tr>
 </template>
 
@@ -29,7 +28,7 @@ export default {
 			this.$modal.show(
 				CriarEditar,
 				{
-					titulo: "Produto ou serviço",
+					titulo: "Produto",
 					estados:$this.estados,
 					form: $this.form,
           item:$this.item,

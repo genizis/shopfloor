@@ -28,6 +28,12 @@ var selectCount = 1;
 
 Vue.mixin({
     methods: {
+        valorInput(valor) {
+            if (valor == false) valor = "";
+            if (valor == true) valor = 1;
+            valor = valor == null ? "" : valor;
+            return valor;
+        },
         mulSe(valor, lista) {
             var Nvalor = parseInt(valor);
             return lista.indexOf(Nvalor) > -1;

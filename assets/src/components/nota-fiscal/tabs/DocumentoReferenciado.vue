@@ -8,8 +8,8 @@
       <label for="">Tipo </label>
       <select
         class="form-control"
-        name="documento.tipo"
-        v-model="form.documento.tipo"
+        name="documento_tipo"
+        v-model="form.documento_tipo"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -19,61 +19,61 @@
       </select>
     </div>
 
-    <div class="form-group col-md-3" v-if="mulSeText(form.documento.tipo,['55','57'])">
+    <div class="form-group col-md-3" v-if="mulSeText(form.documento_tipo,['55','57'])">
       <label for="">Chave de acesso</label>
       <input
         type="text"
         maxlength="255"
         class="form-control"
-        name="documento.chaveAcesso"
-        v-model="form.documento.chaveAcesso"
+        name="documento_chaveAcesso"
+        v-model="form.documento_chaveAcesso"
       />
     
     </div>
 
-    <div class="form-group col-md-3" v-if="mulSeText(form.documento.tipo,['2D'])">
+    <div class="form-group col-md-3" v-if="mulSeText(form.documento_tipo,['2D'])">
       <label for="">Número do Contador de Ordem de Operação - COO</label>
       <input
         type="text"
         maxlength="255"
         class="form-control"
-        name="documento.numeroContador"
-        v-model="form.documento.numeroContador"
+        name="documento_numeroContador"
+        v-model="form.documento_numeroContador"
       />
 
     </div>
 
-    <div class="form-group col-md-3" v-if="mulSeText(form.documento.tipo,['1', '2', 'R1', '4'])">
+    <div class="form-group col-md-3" v-if="mulSeText(form.documento_tipo,['1', '2', 'R1', '4'])">
       <label for="">Ano e mês de emissão</label>
       <input
         type="text"
         maxlength="255"
         class="form-control"
-        name="documento.anoMesEmissao"
-        v-model="form.documento.anoMesEmissao"
+        name="documento_anoMesEmissao"
+        v-model="form.documento_anoMesEmissao"
       />
     </div>
 
-    <div class="form-group col-md-3" v-if="mulSeText(form.documento.tipo,['1', '2', 'R1', '4'])">
+    <div class="form-group col-md-3" v-if="mulSeText(form.documento_tipo,['1', '2', 'R1', '4'])">
       <label for="">Número</label>
       <input
         type="text"
         maxlength="255"
         class="form-control"
-        name="documento.numero"
-        v-model="form.documento.numero"
+        name="documento_numero"
+        v-model="form.documento_numero"
       />
 
     </div>
 
-    <div class="form-group col-md-3" v-if="mulSeText(form.documento.tipo,['1', '2', 'R1', '4'])">
+    <div class="form-group col-md-3" v-if="mulSeText(form.documento_tipo,['1', '2', 'R1', '4'])">
       <label for="">Série</label>
       <input
         type="text"
         maxlength="255"
         class="form-control"
-        name="documento.serie"
-        v-model="form.documento.serie"
+        name="documento_serie"
+        v-model="form.documento_serie"
       />
 
     </div>

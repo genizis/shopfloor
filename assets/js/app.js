@@ -5883,7 +5883,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["texto", "tipo", "idTipo", "titulo"],
+  props: ["texto", "tipo", "titulo", "idfaturamento"],
   data: function data() {
     return {
       mostrar: false
@@ -5896,7 +5896,7 @@ __webpack_require__.r(__webpack_exports__);
       this.$modal.show(_Form_vue__WEBPACK_IMPORTED_MODULE_0__["default"], {
         titulo: $this.titulo,
         tipo: $this.tipo,
-        idTipo: $this.idTipo
+        idfaturamento: $this.idfaturamento
       }, {
         height: "auto",
         width: "80%",
@@ -6011,7 +6011,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["titulo"],
+  props: ["titulo", "idfaturamento"],
   data: function data() {
     return {
       money: {
@@ -6024,6 +6024,7 @@ __webpack_require__.r(__webpack_exports__);
         /* doesn't work with directive */
 
       },
+      status: "",
       mostrar: false,
       estados: [],
       form: {
@@ -6032,7 +6033,7 @@ __webpack_require__.r(__webpack_exports__);
         retencoes: {},
         enderecoEntrega: {},
         transportador: {},
-        pagamento: {},
+        pagamentoItens: {},
         pessoasAutorizadas: {},
         intermediador: {},
         informacoesAdicionais: {},
@@ -6063,9 +6064,92 @@ __webpack_require__.r(__webpack_exports__);
     .then(function (response) {
       _this.estados = response.data;
     });
+    this.form.itensNota = [];
+    axios.get("/nota-fiscal/api/lista-faturamento?id=" + this.idfaturamento) //Buscar nota fiscal pelo idfaturamento
+    .then(function (response) {
+      var data = response.data;
+
+      for (var chave in data) {
+        Vue.set(_this.form, chave, data[chave]);
+      }
+
+      if (data == null) {
+        _this.buscarProdutosFaturamento();
+      }
+
+      _this.mostrar = true;
+    });
+    /*
+          */
   },
   methods: {
-    cadastrarEditar: function cadastrarEditar() {}
+    buscarProdutosFaturamento: function buscarProdutosFaturamento() {
+      var _this2 = this;
+
+      axios.get("/nota-fiscal/api/produtos-faturamento?id=" + this.idfaturamento) //Buscar estados
+      .then(function (response) {
+        var objetos = response.data;
+
+        for (var index = 0; index < objetos.length; index++) {
+          var element = objetos[index];
+
+          _this2.form.itensNota.push({
+            codigo: element["cod_produto"],
+            descricao: element["nome_produto"]
+          });
+        }
+      });
+    },
+    cadastrarEditar: function cadastrarEditar(e) {
+      var _this3 = this;
+
+      e.preventDefault();
+      var $this = this;
+      var alerta = alertify.alert('<div class="text-center">Enviando informações... <br>' + '<i class="fa fa-refresh fa-spin fa-3x fa-fw"></i><br> Aguarde... </div>').set("closable", false).set("basic", true);
+      var $this = this;
+      var formData = new FormData(this.$refs.formVinculo);
+      if ($this.form.id) formData.append("id", $this.form.id);
+      formData.append("FKIDfaturamentoPedido", $this.idfaturamento); //Id para editar
+
+      $.each(this.form, function (index, valorCampo) {
+        if (!(valorCampo instanceof Object)) {
+          formData.append(index, $this.valorInput(valorCampo));
+        }
+      });
+      if (this.form.pagamentoItens != null) $.each(this.form.pagamentoItens, function (index, regra) {
+        var nome = "pagamento_itens[" + index + "]";
+        $this.getFormData(formData, regra, nome);
+      });
+      if (this.form.pessoasAutorizadas != null) $.each(this.form.pessoasAutorizadas, function (index, regra) {
+        var nome = "pessoas_autorizadas[" + index + "]";
+        $this.getFormData(formData, regra, nome);
+      });
+      if (this.form.itensNota != null) $.each(this.form.itensNota, function (index, regra) {
+        var nome = "itens_nota[" + index + "]";
+        $this.getFormData(formData, regra, nome);
+      });
+      var url = "/nota-fiscal/nova";
+      axios.post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }).then(function (response) {
+        //console.log(response.data);
+        if (response.data.resultado) {
+          $this.$emit("close");
+          alertify.success("Salvo com sucesso");
+          alertify.closeAll(); //Vue.set(this.status, "sucesso", response.data.msg);
+          //$this.funcaocallback();
+          // window.location = "/natureza-operacao/editar/" + response.data.id;
+        } else {
+          alertify.error("Erro ao salvar"); //Vue.set(this.status, "erro", response.data.msg);
+        }
+
+        alertify.closeAll();
+      })["catch"](function (error) {
+        return _this3.catchErro(error, _this3.status);
+      });
+    }
   },
   components: {
     Geral: _tabs_Geral_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
@@ -6100,6 +6184,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var v_money__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! v-money */ "./node_modules/v-money/dist/v-money.js");
 /* harmony import */ var v_money__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(v_money__WEBPACK_IMPORTED_MODULE_0__);
+//
 //
 //
 //
@@ -6693,6 +6778,7 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
+    /*
     this.form.destinatario = {
       nomeContato: "",
       tipoPessoa: "",
@@ -6711,8 +6797,9 @@ __webpack_require__.r(__webpack_exports__);
       complemento: "",
       foneFax: "",
       email: "",
-      vendedor: ""
+      vendedor: "",
     };
+    */
   },
   methods: {} //,    components: { Cabecalho,ListaContato,Conversa}
 
@@ -7188,10 +7275,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["form"],
   data: function data() {
     return {
+      listaNatureza: [],
       tipoSaida: [{
         id: "exp",
         texto: "Exportação"
@@ -7249,8 +7341,30 @@ __webpack_require__.r(__webpack_exports__);
       }]
     };
   },
-  mounted: function mounted() {},
-  methods: {} //,    components: {}
+  mounted: function mounted() {
+    var $this = this;
+    $(function () {
+      $($this.$refs.buscaNatureza).change(function (event) {
+        $this.form.FKIDnaturezaOperacaoText = $this.textoSelect(this);
+        $this.form.FKIDnaturezaOperacao = $(this).val();
+        $this.buscarNaturezaOperacao();
+      });
+      $this.selectAjaxDinamico($($this.$refs.buscaNatureza), "Buscar natureza da operacao...", "/ajax/busca-natureza-operacao-filtro", function (item) {
+        $this.listaNatureza[item.id] = item;
+        return {
+          text: item.descricao,
+          id: item.id
+        };
+      });
+    });
+  },
+  methods: {
+    buscarNaturezaOperacao: function buscarNaturezaOperacao() {
+      var item = this.listaNatureza[this.form.FKIDnaturezaOperacao];
+      Vue.set(this.form, "informacoesAdicionais_informacoesComplementaresFiscoNatureza", item.InformacoesAdicionais);
+      Vue.set(this.form, "informacoesAdicionais_informacoesComplementaresNatureza", item.InformacoesComplementares);
+    }
+  } //,    components: {}
 
 });
 
@@ -7423,11 +7537,13 @@ __webpack_require__.r(__webpack_exports__);
     return {};
   },
   mounted: function mounted() {
-    this.form.intermediador = {
-      intermediador: false,
-      CNPJ: "",
-      identificacao: ""
-    };
+    /*
+        this.form.intermediador = {
+          intermediador: false,
+          CNPJ: "",
+          identificacao: "",
+        };
+        */
   },
   methods: {} //,    components: {}
 
@@ -7660,6 +7776,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -7670,7 +7793,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["form", "titulo", "estados", "form", "item", "money"],
+  props: ["form", "titulo", "estados", "item", "money"],
   data: function data() {
     return {
       tipo: [{
@@ -7686,9 +7809,8 @@ __webpack_require__.r(__webpack_exports__);
     Vue.set(this.item, "ipi", {});
     Vue.set(this.item, "pis", {});
     Vue.set(this.item, "confis", {});
-    Vue.set(this.item, "tipo", "");
-    Vue.set(this.item, "descricao", "");
-    Vue.set(this.item, "codigo", "");
+    Vue.set(this.item, "tipo", "produto"); // Vue.set(this.item, "descricao", "");
+    // Vue.set(this.item, "codigo", "");
   },
   methods: {},
   components: {
@@ -7757,13 +7879,7 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {};
   },
-  mounted: function mounted() {
-    this.form.itensNota = [{
-      id: "",
-      cad: "",
-      FKIDContato: "",
-      CPFCNPJ: ""
-    }];
+  mounted: function mounted() {//this.form.itensNota = [];
   },
   methods: {},
   components: {
@@ -7797,7 +7913,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -7812,7 +7927,7 @@ __webpack_require__.r(__webpack_exports__);
     abrirModal: function abrirModal() {
       var $this = this;
       this.$modal.show(_CriarEditar__WEBPACK_IMPORTED_MODULE_1__["default"], {
-        titulo: "Produto ou serviço",
+        titulo: "Produto",
         estados: $this.estados,
         form: $this.form,
         item: $this.item,
@@ -8001,11 +8116,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["item", "money"],
   data: function data() {
     return {
+      listaNatureza: [],
       tipoDesconto: [{
         id: "condicional",
         texto: "Condicional"
@@ -8016,6 +8141,21 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
+    var $this = this;
+    $(function () {
+      $($this.$refs.buscaNatureza).change(function (event) {
+        $this.item.FKIDNaturezaOperacaoText = $this.textoSelect(this);
+        $this.item.FKIDNaturezaOperacao = $(this).val();
+      });
+      $this.selectAjaxDinamico($($this.$refs.buscaNatureza), "Buscar natureza da operacao...", "/ajax/busca-natureza-operacao-filtro", function (item) {
+        $this.listaNatureza[item.id] = item;
+        return {
+          text: item.descricao,
+          id: item.id
+        };
+      });
+    });
+    /*
     Vue.set(this.item, "quantidade", "");
     Vue.set(this.item, "unidade", "");
     Vue.set(this.item, "valorUnitario", "");
@@ -8033,6 +8173,7 @@ __webpack_require__.r(__webpack_exports__);
     Vue.set(this.item, "informacoesComplementares", "");
     Vue.set(this.item, "informacoesCompItem", "");
     Vue.set(this.item, "informacoesCompIFItem", "");
+    */
   },
   methods: {},
   //,    components: {}
@@ -8750,9 +8891,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["item", "money"],
+  props: ["item", "form", "money"],
   data: function data() {
     return {
       STmodalidadeBC: [{
@@ -8922,12 +9067,7 @@ __webpack_require__.r(__webpack_exports__);
       }]
     };
   },
-  mounted: function mounted() {
-    Vue.set(this.item, "icms", {
-      situacaoTributaria: "",
-      codigoSituacao: ""
-    });
-  },
+  mounted: function mounted() {},
   methods: {},
   //,    components: {}
   directives: {
@@ -9343,14 +9483,16 @@ __webpack_require__.r(__webpack_exports__);
     Vue.set(this.item, "ipi", {
       situacaoTributaria: ""
     });
-    Vue.set(this.item.ipi, "situacaoTributaria", "");
-    Vue.set(this.item.ipi, "baseIPI", "");
-    Vue.set(this.item.ipi, "valorBaseIPI", "");
-    Vue.set(this.item.ipi, "valorIPI", "");
-    Vue.set(this.item.ipi, "codEnquad", "");
-    Vue.set(this.item.ipi, "codExcecaoTIPI", "");
-    Vue.set(this.item.ipi, "informacoesComp", "");
-    Vue.set(this.item.ipi, "informacoesCompIF", "");
+    /*
+       Vue.set(this.item.ipi_"situacaoTributaria", "");
+       Vue.set(this.item.ipi_ "baseIPI", "");
+       Vue.set(this.item.ipi_ "valorBaseIPI", "");
+       Vue.set(this.item.ipi_ "valorIPI", "");
+       Vue.set(this.item.ipi_ "codEnquad", "");
+       Vue.set(this.item.ipi_ "codExcecaoTIPI", "");
+       Vue.set(this.item.ipi_ "informacoesComp", "");
+       Vue.set(this.item.ipi_ "informacoesCompIF", "");
+    */
   },
   methods: {},
   //,    components: {}
@@ -9523,13 +9665,7 @@ __webpack_require__.r(__webpack_exports__);
       }]
     };
   },
-  mounted: function mounted() {
-    Vue.set(this.item, "issqn", {
-      situacaoTributaria: 0,
-      reterISS: 0,
-      descontarISS: 0
-    });
-  },
+  mounted: function mounted() {},
   methods: {},
   //,    components: {}
   directives: {
@@ -9752,11 +9888,7 @@ __webpack_require__.r(__webpack_exports__);
       }]
     };
   },
-  mounted: function mounted() {
-    Vue.set(this.item, "outros", {
-      presumidoCalculo: 1
-    });
-  },
+  mounted: function mounted() {},
   methods: {},
   //,    components: {}
   directives: {
@@ -10091,14 +10223,7 @@ __webpack_require__.r(__webpack_exports__);
       }]
     };
   },
-  mounted: function mounted() {
-    Vue.set(this.item, "pis", {
-      situacaoTributaria: ""
-    });
-    Vue.set(this.item, "confis", {
-      situacaoTributaria: ""
-    });
-  },
+  mounted: function mounted() {},
   methods: {},
   //,    components: {}
   directives: {
@@ -10199,11 +10324,7 @@ __webpack_require__.r(__webpack_exports__);
       }]
     };
   },
-  mounted: function mounted() {
-    Vue.set(this.item, "retencoes", {
-      impostoRetido: 0
-    });
-  },
+  mounted: function mounted() {},
   methods: {},
   //,    components: {}
   directives: {
@@ -10279,6 +10400,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["item", "money"],
@@ -10288,7 +10414,11 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {},
-  methods: {},
+  methods: {
+    remover: function remover() {
+      this.$emit('remover', this.item);
+    }
+  },
   directives: {
     money: v_money__WEBPACK_IMPORTED_MODULE_0__["VMoney"]
   }
@@ -10343,17 +10473,25 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["form", "money"],
   data: function data() {
-    return {};
+    return {
+      keyCont: 999
+    };
   },
   mounted: function mounted() {
-    this.form.pagamento = {
-      condicaoPagamento: "",
-      FKIDCategoria: "",
-      itens: [{
+    if (typeof this.form.pagamentoItens.length == 'undefined') this.form.pagamentoItens = [];
+    /*this.form.pagamento_condicaoPagamento = "";
+    this.form.pagamento_FKIDCategoria = "";
+    this.form.pagamentoItens = [
+      {
         dias: "",
         data: "",
         valor: "",
@@ -10361,11 +10499,49 @@ __webpack_require__.r(__webpack_exports__);
         FKIDFormaPagamento: "",
         observacao: "",
         id: "",
-        cad: false
-      }]
-    };
+        cad: false,
+      },
+    ];
+    */
   },
-  methods: {},
+  methods: {
+    remover: function remover(item) {
+      var $this = this;
+
+      if (item.cad) {
+        var _index = this.buscarIndexArray(this.form.pagamentoItens, "keyCont", item.keyCont);
+
+        $this.form.pagamentoItens.splice(_index, 1);
+      } else {
+        var index = this.buscarIndexArray(this.form.pagamentoItens, "id", item.id);
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir essa regra?", function () {
+          axios.get("/ajax/excluir-nota-fiscal-parcela?id=" + item.id).then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.form.pagamentoItens.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
+    },
+    novo: function novo() {
+      this.form.pagamentoItens.push({
+        dias: "",
+        data: "",
+        valor: "",
+        pagamento: "",
+        FKIDFormaPagamento: "",
+        keyCont: this.keyCont++,
+        cad: true
+      });
+    }
+  },
   components: {
     Item: _Item_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
   }
@@ -10407,6 +10583,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["item"],
   data: function data() {
@@ -10415,7 +10596,11 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {},
-  methods: {}
+  methods: {
+    remover: function remover() {
+      this.$emit('remover', this.item);
+    }
+  }
 });
 
 /***/ }),
@@ -10445,21 +10630,58 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["form"],
   data: function data() {
-    return {};
+    return {
+      keyCont: 999
+    };
   },
   mounted: function mounted() {
-    this.form.pessoasAutorizadas = [{
-      id: "",
-      cad: "",
-      FKIDContato: "",
-      CPFCNPJ: ""
-    }];
+    if (typeof this.form.pessoasAutorizadas.length == 'undefined') this.form.pessoasAutorizadas = [];
   },
-  methods: {},
+  methods: {
+    remover: function remover(item) {
+      var $this = this;
+
+      if (item.cad) {
+        var _index = this.buscarIndexArray(this.form.pessoasAutorizadas, "keyCont", item.keyCont);
+
+        $this.form.pessoasAutorizadas.splice(_index, 1);
+      } else {
+        var index = this.buscarIndexArray(this.form.pessoasAutorizadas, "id", item.id);
+        var $this = this;
+        alertify.confirm("alerta", "Tem certeza que deseja excluir essa regra?", function () {
+          axios.get("/ajax/excluir-nota-fiscal-pessoa-autorizada?id=" + item.id).then(function (response) {
+            if (response.data.resultado) {
+              alertify.success(response.data.msg);
+              $this.form.pessoasAutorizadas.splice(index, 1);
+            } else {
+              alertify.error(response.data.msg);
+            }
+          });
+        }, function () {}).set("labels", {
+          ok: "Sim",
+          cancel: "Cancelar"
+        }).set("closable", true).set("basic", false).closeOthers();
+      }
+    },
+    novo: function novo() {
+      this.form.pessoasAutorizadas.push({
+        cad: true,
+        FKIDContato: "",
+        CPFCNPJ: "",
+        keyCont: this.keyCont++
+      });
+    }
+  },
   components: {
     Item: _Item_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
   }
@@ -10583,6 +10805,7 @@ __webpack_require__.r(__webpack_exports__);
     return {};
   },
   mounted: function mounted() {
+    /*
     this.form.retencoes = {
       minimoRetencao: "",
       baseRetencao: "",
@@ -10590,8 +10813,9 @@ __webpack_require__.r(__webpack_exports__);
       valorCSLL: "",
       valorPISretido: "",
       valorCOFINSRetido: "",
-      valorISSRetido: ""
+      valorISSRetido: "",
     };
+    */
   },
   methods: {},
   directives: {
@@ -10856,6 +11080,7 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
+    /*
     this.form.transportador = {
       nome: "",
       freteConta: "",
@@ -10874,8 +11099,9 @@ __webpack_require__.r(__webpack_exports__);
       presoBruto: "",
       pesoLiquido: "",
       logistica: "",
-      enderecoEntregaDiferente: false
+      enderecoEntregaDiferente: false,
     };
+    */
   },
   methods: {} //,    components: {}
 
@@ -39970,83 +40196,93 @@ var render = function() {
         on: { submit: _vm.cadastrarEditar }
       },
       [
-        _c(
-          "div",
-          { staticClass: "form-row col-12" },
-          [
-            _c("Geral", { attrs: { form: _vm.form } }),
-            _vm._v(" "),
-            _c("Destinatario", {
-              attrs: { estados: _vm.estados, form: _vm.form }
-            }),
-            _vm._v(" "),
-            _c("ItensNota", { attrs: { money: _vm.money, form: _vm.form } }),
-            _vm._v(" "),
-            _c("DadosExportacao", {
-              attrs: { estados: _vm.estados, form: _vm.form }
-            }),
-            _vm._v(" "),
-            _c("CalculoImposto", {
-              attrs: { money: _vm.money, form: _vm.form }
-            }),
-            _vm._v(" "),
-            _c("Retencoes", { attrs: { money: _vm.money, form: _vm.form } }),
-            _vm._v(" "),
-            _c("TransportadorVolumes", {
-              attrs: { estados: _vm.estados, form: _vm.form }
-            }),
-            _vm._v(" "),
-            _c("EnderecoEntrega", {
-              attrs: { estados: _vm.estados, form: _vm.form }
-            }),
-            _vm._v(" "),
-            _c("Pagamento", { attrs: { money: _vm.money, form: _vm.form } }),
-            _vm._v(" "),
-            _c("PessoasAutorizadasXML", { attrs: { form: _vm.form } }),
-            _vm._v(" "),
-            _c("Intermediador", { attrs: { form: _vm.form } }),
-            _vm._v(" "),
-            _c("InformacoesAdicionais", { attrs: { form: _vm.form } }),
-            _vm._v(" "),
-            _c("DocumentoReferenciado", { attrs: { form: _vm.form } })
-          ],
-          1
-        )
+        _vm.mostrar
+          ? _c(
+              "div",
+              { staticClass: "form-row col-12" },
+              [
+                _c("Geral", { attrs: { form: _vm.form } }),
+                _vm._v(" "),
+                _c("Destinatario", {
+                  attrs: { estados: _vm.estados, form: _vm.form }
+                }),
+                _vm._v(" "),
+                _c("ItensNota", {
+                  attrs: { money: _vm.money, form: _vm.form }
+                }),
+                _vm._v(" "),
+                _c("DadosExportacao", {
+                  attrs: { estados: _vm.estados, form: _vm.form }
+                }),
+                _vm._v(" "),
+                _c("CalculoImposto", {
+                  attrs: { money: _vm.money, form: _vm.form }
+                }),
+                _vm._v(" "),
+                _c("Retencoes", {
+                  attrs: { money: _vm.money, form: _vm.form }
+                }),
+                _vm._v(" "),
+                _c("TransportadorVolumes", {
+                  attrs: { estados: _vm.estados, form: _vm.form }
+                }),
+                _vm._v(" "),
+                _c("EnderecoEntrega", {
+                  attrs: { estados: _vm.estados, form: _vm.form }
+                }),
+                _vm._v(" "),
+                _c("Pagamento", {
+                  attrs: { money: _vm.money, form: _vm.form }
+                }),
+                _vm._v(" "),
+                _c("PessoasAutorizadasXML", { attrs: { form: _vm.form } }),
+                _vm._v(" "),
+                _c("Intermediador", { attrs: { form: _vm.form } }),
+                _vm._v(" "),
+                _c("InformacoesAdicionais", { attrs: { form: _vm.form } }),
+                _vm._v(" "),
+                _c("DocumentoReferenciado", { attrs: { form: _vm.form } })
+              ],
+              1
+            )
+          : _vm._e(),
+        _vm._v(" "),
+        _c("div", { staticClass: "modal-footer col-12 text-right" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c(
+            "a",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { href: "#" },
+              on: {
+                click: function($event) {
+                  return _vm.$emit("close")
+                }
+              }
+            },
+            [_vm._v("Cancelar")]
+          )
+        ])
       ]
-    ),
-    _vm._v(" "),
-    _c("div", { staticClass: "modal-footer col-12 text-right" }, [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-primary",
-          attrs: { type: "button", name: "Opcao", value: "salvar" },
-          on: {
-            click: function($event) {
-              return _vm.validarForm()
-            }
-          }
-        },
-        [_c("i", { staticClass: "fas fa-save" }), _vm._v(" Salvar\n    ")]
-      ),
-      _vm._v(" "),
-      _c(
-        "a",
-        {
-          staticClass: "btn btn-secondary",
-          attrs: { href: "#" },
-          on: {
-            click: function($event) {
-              return _vm.$emit("close")
-            }
-          }
-        },
-        [_vm._v("Cancelar")]
-      )
-    ])
+    )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "button",
+      {
+        staticClass: "btn btn-primary",
+        attrs: { type: "submit", name: "Opcao", value: "salvar" }
+      },
+      [_c("i", { staticClass: "fas fa-save" }), _vm._v(" Salvar\n      ")]
+    )
+  }
+]
 render._withStripped = true
 
 
@@ -40072,7 +40308,7 @@ var render = function() {
     _vm._m(0),
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-3" }, [
-      _c("label", { attrs: { for: "calculoimposto.calculoAutomatico" } }, [
+      _c("label", { attrs: { for: "calculoimposto_calculoAutomatico" } }, [
         _vm._v("Cálculo automático ligado\n    ")
       ]),
       _vm._v(" "),
@@ -40081,45 +40317,46 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.calculoAutomatico,
-            expression: "form.calculoimposto.calculoAutomatico"
+            value: _vm.form.calculoimposto_calculoAutomatico,
+            expression: "form.calculoimposto_calculoAutomatico"
           }
         ],
         attrs: {
           type: "checkbox",
-          id: "calculoimposto.calculoAutomatico",
-          name: "calculoimposto.calculoAutomatico"
+          value: "1",
+          id: "calculoimposto_calculoAutomatico",
+          name: "calculoimposto_calculoAutomatico"
         },
         domProps: {
-          checked: Array.isArray(_vm.form.calculoimposto.calculoAutomatico)
-            ? _vm._i(_vm.form.calculoimposto.calculoAutomatico, null) > -1
-            : _vm.form.calculoimposto.calculoAutomatico
+          checked: Array.isArray(_vm.form.calculoimposto_calculoAutomatico)
+            ? _vm._i(_vm.form.calculoimposto_calculoAutomatico, "1") > -1
+            : _vm.form.calculoimposto_calculoAutomatico
         },
         on: {
           change: function($event) {
-            var $$a = _vm.form.calculoimposto.calculoAutomatico,
+            var $$a = _vm.form.calculoimposto_calculoAutomatico,
               $$el = $event.target,
               $$c = $$el.checked ? true : false
             if (Array.isArray($$a)) {
-              var $$v = null,
+              var $$v = "1",
                 $$i = _vm._i($$a, $$v)
               if ($$el.checked) {
                 $$i < 0 &&
                   _vm.$set(
-                    _vm.form.calculoimposto,
-                    "calculoAutomatico",
+                    _vm.form,
+                    "calculoimposto_calculoAutomatico",
                     $$a.concat([$$v])
                   )
               } else {
                 $$i > -1 &&
                   _vm.$set(
-                    _vm.form.calculoimposto,
-                    "calculoAutomatico",
+                    _vm.form,
+                    "calculoimposto_calculoAutomatico",
                     $$a.slice(0, $$i).concat($$a.slice($$i + 1))
                   )
               }
             } else {
-              _vm.$set(_vm.form.calculoimposto, "calculoAutomatico", $$c)
+              _vm.$set(_vm.form, "calculoimposto_calculoAutomatico", $$c)
             }
           }
         }
@@ -40140,23 +40377,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.baseICMS,
-            expression: "form.calculoimposto.baseICMS"
+            value: _vm.form.calculoimposto_baseICMS,
+            expression: "form.calculoimposto_baseICMS"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          name: "calculoimposto.baseICMS",
-          readonly: _vm.form.calculoimposto.calculoAutomatico
+          name: "calculoimposto_baseICMS",
+          readonly: _vm.form.calculoimposto_calculoAutomatico
         },
-        domProps: { value: _vm.form.calculoimposto.baseICMS },
+        domProps: { value: _vm.form.calculoimposto_baseICMS },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.calculoimposto, "baseICMS", $event.target.value)
+            _vm.$set(_vm.form, "calculoimposto_baseICMS", $event.target.value)
           }
         }
       })
@@ -40176,23 +40413,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.valorICMS,
-            expression: "form.calculoimposto.valorICMS"
+            value: _vm.form.calculoimposto_valorICMS,
+            expression: "form.calculoimposto_valorICMS"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.valorICMS"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_valorICMS"
         },
-        domProps: { value: _vm.form.calculoimposto.valorICMS },
+        domProps: { value: _vm.form.calculoimposto_valorICMS },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.calculoimposto, "valorICMS", $event.target.value)
+            _vm.$set(_vm.form, "calculoimposto_valorICMS", $event.target.value)
           }
         }
       })
@@ -40212,23 +40449,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.baseICMSST,
-            expression: "form.calculoimposto.baseICMSST"
+            value: _vm.form.calculoimposto_baseICMSST,
+            expression: "form.calculoimposto_baseICMSST"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.baseICMSST"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_baseICMSST"
         },
-        domProps: { value: _vm.form.calculoimposto.baseICMSST },
+        domProps: { value: _vm.form.calculoimposto_baseICMSST },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.calculoimposto, "baseICMSST", $event.target.value)
+            _vm.$set(_vm.form, "calculoimposto_baseICMSST", $event.target.value)
           }
         }
       })
@@ -40248,25 +40485,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.valorICMSST,
-            expression: "form.calculoimposto.valorICMSST"
+            value: _vm.form.calculoimposto_valorICMSST,
+            expression: "form.calculoimposto_valorICMSST"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.valorICMSST"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_valorICMSST"
         },
-        domProps: { value: _vm.form.calculoimposto.valorICMSST },
+        domProps: { value: _vm.form.calculoimposto_valorICMSST },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.calculoimposto,
-              "valorICMSST",
+              _vm.form,
+              "calculoimposto_valorICMSST",
               $event.target.value
             )
           }
@@ -40288,25 +40525,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.totalServicos,
-            expression: "form.calculoimposto.totalServicos"
+            value: _vm.form.calculoimposto_totalServicos,
+            expression: "form.calculoimposto_totalServicos"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.totalServicos"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_totalServicos"
         },
-        domProps: { value: _vm.form.calculoimposto.totalServicos },
+        domProps: { value: _vm.form.calculoimposto_totalServicos },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.calculoimposto,
-              "totalServicos",
+              _vm.form,
+              "calculoimposto_totalServicos",
               $event.target.value
             )
           }
@@ -40328,25 +40565,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.totalProdutos,
-            expression: "form.calculoimposto.totalProdutos"
+            value: _vm.form.calculoimposto_totalProdutos,
+            expression: "form.calculoimposto_totalProdutos"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.totalProdutos"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_totalProdutos"
         },
-        domProps: { value: _vm.form.calculoimposto.totalProdutos },
+        domProps: { value: _vm.form.calculoimposto_totalProdutos },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.calculoimposto,
-              "totalProdutos",
+              _vm.form,
+              "calculoimposto_totalProdutos",
               $event.target.value
             )
           }
@@ -40368,23 +40605,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.valorFrete,
-            expression: "form.calculoimposto.valorFrete"
+            value: _vm.form.calculoimposto_valorFrete,
+            expression: "form.calculoimposto_valorFrete"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.valorFrete"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_valorFrete"
         },
-        domProps: { value: _vm.form.calculoimposto.valorFrete },
+        domProps: { value: _vm.form.calculoimposto_valorFrete },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.calculoimposto, "valorFrete", $event.target.value)
+            _vm.$set(_vm.form, "calculoimposto_valorFrete", $event.target.value)
           }
         }
       })
@@ -40404,25 +40641,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.valorSeguro,
-            expression: "form.calculoimposto.valorSeguro"
+            value: _vm.form.calculoimposto_valorSeguro,
+            expression: "form.calculoimposto_valorSeguro"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.valorSeguro"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_valorSeguro"
         },
-        domProps: { value: _vm.form.calculoimposto.valorSeguro },
+        domProps: { value: _vm.form.calculoimposto_valorSeguro },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.calculoimposto,
-              "valorSeguro",
+              _vm.form,
+              "calculoimposto_valorSeguro",
               $event.target.value
             )
           }
@@ -40444,25 +40681,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.outrasDespesas,
-            expression: "form.calculoimposto.outrasDespesas"
+            value: _vm.form.calculoimposto_outrasDespesas,
+            expression: "form.calculoimposto_outrasDespesas"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.outrasDespesas"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_outrasDespesas"
         },
-        domProps: { value: _vm.form.calculoimposto.outrasDespesas },
+        domProps: { value: _vm.form.calculoimposto_outrasDespesas },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.calculoimposto,
-              "outrasDespesas",
+              _vm.form,
+              "calculoimposto_outrasDespesas",
               $event.target.value
             )
           }
@@ -40484,23 +40721,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.valorIPI,
-            expression: "form.calculoimposto.valorIPI"
+            value: _vm.form.calculoimposto_valorIPI,
+            expression: "form.calculoimposto_valorIPI"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.valorIPI"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_valorIPI"
         },
-        domProps: { value: _vm.form.calculoimposto.valorIPI },
+        domProps: { value: _vm.form.calculoimposto_valorIPI },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.calculoimposto, "valorIPI", $event.target.value)
+            _vm.$set(_vm.form, "calculoimposto_valorIPI", $event.target.value)
           }
         }
       })
@@ -40520,23 +40757,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.valorISSQN,
-            expression: "form.calculoimposto.valorISSQN"
+            value: _vm.form.calculoimposto_valorISSQN,
+            expression: "form.calculoimposto_valorISSQN"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.valorISSQN"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_valorISSQN"
         },
-        domProps: { value: _vm.form.calculoimposto.valorISSQN },
+        domProps: { value: _vm.form.calculoimposto_valorISSQN },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.calculoimposto, "valorISSQN", $event.target.value)
+            _vm.$set(_vm.form, "calculoimposto_valorISSQN", $event.target.value)
           }
         }
       })
@@ -40556,23 +40793,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.totalNota,
-            expression: "form.calculoimposto.totalNota"
+            value: _vm.form.calculoimposto_totalNota,
+            expression: "form.calculoimposto_totalNota"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.totalNota"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_totalNota"
         },
-        domProps: { value: _vm.form.calculoimposto.totalNota },
+        domProps: { value: _vm.form.calculoimposto_totalNota },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.calculoimposto, "totalNota", $event.target.value)
+            _vm.$set(_vm.form, "calculoimposto_totalNota", $event.target.value)
           }
         }
       })
@@ -40592,19 +40829,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.desconto,
-            expression: "form.calculoimposto.desconto"
+            value: _vm.form.calculoimposto_desconto,
+            expression: "form.calculoimposto_desconto"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", name: "calculoimposto.desconto" },
-        domProps: { value: _vm.form.calculoimposto.desconto },
+        attrs: { type: "text", name: "calculoimposto_desconto" },
+        domProps: { value: _vm.form.calculoimposto_desconto },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.calculoimposto, "desconto", $event.target.value)
+            _vm.$set(_vm.form, "calculoimposto_desconto", $event.target.value)
           }
         }
       })
@@ -40624,25 +40861,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.valorFunrural,
-            expression: "form.calculoimposto.valorFunrural"
+            value: _vm.form.calculoimposto_valorFunrural,
+            expression: "form.calculoimposto_valorFunrural"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.valorFunrural"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_valorFunrural"
         },
-        domProps: { value: _vm.form.calculoimposto.valorFunrural },
+        domProps: { value: _vm.form.calculoimposto_valorFunrural },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.calculoimposto,
-              "valorFunrural",
+              _vm.form,
+              "calculoimposto_valorFunrural",
               $event.target.value
             )
           }
@@ -40664,25 +40901,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.totalFaturado,
-            expression: "form.calculoimposto.totalFaturado"
+            value: _vm.form.calculoimposto_totalFaturado,
+            expression: "form.calculoimposto_totalFaturado"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.totalFaturado"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_totalFaturado"
         },
-        domProps: { value: _vm.form.calculoimposto.totalFaturado },
+        domProps: { value: _vm.form.calculoimposto_totalFaturado },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.calculoimposto,
-              "totalFaturado",
+              _vm.form,
+              "calculoimposto_totalFaturado",
               $event.target.value
             )
           }
@@ -40698,19 +40935,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.nItens,
-            expression: "form.calculoimposto.nItens"
+            value: _vm.form.calculoimposto_nItens,
+            expression: "form.calculoimposto_nItens"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "number", name: "calculoimposto.nItens" },
-        domProps: { value: _vm.form.calculoimposto.nItens },
+        attrs: { type: "number", name: "calculoimposto_nItens" },
+        domProps: { value: _vm.form.calculoimposto_nItens },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.calculoimposto, "nItens", $event.target.value)
+            _vm.$set(_vm.form, "calculoimposto_nItens", $event.target.value)
           }
         }
       })
@@ -40730,25 +40967,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.calculoimposto.totalAtributos,
-            expression: "form.calculoimposto.totalAtributos"
+            value: _vm.form.calculoimposto_totalAtributos,
+            expression: "form.calculoimposto_totalAtributos"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "calculoimposto.totalAtributos"
+          readonly: _vm.form.calculoimposto_calculoAutomatico,
+          name: "calculoimposto_totalAtributos"
         },
-        domProps: { value: _vm.form.calculoimposto.totalAtributos },
+        domProps: { value: _vm.form.calculoimposto_totalAtributos },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.calculoimposto,
-              "totalAtributos",
+              _vm.form,
+              "calculoimposto_totalAtributos",
               $event.target.value
             )
           }
@@ -40921,23 +41158,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.nomeContato,
-            expression: "form.destinatario.nomeContato"
+            value: _vm.form.destinatario_nomeContato,
+            expression: "form.destinatario_nomeContato"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "255",
-          name: "destinatario.nomeContato"
+          name: "destinatario_nomeContato"
         },
-        domProps: { value: _vm.form.destinatario.nomeContato },
+        domProps: { value: _vm.form.destinatario_nomeContato },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.destinatario, "nomeContato", $event.target.value)
+            _vm.$set(_vm.form, "destinatario_nomeContato", $event.target.value)
           }
         }
       })
@@ -40953,13 +41190,13 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.destinatario.tipoPessoa,
-              expression: "form.destinatario.tipoPessoa"
+              value: _vm.form.destinatario_tipoPessoa,
+              expression: "form.destinatario_tipoPessoa"
             }
           ],
           staticClass: "form-control",
           attrs: {
-            name: "destinatario.tipoPessoa",
+            name: "destinatario_tipoPessoa",
             placeholder: "Selecione..."
           },
           on: {
@@ -40973,8 +41210,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.form.destinatario,
-                "tipoPessoa",
+                _vm.form,
+                "destinatario_tipoPessoa",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -41000,33 +41237,33 @@ var render = function() {
           {
             name: "show",
             rawName: "v-show",
-            value: _vm.form.destinatario.tipoPessoa == "f",
-            expression: "form.destinatario.tipoPessoa == 'f'"
+            value: _vm.form.destinatario_tipoPessoa == "f",
+            expression: "form.destinatario_tipoPessoa == 'f'"
           }
         ],
         staticClass: "form-group col-md-3"
       },
       [
-        _c("label", { attrs: { for: "" } }, [_vm._v("CPF MASKCPF")]),
+        _c("label", { attrs: { for: "" } }, [_vm._v("CPF")]),
         _vm._v(" "),
         _c("input", {
           directives: [
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.destinatario.cpf,
-              expression: "form.destinatario.cpf"
+              value: _vm.form.destinatario_cpf,
+              expression: "form.destinatario_cpf"
             }
           ],
           staticClass: "form-control",
-          attrs: { type: "text", maxlength: "20", name: "destinatario.cpf" },
-          domProps: { value: _vm.form.destinatario.cpf },
+          attrs: { type: "text", maxlength: "20", name: "destinatario_cpf" },
+          domProps: { value: _vm.form.destinatario_cpf },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
-              _vm.$set(_vm.form.destinatario, "cpf", $event.target.value)
+              _vm.$set(_vm.form, "destinatario_cpf", $event.target.value)
             }
           }
         })
@@ -41040,8 +41277,8 @@ var render = function() {
           {
             name: "show",
             rawName: "v-show",
-            value: _vm.form.destinatario.tipoPessoa == "j",
-            expression: "form.destinatario.tipoPessoa == 'j'"
+            value: _vm.form.destinatario_tipoPessoa == "j",
+            expression: "form.destinatario_tipoPessoa == 'j'"
           }
         ],
         staticClass: "form-group col-md-3"
@@ -41054,19 +41291,19 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.destinatario.cnpj,
-              expression: "form.destinatario.cnpj"
+              value: _vm.form.destinatario_cnpj,
+              expression: "form.destinatario_cnpj"
             }
           ],
           staticClass: "form-control",
-          attrs: { type: "text", maxlength: "18", name: "destinatario.cnpj" },
-          domProps: { value: _vm.form.destinatario.cnpj },
+          attrs: { type: "text", maxlength: "18", name: "destinatario_cnpj" },
+          domProps: { value: _vm.form.destinatario_cnpj },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
-              _vm.$set(_vm.form.destinatario, "cnpj", $event.target.value)
+              _vm.$set(_vm.form, "destinatario_cnpj", $event.target.value)
             }
           }
         })
@@ -41080,8 +41317,8 @@ var render = function() {
           {
             name: "show",
             rawName: "v-show",
-            value: _vm.form.destinatario.tipoPessoa == "e",
-            expression: "form.destinatario.tipoPessoa == 'e'"
+            value: _vm.form.destinatario_tipoPessoa == "e",
+            expression: "form.destinatario_tipoPessoa == 'e'"
           }
         ],
         staticClass: "form-group col-md-3"
@@ -41094,19 +41331,19 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.destinatario.pais,
-              expression: "form.destinatario.pais"
+              value: _vm.form.destinatario_pais,
+              expression: "form.destinatario_pais"
             }
           ],
           staticClass: "form-control",
-          attrs: { type: "text", maxlength: "100", name: "destinatario.pais" },
-          domProps: { value: _vm.form.destinatario.pais },
+          attrs: { type: "text", maxlength: "100", name: "destinatario_pais" },
+          domProps: { value: _vm.form.destinatario_pais },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
-              _vm.$set(_vm.form.destinatario, "pais", $event.target.value)
+              _vm.$set(_vm.form, "destinatario_pais", $event.target.value)
             }
           }
         })
@@ -41120,8 +41357,8 @@ var render = function() {
           {
             name: "show",
             rawName: "v-show",
-            value: _vm.form.destinatario.tipoPessoa == "e",
-            expression: "form.destinatario.tipoPessoa == 'e'"
+            value: _vm.form.destinatario_tipoPessoa == "e",
+            expression: "form.destinatario_tipoPessoa == 'e'"
           }
         ],
         staticClass: "form-group col-md-3"
@@ -41136,13 +41373,13 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.form.destinatario.contribuinte,
-                expression: "form.destinatario.contribuinte"
+                value: _vm.form.destinatario_contribuinte,
+                expression: "form.destinatario_contribuinte"
               }
             ],
             staticClass: "form-control",
             attrs: {
-              name: "destinatario.contribuinte",
+              name: "destinatario_contribuinte",
               placeholder: "Selecione..."
             },
             on: {
@@ -41156,8 +41393,8 @@ var render = function() {
                     return val
                   })
                 _vm.$set(
-                  _vm.form.destinatario,
-                  "contribuinte",
+                  _vm.form,
+                  "destinatario_contribuinte",
                   $event.target.multiple ? $$selectedVal : $$selectedVal[0]
                 )
               }
@@ -41178,7 +41415,6 @@ var render = function() {
     ),
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-3" }, [
-      _vm._v("\n    Contribuinte = 2 valor “ISENTO”\n    "),
       _c("label", { attrs: { for: "" } }, [_vm._v("Inscrição Estadual ")]),
       _vm._v(" "),
       _c("input", {
@@ -41186,25 +41422,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.inscricaoEstadual,
-            expression: "form.destinatario.inscricaoEstadual"
+            value: _vm.form.destinatario_inscricaoEstadual,
+            expression: "form.destinatario_inscricaoEstadual"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "100",
-          name: "destinatario.inscricaoEstadual"
+          name: "destinatario_inscricaoEstadual"
         },
-        domProps: { value: _vm.form.destinatario.inscricaoEstadual },
+        domProps: { value: _vm.form.destinatario_inscricaoEstadual },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.destinatario,
-              "inscricaoEstadual",
+              _vm.form,
+              "destinatario_inscricaoEstadual",
               $event.target.value
             )
           }
@@ -41213,7 +41449,7 @@ var render = function() {
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-3" }, [
-      _c("label", { attrs: { for: "destinatario.consumidorFinal" } }, [
+      _c("label", { attrs: { for: "destinatario_consumidorFinal" } }, [
         _vm._v("Consumidor final ")
       ]),
       _vm._v(" "),
@@ -41222,24 +41458,24 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.consumidorFinal,
-            expression: "form.destinatario.consumidorFinal"
+            value: _vm.form.destinatario_consumidorFinal,
+            expression: "form.destinatario_consumidorFinal"
           }
         ],
         attrs: {
           type: "checkbox",
           value: "1",
-          name: "destinatario.consumidorFinal",
-          id: "destinatario.consumidorFinal"
+          name: "destinatario_consumidorFinal",
+          id: "destinatario_consumidorFinal"
         },
         domProps: {
-          checked: Array.isArray(_vm.form.destinatario.consumidorFinal)
-            ? _vm._i(_vm.form.destinatario.consumidorFinal, "1") > -1
-            : _vm.form.destinatario.consumidorFinal
+          checked: Array.isArray(_vm.form.destinatario_consumidorFinal)
+            ? _vm._i(_vm.form.destinatario_consumidorFinal, "1") > -1
+            : _vm.form.destinatario_consumidorFinal
         },
         on: {
           change: function($event) {
-            var $$a = _vm.form.destinatario.consumidorFinal,
+            var $$a = _vm.form.destinatario_consumidorFinal,
               $$el = $event.target,
               $$c = $$el.checked ? true : false
             if (Array.isArray($$a)) {
@@ -41248,20 +41484,20 @@ var render = function() {
               if ($$el.checked) {
                 $$i < 0 &&
                   _vm.$set(
-                    _vm.form.destinatario,
-                    "consumidorFinal",
+                    _vm.form,
+                    "destinatario_consumidorFinal",
                     $$a.concat([$$v])
                   )
               } else {
                 $$i > -1 &&
                   _vm.$set(
-                    _vm.form.destinatario,
-                    "consumidorFinal",
+                    _vm.form,
+                    "destinatario_consumidorFinal",
                     $$a.slice(0, $$i).concat($$a.slice($$i + 1))
                   )
               }
             } else {
-              _vm.$set(_vm.form.destinatario, "consumidorFinal", $$c)
+              _vm.$set(_vm.form, "destinatario_consumidorFinal", $$c)
             }
           }
         }
@@ -41270,25 +41506,25 @@ var render = function() {
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-3" }, [
       _c("label", { attrs: { for: "" } }, [_vm._v("CEP ")]),
-      _vm._v(" Buscar endereço pelo CEP\n    "),
+      _vm._v(" "),
       _c("input", {
         directives: [
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.cep,
-            expression: "form.destinatario.cep"
+            value: _vm.form.destinatario_cep,
+            expression: "form.destinatario_cep"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", maxlength: "10", name: "destinatario.cep" },
-        domProps: { value: _vm.form.destinatario.cep },
+        attrs: { type: "text", maxlength: "10", name: "destinatario_cep" },
+        domProps: { value: _vm.form.destinatario_cep },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.destinatario, "cep", $event.target.value)
+            _vm.$set(_vm.form, "destinatario_cep", $event.target.value)
           }
         }
       })
@@ -41304,12 +41540,12 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.destinatario.UF,
-              expression: "form.destinatario.UF"
+              value: _vm.form.destinatario_UF,
+              expression: "form.destinatario_UF"
             }
           ],
           staticClass: "form-control",
-          attrs: { name: "destinatario.UF", placeholder: "Selecione..." },
+          attrs: { name: "destinatario_UF", placeholder: "Selecione..." },
           on: {
             change: function($event) {
               var $$selectedVal = Array.prototype.filter
@@ -41321,8 +41557,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.form.destinatario,
-                "UF",
+                _vm.form,
+                "destinatario_UF",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -41349,23 +41585,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.municipio,
-            expression: "form.destinatario.municipio"
+            value: _vm.form.destinatario_municipio,
+            expression: "form.destinatario_municipio"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "255",
-          name: "destinatario.municipio"
+          name: "destinatario_municipio"
         },
-        domProps: { value: _vm.form.destinatario.municipio },
+        domProps: { value: _vm.form.destinatario_municipio },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.destinatario, "municipio", $event.target.value)
+            _vm.$set(_vm.form, "destinatario_municipio", $event.target.value)
           }
         }
       })
@@ -41379,19 +41615,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.bairro,
-            expression: "form.destinatario.bairro"
+            value: _vm.form.destinatario_bairro,
+            expression: "form.destinatario_bairro"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", maxlength: "255", name: "destinatario.bairro" },
-        domProps: { value: _vm.form.destinatario.bairro },
+        attrs: { type: "text", maxlength: "255", name: "destinatario_bairro" },
+        domProps: { value: _vm.form.destinatario_bairro },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.destinatario, "bairro", $event.target.value)
+            _vm.$set(_vm.form, "destinatario_bairro", $event.target.value)
           }
         }
       })
@@ -41405,23 +41641,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.endereco,
-            expression: "form.destinatario.endereco"
+            value: _vm.form.destinatario_endereco,
+            expression: "form.destinatario_endereco"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "255",
-          name: "destinatario.endereco"
+          name: "destinatario_endereco"
         },
-        domProps: { value: _vm.form.destinatario.endereco },
+        domProps: { value: _vm.form.destinatario_endereco },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.destinatario, "endereco", $event.target.value)
+            _vm.$set(_vm.form, "destinatario_endereco", $event.target.value)
           }
         }
       })
@@ -41435,19 +41671,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.numero,
-            expression: "form.destinatario.numero"
+            value: _vm.form.destinatario_numero,
+            expression: "form.destinatario_numero"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", maxlength: "20", name: "destinatario.numero" },
-        domProps: { value: _vm.form.destinatario.numero },
+        attrs: { type: "text", maxlength: "20", name: "destinatario_numero" },
+        domProps: { value: _vm.form.destinatario_numero },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.destinatario, "numero", $event.target.value)
+            _vm.$set(_vm.form, "destinatario_numero", $event.target.value)
           }
         }
       })
@@ -41461,23 +41697,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.complemento,
-            expression: "form.destinatario.complemento"
+            value: _vm.form.destinatario_complemento,
+            expression: "form.destinatario_complemento"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "255",
-          name: "destinatario.complemento"
+          name: "destinatario_complemento"
         },
-        domProps: { value: _vm.form.destinatario.complemento },
+        domProps: { value: _vm.form.destinatario_complemento },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.destinatario, "complemento", $event.target.value)
+            _vm.$set(_vm.form, "destinatario_complemento", $event.target.value)
           }
         }
       })
@@ -41491,19 +41727,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.foneFax,
-            expression: "form.destinatario.foneFax"
+            value: _vm.form.destinatario_foneFax,
+            expression: "form.destinatario_foneFax"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", maxlength: "15", name: "destinatario.foneFax" },
-        domProps: { value: _vm.form.destinatario.foneFax },
+        attrs: { type: "text", maxlength: "15", name: "destinatario_foneFax" },
+        domProps: { value: _vm.form.destinatario_foneFax },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.destinatario, "foneFax", $event.target.value)
+            _vm.$set(_vm.form, "destinatario_foneFax", $event.target.value)
           }
         }
       })
@@ -41517,19 +41753,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.email,
-            expression: "form.destinatario.email"
+            value: _vm.form.destinatario_email,
+            expression: "form.destinatario_email"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "email", maxlength: "255", name: "destinatario.email" },
-        domProps: { value: _vm.form.destinatario.email },
+        attrs: { type: "email", maxlength: "255", name: "destinatario_email" },
+        domProps: { value: _vm.form.destinatario_email },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.destinatario, "email", $event.target.value)
+            _vm.$set(_vm.form, "destinatario_email", $event.target.value)
           }
         }
       })
@@ -41537,29 +41773,29 @@ var render = function() {
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-3" }, [
       _c("label", { attrs: { for: "" } }, [_vm._v("Vendedor ")]),
-      _vm._v(" FKIDVendedor\n    "),
+      _vm._v(" "),
       _c("input", {
         directives: [
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.destinatario.vendedor,
-            expression: "form.destinatario.vendedor"
+            value: _vm.form.destinatario_vendedor,
+            expression: "form.destinatario_vendedor"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "255",
-          name: "destinatario.vendedor"
+          name: "destinatario_vendedor"
         },
-        domProps: { value: _vm.form.destinatario.vendedor },
+        domProps: { value: _vm.form.destinatario_vendedor },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.destinatario, "vendedor", $event.target.value)
+            _vm.$set(_vm.form, "destinatario_vendedor", $event.target.value)
           }
         }
       })
@@ -41610,12 +41846,12 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.documento.tipo,
-              expression: "form.documento.tipo"
+              value: _vm.form.documento_tipo,
+              expression: "form.documento_tipo"
             }
           ],
           staticClass: "form-control",
-          attrs: { name: "documento.tipo", placeholder: "Selecione..." },
+          attrs: { name: "documento_tipo", placeholder: "Selecione..." },
           on: {
             change: function($event) {
               var $$selectedVal = Array.prototype.filter
@@ -41627,8 +41863,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.form.documento,
-                "tipo",
+                _vm.form,
+                "documento_tipo",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -41649,7 +41885,7 @@ var render = function() {
       )
     ]),
     _vm._v(" "),
-    _vm.mulSeText(_vm.form.documento.tipo, ["55", "57"])
+    _vm.mulSeText(_vm.form.documento_tipo, ["55", "57"])
       ? _c("div", { staticClass: "form-group col-md-3" }, [
           _c("label", { attrs: { for: "" } }, [_vm._v("Chave de acesso")]),
           _vm._v(" "),
@@ -41658,30 +41894,30 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.form.documento.chaveAcesso,
-                expression: "form.documento.chaveAcesso"
+                value: _vm.form.documento_chaveAcesso,
+                expression: "form.documento_chaveAcesso"
               }
             ],
             staticClass: "form-control",
             attrs: {
               type: "text",
               maxlength: "255",
-              name: "documento.chaveAcesso"
+              name: "documento_chaveAcesso"
             },
-            domProps: { value: _vm.form.documento.chaveAcesso },
+            domProps: { value: _vm.form.documento_chaveAcesso },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.$set(_vm.form.documento, "chaveAcesso", $event.target.value)
+                _vm.$set(_vm.form, "documento_chaveAcesso", $event.target.value)
               }
             }
           })
         ])
       : _vm._e(),
     _vm._v(" "),
-    _vm.mulSeText(_vm.form.documento.tipo, ["2D"])
+    _vm.mulSeText(_vm.form.documento_tipo, ["2D"])
       ? _c("div", { staticClass: "form-group col-md-3" }, [
           _c("label", { attrs: { for: "" } }, [
             _vm._v("Número do Contador de Ordem de Operação - COO")
@@ -41692,25 +41928,25 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.form.documento.numeroContador,
-                expression: "form.documento.numeroContador"
+                value: _vm.form.documento_numeroContador,
+                expression: "form.documento_numeroContador"
               }
             ],
             staticClass: "form-control",
             attrs: {
               type: "text",
               maxlength: "255",
-              name: "documento.numeroContador"
+              name: "documento_numeroContador"
             },
-            domProps: { value: _vm.form.documento.numeroContador },
+            domProps: { value: _vm.form.documento_numeroContador },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
                 _vm.$set(
-                  _vm.form.documento,
-                  "numeroContador",
+                  _vm.form,
+                  "documento_numeroContador",
                   $event.target.value
                 )
               }
@@ -41719,7 +41955,7 @@ var render = function() {
         ])
       : _vm._e(),
     _vm._v(" "),
-    _vm.mulSeText(_vm.form.documento.tipo, ["1", "2", "R1", "4"])
+    _vm.mulSeText(_vm.form.documento_tipo, ["1", "2", "R1", "4"])
       ? _c("div", { staticClass: "form-group col-md-3" }, [
           _c("label", { attrs: { for: "" } }, [_vm._v("Ano e mês de emissão")]),
           _vm._v(" "),
@@ -41728,25 +41964,25 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.form.documento.anoMesEmissao,
-                expression: "form.documento.anoMesEmissao"
+                value: _vm.form.documento_anoMesEmissao,
+                expression: "form.documento_anoMesEmissao"
               }
             ],
             staticClass: "form-control",
             attrs: {
               type: "text",
               maxlength: "255",
-              name: "documento.anoMesEmissao"
+              name: "documento_anoMesEmissao"
             },
-            domProps: { value: _vm.form.documento.anoMesEmissao },
+            domProps: { value: _vm.form.documento_anoMesEmissao },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
                 _vm.$set(
-                  _vm.form.documento,
-                  "anoMesEmissao",
+                  _vm.form,
+                  "documento_anoMesEmissao",
                   $event.target.value
                 )
               }
@@ -41755,7 +41991,7 @@ var render = function() {
         ])
       : _vm._e(),
     _vm._v(" "),
-    _vm.mulSeText(_vm.form.documento.tipo, ["1", "2", "R1", "4"])
+    _vm.mulSeText(_vm.form.documento_tipo, ["1", "2", "R1", "4"])
       ? _c("div", { staticClass: "form-group col-md-3" }, [
           _c("label", { attrs: { for: "" } }, [_vm._v("Número")]),
           _vm._v(" "),
@@ -41764,26 +42000,26 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.form.documento.numero,
-                expression: "form.documento.numero"
+                value: _vm.form.documento_numero,
+                expression: "form.documento_numero"
               }
             ],
             staticClass: "form-control",
-            attrs: { type: "text", maxlength: "255", name: "documento.numero" },
-            domProps: { value: _vm.form.documento.numero },
+            attrs: { type: "text", maxlength: "255", name: "documento_numero" },
+            domProps: { value: _vm.form.documento_numero },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.$set(_vm.form.documento, "numero", $event.target.value)
+                _vm.$set(_vm.form, "documento_numero", $event.target.value)
               }
             }
           })
         ])
       : _vm._e(),
     _vm._v(" "),
-    _vm.mulSeText(_vm.form.documento.tipo, ["1", "2", "R1", "4"])
+    _vm.mulSeText(_vm.form.documento_tipo, ["1", "2", "R1", "4"])
       ? _c("div", { staticClass: "form-group col-md-3" }, [
           _c("label", { attrs: { for: "" } }, [_vm._v("Série")]),
           _vm._v(" "),
@@ -41792,19 +42028,19 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.form.documento.serie,
-                expression: "form.documento.serie"
+                value: _vm.form.documento_serie,
+                expression: "form.documento_serie"
               }
             ],
             staticClass: "form-control",
-            attrs: { type: "text", maxlength: "255", name: "documento.serie" },
-            domProps: { value: _vm.form.documento.serie },
+            attrs: { type: "text", maxlength: "255", name: "documento_serie" },
+            domProps: { value: _vm.form.documento_serie },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.$set(_vm.form.documento, "serie", $event.target.value)
+                _vm.$set(_vm.form, "documento_serie", $event.target.value)
               }
             }
           })
@@ -41850,8 +42086,8 @@ var render = function() {
         {
           name: "show",
           rawName: "v-show",
-          value: _vm.form.transportador.enderecoEntregaDiferente == 1,
-          expression: "form.transportador.enderecoEntregaDiferente==1"
+          value: _vm.form.transportador_enderecoEntregaDiferente == 1,
+          expression: "form.transportador_enderecoEntregaDiferente==1"
         }
       ],
       staticClass: "row col-12"
@@ -41867,19 +42103,19 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.enderecoEntrega.nome,
-              expression: "form.enderecoEntrega.nome"
+              value: _vm.form.enderecoEntrega_nome,
+              expression: "form.enderecoEntrega_nome"
             }
           ],
           staticClass: "form-control",
-          attrs: { type: "text", name: "enderecoEntrega.nome" },
-          domProps: { value: _vm.form.enderecoEntrega.nome },
+          attrs: { type: "text", name: "enderecoEntrega_nome" },
+          domProps: { value: _vm.form.enderecoEntrega_nome },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
-              _vm.$set(_vm.form.enderecoEntrega, "nome", $event.target.value)
+              _vm.$set(_vm.form, "enderecoEntrega_nome", $event.target.value)
             }
           }
         })
@@ -41893,19 +42129,19 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.enderecoEntrega.cep,
-              expression: "form.enderecoEntrega.cep"
+              value: _vm.form.enderecoEntrega_cep,
+              expression: "form.enderecoEntrega_cep"
             }
           ],
           staticClass: "form-control",
-          attrs: { type: "text", maxlength: "10", name: "enderecoEntrega.cep" },
-          domProps: { value: _vm.form.enderecoEntrega.cep },
+          attrs: { type: "text", maxlength: "10", name: "enderecoEntrega_cep" },
+          domProps: { value: _vm.form.enderecoEntrega_cep },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
-              _vm.$set(_vm.form.enderecoEntrega, "cep", $event.target.value)
+              _vm.$set(_vm.form, "enderecoEntrega_cep", $event.target.value)
             }
           }
         })
@@ -41921,12 +42157,12 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.form.enderecoEntrega.UF,
-                expression: "form.enderecoEntrega.UF"
+                value: _vm.form.enderecoEntrega_UF,
+                expression: "form.enderecoEntrega_UF"
               }
             ],
             staticClass: "form-control",
-            attrs: { name: "enderecoEntrega.UF", placeholder: "Selecione..." },
+            attrs: { name: "enderecoEntrega_UF", placeholder: "Selecione..." },
             on: {
               change: function($event) {
                 var $$selectedVal = Array.prototype.filter
@@ -41938,8 +42174,8 @@ var render = function() {
                     return val
                   })
                 _vm.$set(
-                  _vm.form.enderecoEntrega,
-                  "UF",
+                  _vm.form,
+                  "enderecoEntrega_UF",
                   $event.target.multiple ? $$selectedVal : $$selectedVal[0]
                 )
               }
@@ -41966,25 +42202,25 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.enderecoEntrega.municipio,
-              expression: "form.enderecoEntrega.municipio"
+              value: _vm.form.enderecoEntrega_municipio,
+              expression: "form.enderecoEntrega_municipio"
             }
           ],
           staticClass: "form-control",
           attrs: {
             type: "text",
             maxlength: "255",
-            name: "enderecoEntrega.municipio"
+            name: "enderecoEntrega_municipio"
           },
-          domProps: { value: _vm.form.enderecoEntrega.municipio },
+          domProps: { value: _vm.form.enderecoEntrega_municipio },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
               _vm.$set(
-                _vm.form.enderecoEntrega,
-                "municipio",
+                _vm.form,
+                "enderecoEntrega_municipio",
                 $event.target.value
               )
             }
@@ -42000,25 +42236,25 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.enderecoEntrega.endereco,
-              expression: "form.enderecoEntrega.endereco"
+              value: _vm.form.enderecoEntrega_endereco,
+              expression: "form.enderecoEntrega_endereco"
             }
           ],
           staticClass: "form-control",
           attrs: {
             type: "text",
             maxlength: "255",
-            name: "enderecoEntrega.endereco"
+            name: "enderecoEntrega_endereco"
           },
-          domProps: { value: _vm.form.enderecoEntrega.endereco },
+          domProps: { value: _vm.form.enderecoEntrega_endereco },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
               _vm.$set(
-                _vm.form.enderecoEntrega,
-                "endereco",
+                _vm.form,
+                "enderecoEntrega_endereco",
                 $event.target.value
               )
             }
@@ -42034,23 +42270,23 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.enderecoEntrega.numero,
-              expression: "form.enderecoEntrega.numero"
+              value: _vm.form.enderecoEntrega_numero,
+              expression: "form.enderecoEntrega_numero"
             }
           ],
           staticClass: "form-control",
           attrs: {
             type: "text",
             maxlength: "50",
-            name: "enderecoEntrega.numero"
+            name: "enderecoEntrega_numero"
           },
-          domProps: { value: _vm.form.enderecoEntrega.numero },
+          domProps: { value: _vm.form.enderecoEntrega_numero },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
-              _vm.$set(_vm.form.enderecoEntrega, "numero", $event.target.value)
+              _vm.$set(_vm.form, "enderecoEntrega_numero", $event.target.value)
             }
           }
         })
@@ -42064,23 +42300,23 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.enderecoEntrega.bairro,
-              expression: "form.enderecoEntrega.bairro"
+              value: _vm.form.enderecoEntrega_bairro,
+              expression: "form.enderecoEntrega_bairro"
             }
           ],
           staticClass: "form-control",
           attrs: {
             type: "text",
             maxlength: "255",
-            name: "enderecoEntrega.bairro"
+            name: "enderecoEntrega_bairro"
           },
-          domProps: { value: _vm.form.enderecoEntrega.bairro },
+          domProps: { value: _vm.form.enderecoEntrega_bairro },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
-              _vm.$set(_vm.form.enderecoEntrega, "bairro", $event.target.value)
+              _vm.$set(_vm.form, "enderecoEntrega_bairro", $event.target.value)
             }
           }
         })
@@ -42094,25 +42330,25 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.enderecoEntrega.complemento,
-              expression: "form.enderecoEntrega.complemento"
+              value: _vm.form.enderecoEntrega_complemento,
+              expression: "form.enderecoEntrega_complemento"
             }
           ],
           staticClass: "form-control",
           attrs: {
             type: "text",
             maxlength: "255",
-            name: "enderecoEntrega.complemento"
+            name: "enderecoEntrega_complemento"
           },
-          domProps: { value: _vm.form.enderecoEntrega.complemento },
+          domProps: { value: _vm.form.enderecoEntrega_complemento },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
               _vm.$set(
-                _vm.form.enderecoEntrega,
-                "complemento",
+                _vm.form,
+                "enderecoEntrega_complemento",
                 $event.target.value
               )
             }
@@ -42128,23 +42364,23 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.enderecoEntrega.pais,
-              expression: "form.enderecoEntrega.pais"
+              value: _vm.form.enderecoEntrega_pais,
+              expression: "form.enderecoEntrega_pais"
             }
           ],
           staticClass: "form-control",
           attrs: {
             type: "text",
             maxlength: "255",
-            name: "enderecoEntrega.pais"
+            name: "enderecoEntrega_pais"
           },
-          domProps: { value: _vm.form.enderecoEntrega.pais },
+          domProps: { value: _vm.form.enderecoEntrega_pais },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
-              _vm.$set(_vm.form.enderecoEntrega, "pais", $event.target.value)
+              _vm.$set(_vm.form, "enderecoEntrega_pais", $event.target.value)
             }
           }
         })
@@ -42336,31 +42572,55 @@ var render = function() {
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-4" }, [
-      _c("label", { attrs: { for: "" } }, [
-        _vm._v("Natureza de operação SELECT2")
-      ]),
+      _c("label", { attrs: { for: "" } }, [_vm._v("Natureza de operação")]),
       _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.form.FKIDnaturezaOperacao,
-            expression: "form.FKIDnaturezaOperacao"
-          }
-        ],
-        staticClass: "form-control",
-        attrs: { type: "text", maxlength: "200", name: "FKIDnaturezaOperacao" },
-        domProps: { value: _vm.form.FKIDnaturezaOperacao },
-        on: {
-          input: function($event) {
-            if ($event.target.composing) {
-              return
+      _c(
+        "select",
+        {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.form.FKIDnaturezaOperacao,
+              expression: "form.FKIDnaturezaOperacao"
             }
-            _vm.$set(_vm.form, "FKIDnaturezaOperacao", $event.target.value)
+          ],
+          ref: "buscaNatureza",
+          attrs: { name: "FKIDnaturezaOperacao" },
+          on: {
+            change: function($event) {
+              var $$selectedVal = Array.prototype.filter
+                .call($event.target.options, function(o) {
+                  return o.selected
+                })
+                .map(function(o) {
+                  var val = "_value" in o ? o._value : o.value
+                  return val
+                })
+              _vm.$set(
+                _vm.form,
+                "FKIDnaturezaOperacao",
+                $event.target.multiple ? $$selectedVal : $$selectedVal[0]
+              )
+            }
           }
-        }
-      })
+        },
+        [
+          _vm.form.FKIDnaturezaOperacaoText != ""
+            ? _c(
+                "option",
+                { domProps: { value: _vm.form.FKIDnaturezaOperacao } },
+                [
+                  _vm._v(
+                    "\n        " +
+                      _vm._s(_vm.form.FKIDnaturezaOperacaoText) +
+                      "\n      "
+                  )
+                ]
+              )
+            : _vm._e()
+        ]
+      )
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-2" }, [
@@ -42389,7 +42649,7 @@ var render = function() {
       })
     ]),
     _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-1" }, [
+    _c("div", { staticClass: "form-group col-md-2" }, [
       _c("label", { attrs: { for: "" } }, [_vm._v("Hora de emissão ")]),
       _vm._v(" "),
       _c("input", {
@@ -42441,7 +42701,7 @@ var render = function() {
       })
     ]),
     _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-1" }, [
+    _c("div", { staticClass: "form-group col-md-2" }, [
       _c("label", { attrs: { for: "" } }, [_vm._v("Hora saída ")]),
       _vm._v(" "),
       _c("input", {
@@ -42666,25 +42926,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.informacoesAdicionais.numeroLojaVirtual,
-            expression: "form.informacoesAdicionais.numeroLojaVirtual"
+            value: _vm.form.informacoesAdicionais_numeroLojaVirtual,
+            expression: "form.informacoesAdicionais_numeroLojaVirtual"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "255",
-          name: "informacoesAdicionais.numeroLojaVirtual"
+          name: "informacoesAdicionais_numeroLojaVirtual"
         },
-        domProps: { value: _vm.form.informacoesAdicionais.numeroLojaVirtual },
+        domProps: { value: _vm.form.informacoesAdicionais_numeroLojaVirtual },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.informacoesAdicionais,
-              "numeroLojaVirtual",
+              _vm.form,
+              "informacoesAdicionais_numeroLojaVirtual",
               $event.target.value
             )
           }
@@ -42700,25 +42960,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.informacoesAdicionais.origemLojaVirtual,
-            expression: "form.informacoesAdicionais.origemLojaVirtual"
+            value: _vm.form.informacoesAdicionais_origemLojaVirtual,
+            expression: "form.informacoesAdicionais_origemLojaVirtual"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "255",
-          name: "informacoesAdicionais.origemLojaVirtual"
+          name: "informacoesAdicionais_origemLojaVirtual"
         },
-        domProps: { value: _vm.form.informacoesAdicionais.origemLojaVirtual },
+        domProps: { value: _vm.form.informacoesAdicionais_origemLojaVirtual },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.informacoesAdicionais,
-              "origemLojaVirtual",
+              _vm.form,
+              "informacoesAdicionais_origemLojaVirtual",
               $event.target.value
             )
           }
@@ -42734,25 +42994,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.informacoesAdicionais.origemCanalVenda,
-            expression: "form.informacoesAdicionais.origemCanalVenda"
+            value: _vm.form.informacoesAdicionais_origemCanalVenda,
+            expression: "form.informacoesAdicionais_origemCanalVenda"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "255",
-          name: "informacoesAdicionais.origemCanalVenda"
+          name: "informacoesAdicionais_origemCanalVenda"
         },
-        domProps: { value: _vm.form.informacoesAdicionais.origemCanalVenda },
+        domProps: { value: _vm.form.informacoesAdicionais_origemCanalVenda },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.informacoesAdicionais,
-              "origemCanalVenda",
+              _vm.form,
+              "informacoesAdicionais_origemCanalVenda",
               $event.target.value
             )
           }
@@ -42770,17 +43030,17 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.informacoesAdicionais.informacoesComplementares,
-            expression: "form.informacoesAdicionais.informacoesComplementares"
+            value: _vm.form.informacoesAdicionais_informacoesComplementares,
+            expression: "form.informacoesAdicionais_informacoesComplementares"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
-          name: "informacoesAdicionais.informacoesComplementares"
+          name: "informacoesAdicionais_informacoesComplementares"
         },
         domProps: {
-          value: _vm.form.informacoesAdicionais.informacoesComplementares
+          value: _vm.form.informacoesAdicionais_informacoesComplementares
         },
         on: {
           input: function($event) {
@@ -42788,8 +43048,8 @@ var render = function() {
               return
             }
             _vm.$set(
-              _vm.form.informacoesAdicionais,
-              "informacoesComplementares",
+              _vm.form,
+              "informacoesAdicionais_informacoesComplementares",
               $event.target.value
             )
           }
@@ -42808,20 +43068,20 @@ var render = function() {
             name: "model",
             rawName: "v-model",
             value:
-              _vm.form.informacoesAdicionais.informacoesComplementaresNatureza,
+              _vm.form.informacoesAdicionais_informacoesComplementaresNatureza,
             expression:
-              "form.informacoesAdicionais.informacoesComplementaresNatureza"
+              "form.informacoesAdicionais_informacoesComplementaresNatureza"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           readonly: "",
-          name: "informacoesAdicionais.informacoesComplementaresNatureza"
+          name: "informacoesAdicionais_informacoesComplementaresNatureza"
         },
         domProps: {
           value:
-            _vm.form.informacoesAdicionais.informacoesComplementaresNatureza
+            _vm.form.informacoesAdicionais_informacoesComplementaresNatureza
         },
         on: {
           input: function($event) {
@@ -42829,8 +43089,8 @@ var render = function() {
               return
             }
             _vm.$set(
-              _vm.form.informacoesAdicionais,
-              "informacoesComplementaresNatureza",
+              _vm.form,
+              "informacoesAdicionais_informacoesComplementaresNatureza",
               $event.target.value
             )
           }
@@ -42849,22 +43109,22 @@ var render = function() {
             name: "model",
             rawName: "v-model",
             value:
-              _vm.form.informacoesAdicionais
-                .informacoesComplementaresFiscoNatureza,
+              _vm.form
+                .informacoesAdicionais_informacoesComplementaresFiscoNatureza,
             expression:
-              "\n        form.informacoesAdicionais.informacoesComplementaresFiscoNatureza\n      "
+              "\n        form.informacoesAdicionais_informacoesComplementaresFiscoNatureza\n      "
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           readonly: "",
-          name: "informacoesAdicionais.informacoesComplementaresFiscoNatureza"
+          name: "informacoesAdicionais_informacoesComplementaresFiscoNatureza"
         },
         domProps: {
           value:
-            _vm.form.informacoesAdicionais
-              .informacoesComplementaresFiscoNatureza
+            _vm.form
+              .informacoesAdicionais_informacoesComplementaresFiscoNatureza
         },
         on: {
           input: function($event) {
@@ -42872,8 +43132,8 @@ var render = function() {
               return
             }
             _vm.$set(
-              _vm.form.informacoesAdicionais,
-              "informacoesComplementaresFiscoNatureza",
+              _vm.form,
+              "informacoesAdicionais_informacoesComplementaresFiscoNatureza",
               $event.target.value
             )
           }
@@ -42917,7 +43177,7 @@ var render = function() {
     _vm._m(0),
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-3" }, [
-      _c("label", { attrs: { for: "intermediador.intermediador" } }, [
+      _c("label", { attrs: { for: "intermediador" } }, [
         _vm._v("Intermediador ")
       ]),
       _vm._v(" "),
@@ -42926,24 +43186,24 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.intermediador.intermediador,
-            expression: "form.intermediador.intermediador"
+            value: _vm.form.intermediador,
+            expression: "form.intermediador"
           }
         ],
         attrs: {
           type: "checkbox",
           value: "1",
-          name: "intermediador.intermediador",
-          id: "intermediador.intermediador"
+          name: "intermediador",
+          id: "intermediador"
         },
         domProps: {
-          checked: Array.isArray(_vm.form.intermediador.intermediador)
-            ? _vm._i(_vm.form.intermediador.intermediador, "1") > -1
-            : _vm.form.intermediador.intermediador
+          checked: Array.isArray(_vm.form.intermediador)
+            ? _vm._i(_vm.form.intermediador, "1") > -1
+            : _vm.form.intermediador
         },
         on: {
           change: function($event) {
-            var $$a = _vm.form.intermediador.intermediador,
+            var $$a = _vm.form.intermediador,
               $$el = $event.target,
               $$c = $$el.checked ? true : false
             if (Array.isArray($$a)) {
@@ -42951,28 +43211,24 @@ var render = function() {
                 $$i = _vm._i($$a, $$v)
               if ($$el.checked) {
                 $$i < 0 &&
-                  _vm.$set(
-                    _vm.form.intermediador,
-                    "intermediador",
-                    $$a.concat([$$v])
-                  )
+                  _vm.$set(_vm.form, "intermediador", $$a.concat([$$v]))
               } else {
                 $$i > -1 &&
                   _vm.$set(
-                    _vm.form.intermediador,
+                    _vm.form,
                     "intermediador",
                     $$a.slice(0, $$i).concat($$a.slice($$i + 1))
                   )
               }
             } else {
-              _vm.$set(_vm.form.intermediador, "intermediador", $$c)
+              _vm.$set(_vm.form, "intermediador", $$c)
             }
           }
         }
       })
     ]),
     _vm._v(" "),
-    _vm.form.intermediador.intermediador == 1
+    _vm.form.intermediador == 1
       ? _c("div", { staticClass: "form-group col-md-3" }, [
           _c("label", { attrs: { for: "" } }, [_vm._v("CNPJ ")]),
           _vm._v(" "),
@@ -42981,30 +43237,26 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.form.intermediador.CNPJ,
-                expression: "form.intermediador.CNPJ"
+                value: _vm.form.intermediadorCNPJ,
+                expression: "form.intermediadorCNPJ"
               }
             ],
             staticClass: "form-control",
-            attrs: {
-              type: "text",
-              maxlength: "15",
-              name: "intermediador.CNPJ"
-            },
-            domProps: { value: _vm.form.intermediador.CNPJ },
+            attrs: { type: "text", maxlength: "15", name: "intermediadorCNPJ" },
+            domProps: { value: _vm.form.intermediadorCNPJ },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.$set(_vm.form.intermediador, "CNPJ", $event.target.value)
+                _vm.$set(_vm.form, "intermediadorCNPJ", $event.target.value)
               }
             }
           })
         ])
       : _vm._e(),
     _vm._v(" "),
-    _vm.form.intermediador.intermediador == 1
+    _vm.form.intermediador == 1
       ? _c("div", { staticClass: "form-group col-md-3" }, [
           _c("label", { attrs: { for: "" } }, [
             _vm._v("Identificação no intermediador ")
@@ -43015,27 +43267,19 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.form.intermediador.identificacao,
-                expression: "form.intermediador.identificacao"
+                value: _vm.form.intermediadorID,
+                expression: "form.intermediadorID"
               }
             ],
             staticClass: "form-control",
-            attrs: {
-              type: "text",
-              maxlength: "255",
-              name: "intermediador.identificacao"
-            },
-            domProps: { value: _vm.form.intermediador.identificacao },
+            attrs: { type: "text", maxlength: "255", name: "intermediadorID" },
+            domProps: { value: _vm.form.intermediadorID },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.$set(
-                  _vm.form.intermediador,
-                  "identificacao",
-                  $event.target.value
-                )
+                _vm.$set(_vm.form, "intermediadorID", $event.target.value)
               }
             }
           })
@@ -43103,110 +43347,15 @@ var render = function() {
       [
         _c("div", { staticClass: "col-12 row" }, [
           _c("div", { staticClass: "form-group col-md-4" }, [
-            _c("label", { attrs: { for: "" } }, [_vm._v("Descrição ")]),
+            _c("label", { attrs: { for: "" } }, [
+              _vm._v("Codigo - Descrição ")
+            ]),
             _vm._v(" "),
             _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.item.descricao,
-                  expression: "item.descricao"
-                }
-              ],
               staticClass: "form-control",
-              attrs: { type: "text", maxlength: "255" },
-              domProps: { value: _vm.item.descricao },
-              on: {
-                input: function($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.$set(_vm.item, "descricao", $event.target.value)
-                }
-              }
+              attrs: { type: "text", maxlength: "255", readonly: "" },
+              domProps: { value: _vm.item.codigo + " - " + _vm.item.descricao }
             })
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "form-group col-md-4" }, [
-            _c("label", { attrs: { for: "" } }, [_vm._v("Codigo ")]),
-            _vm._v(" "),
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.item.codigo,
-                  expression: "item.codigo"
-                }
-              ],
-              staticClass: "form-control",
-              attrs: { type: "text", maxlength: "255" },
-              domProps: { value: _vm.item.codigo },
-              on: {
-                input: function($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.$set(_vm.item, "codigo", $event.target.value)
-                }
-              }
-            })
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "form-group col-md-4" }, [
-            _c("label", { attrs: { for: "" } }, [_vm._v("Tipo ")]),
-            _vm._v(" "),
-            _c(
-              "select",
-              {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.item.tipo,
-                    expression: "item.tipo"
-                  }
-                ],
-                staticClass: "form-control",
-                attrs: { placeholder: "Selecione..." },
-                on: {
-                  change: function($event) {
-                    var $$selectedVal = Array.prototype.filter
-                      .call($event.target.options, function(o) {
-                        return o.selected
-                      })
-                      .map(function(o) {
-                        var val = "_value" in o ? o._value : o.value
-                        return val
-                      })
-                    _vm.$set(
-                      _vm.item,
-                      "tipo",
-                      $event.target.multiple ? $$selectedVal : $$selectedVal[0]
-                    )
-                  }
-                }
-              },
-              [
-                _c("option", { attrs: { value: "" } }, [
-                  _vm._v("Selecione...")
-                ]),
-                _vm._v(" "),
-                _vm._l(_vm.tipo, function(itemS, key) {
-                  return _c(
-                    "option",
-                    { key: key, domProps: { value: itemS.id } },
-                    [
-                      _vm._v(
-                        "\n            " + _vm._s(itemS.texto) + "\n          "
-                      )
-                    ]
-                  )
-                })
-              ],
-              2
-            )
           ])
         ]),
         _vm._v(" "),
@@ -43237,26 +43386,16 @@ var render = function() {
               {
                 staticClass: "tab-pane fade",
                 attrs: {
-                  id: "tabEstoque",
-                  role: "tabpanel",
-                  "aria-labelledby": "home-tab"
-                }
-              },
-              [_c("Estoque", { attrs: { item: _vm.item, money: _vm.money } })],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "tab-pane fade",
-                attrs: {
                   id: "tabICMS",
                   role: "tabpanel",
                   "aria-labelledby": "home-tab"
                 }
               },
-              [_c("ICMS", { attrs: { item: _vm.item, money: _vm.money } })],
+              [
+                _c("ICMS", {
+                  attrs: { item: _vm.item, form: _vm.form, money: _vm.money }
+                })
+              ],
               1
             ),
             _vm._v(" "),
@@ -43344,11 +43483,11 @@ var render = function() {
           attrs: { type: "button", name: "Opcao", value: "salvar" },
           on: {
             click: function($event) {
-              return _vm.validarForm()
+              return _vm.$emit("close")
             }
           }
         },
-        [_c("i", { staticClass: "fas fa-save" }), _vm._v(" Salvar\n    ")]
+        [_c("i", { staticClass: "fas fa-save" }), _vm._v(" Salvar\n      ")]
       )
     ])
   ])
@@ -43365,7 +43504,7 @@ var staticRenderFns = [
         attrs: { id: "myTab", role: "tablist" }
       },
       [
-        _c("li", { staticClass: "nav-item" }, [
+        _c("li", { staticClass: "nav-item ml-3" }, [
           _c(
             "a",
             {
@@ -43411,21 +43550,6 @@ var staticRenderFns = [
             "a",
             {
               staticClass: "nav-link",
-              attrs: {
-                id: "tabISSQN-tab",
-                "data-toggle": "tab",
-                href: "#tabISSQN"
-              }
-            },
-            [_vm._v("ISSQN")]
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "nav-item" }, [
-          _c(
-            "a",
-            {
-              staticClass: "nav-link",
               attrs: { id: "tabPIS-tab", "data-toggle": "tab", href: "#tabPIS" }
             },
             [_vm._v("PIS/CONFIS")]
@@ -43444,21 +43568,6 @@ var staticRenderFns = [
               }
             },
             [_vm._v("Outros")]
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "nav-item" }, [
-          _c(
-            "a",
-            {
-              staticClass: "nav-link",
-              attrs: {
-                id: "tabEstoque-tab",
-                "data-toggle": "tab",
-                href: "#tabEstoque"
-              }
-            },
-            [_vm._v("Estoque")]
           )
         ]),
         _vm._v(" "),
@@ -43505,7 +43614,7 @@ var render = function() {
     _vm._m(0),
     _vm._v(" "),
     _c("div", { staticClass: "col-12" }, [
-      _c("table", { staticClass: "table table-sm" }, [
+      _c("table", { staticClass: "table" }, [
         _vm._m(1),
         _vm._v(" "),
         _c(
@@ -43537,23 +43646,23 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("thead", [
+    return _c("thead", { staticClass: "thead-light text-center" }, [
       _c("tr", [
-        _c("td", [_vm._v("Produto ou serviço")]),
+        _c("th", [_vm._v("Produto ou serviço")]),
         _vm._v(" "),
-        _c("td", [_vm._v("Código")]),
+        _c("th", [_vm._v("Código")]),
         _vm._v(" "),
-        _c("td", [_vm._v("Un")]),
+        _c("th", [_vm._v("Un")]),
         _vm._v(" "),
-        _c("td", [_vm._v("Qtde")]),
+        _c("th", [_vm._v("Qte")]),
         _vm._v(" "),
-        _c("td", [_vm._v("Preço un")]),
+        _c("th", [_vm._v("Preço un")]),
         _vm._v(" "),
-        _c("td", [_vm._v("NCM")]),
+        _c("th", [_vm._v("NCM")]),
         _vm._v(" "),
-        _c("td"),
+        _c("th"),
         _vm._v(" "),
-        _c("td")
+        _c("th")
       ])
     ])
   }
@@ -43582,6 +43691,7 @@ var render = function() {
   return _c(
     "tr",
     {
+      staticClass: "pointer",
       on: {
         click: function($event) {
           return _vm.abrirModal()
@@ -43589,21 +43699,55 @@ var render = function() {
       }
     },
     [
-      _vm._m(0),
+      _c("th", [
+        _c("input", {
+          staticClass: "form-control",
+          attrs: { type: "text", readonly: "" },
+          domProps: { value: _vm.item.descricao }
+        })
+      ]),
       _vm._v(" "),
-      _vm._m(1),
+      _c("th", [
+        _c("input", {
+          staticClass: "form-control",
+          attrs: { type: "text", readonly: "" },
+          domProps: { value: _vm.item.codigo }
+        })
+      ]),
       _vm._v(" "),
-      _vm._m(2),
+      _c("th", [
+        _c("input", {
+          staticClass: "form-control",
+          attrs: { type: "text", readonly: "" },
+          domProps: { value: _vm.item.unidade }
+        })
+      ]),
       _vm._v(" "),
-      _vm._m(3),
+      _c("th", [
+        _c("input", {
+          staticClass: "form-control",
+          attrs: { type: "text", readonly: "" },
+          domProps: { value: _vm.item.quantidade }
+        })
+      ]),
       _vm._v(" "),
-      _vm._m(4),
+      _c("th", [
+        _c("input", {
+          staticClass: "form-control",
+          attrs: { type: "text", readonly: "" },
+          domProps: { value: _vm.item.valorTotal }
+        })
+      ]),
       _vm._v(" "),
-      _vm._m(5),
+      _c("th", [
+        _c("input", {
+          staticClass: "form-control",
+          attrs: { type: "text", readonly: "" },
+          domProps: { value: _vm.item.NCM }
+        })
+      ]),
       _vm._v(" "),
-      _vm._m(6),
-      _vm._v(" "),
-      _c("td")
+      _vm._m(0)
     ]
   )
 }
@@ -43612,78 +43756,7 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("td", [
-      _c("input", {
-        staticClass: "form-control",
-        attrs: { type: "text", readonly: "" }
-      })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c("input", {
-        staticClass: "form-control",
-        attrs: { type: "text", readonly: "" }
-      })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c("input", {
-        staticClass: "form-control",
-        attrs: { type: "text", readonly: "" }
-      })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c("input", {
-        staticClass: "form-control",
-        attrs: { type: "text", readonly: "" }
-      })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c("input", {
-        staticClass: "form-control",
-        attrs: { type: "text", readonly: "" }
-      })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c("input", {
-        staticClass: "form-control",
-        attrs: { type: "text", readonly: "" }
-      })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c("input", {
-        staticClass: "form-control",
-        attrs: { type: "text", readonly: "" }
-      })
-    ])
+    return _c("th", [_c("i", { staticClass: "fas fa-edit" })])
   }
 ]
 render._withStripped = true
@@ -43707,7 +43780,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "row" }, [
+  return _c("div", { staticClass: "row mt-2" }, [
     _c("div", { staticClass: "form-group col-md-4" }, [
       _c("label", { attrs: { for: "" } }, [_vm._v("Quantidade ")]),
       _vm._v(" "),
@@ -43761,38 +43834,6 @@ var render = function() {
               return
             }
             _vm.$set(_vm.item, "unidade", $event.target.value)
-          }
-        }
-      })
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-4" }, [
-      _c("label", { attrs: { for: "" } }, [_vm._v("Valor Unitário ")]),
-      _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "money",
-            rawName: "v-money",
-            value: _vm.money,
-            expression: "money"
-          },
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.item.valorUnitario,
-            expression: "item.valorUnitario"
-          }
-        ],
-        staticClass: "form-control",
-        attrs: { type: "text" },
-        domProps: { value: _vm.item.valorUnitario },
-        on: {
-          input: function($event) {
-            if ($event.target.composing) {
-              return
-            }
-            _vm.$set(_vm.item, "valorUnitario", $event.target.value)
           }
         }
       })
@@ -43933,7 +43974,7 @@ var render = function() {
           _vm._v(" "),
           _vm._l(_vm.tipoDesconto, function(itemS, key) {
             return _c("option", { key: key, domProps: { value: itemS.id } }, [
-              _vm._v("\n        " + _vm._s(itemS.texto) + "\n      ")
+              _vm._v("\n          " + _vm._s(itemS.texto) + "\n        ")
             ])
           })
         ],
@@ -43942,31 +43983,55 @@ var render = function() {
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-4" }, [
-      _c("label", { attrs: { for: "" } }, [
-        _vm._v("Natureza da Operacao AUTOCOMPLETE ")
-      ]),
+      _c("label", { attrs: { for: "" } }, [_vm._v("Natureza da Operacao ")]),
       _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.item.FKIDNaturezaOperacao,
-            expression: "item.FKIDNaturezaOperacao"
-          }
-        ],
-        staticClass: "form-control",
-        attrs: { type: "number" },
-        domProps: { value: _vm.item.FKIDNaturezaOperacao },
-        on: {
-          input: function($event) {
-            if ($event.target.composing) {
-              return
+      _c(
+        "select",
+        {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.item.FKIDNaturezaOperacao,
+              expression: "item.FKIDNaturezaOperacao"
             }
-            _vm.$set(_vm.item, "FKIDNaturezaOperacao", $event.target.value)
+          ],
+          ref: "buscaNatureza",
+          attrs: { name: "FKIDNaturezaOperacao" },
+          on: {
+            change: function($event) {
+              var $$selectedVal = Array.prototype.filter
+                .call($event.target.options, function(o) {
+                  return o.selected
+                })
+                .map(function(o) {
+                  var val = "_value" in o ? o._value : o.value
+                  return val
+                })
+              _vm.$set(
+                _vm.item,
+                "FKIDNaturezaOperacao",
+                $event.target.multiple ? $$selectedVal : $$selectedVal[0]
+              )
+            }
           }
-        }
-      })
+        },
+        [
+          _vm.item.FKIDNaturezaOperacaoText != ""
+            ? _c(
+                "option",
+                { domProps: { value: _vm.item.FKIDNaturezaOperacao } },
+                [
+                  _vm._v(
+                    "\n          " +
+                      _vm._s(_vm.item.FKIDNaturezaOperacaoText) +
+                      "\n        "
+                  )
+                ]
+              )
+            : _vm._e()
+        ]
+      )
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-4" }, [
@@ -44211,7 +44276,7 @@ var render = function() {
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-12" }, [
       _c("label", { attrs: { for: "" } }, [
-        _vm._v("Informações adicionais de interesse do fisco do item\n    ")
+        _vm._v("Informações adicionais de interesse do fisco do item\n      ")
       ]),
       _vm._v(" "),
       _c("input", {
@@ -44671,120 +44736,211 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "row" }, [
-    _c("div", { staticClass: "form-group col-md-12" }, [
-      _c("label", { attrs: { for: "" } }, [
-        _vm._v(" Situação tributária do ICMS ")
-      ]),
-      _vm._v(" "),
-      _c(
-        "select",
-        {
-          directives: [
-            {
-              name: "model",
-              rawName: "v-model",
-              value: _vm.item.icms.situacaoTributaria,
-              expression: "item.icms.situacaoTributaria"
-            }
-          ],
-          staticClass: "form-control",
-          attrs: { placeholder: "Selecione..." },
-          on: {
-            change: function($event) {
-              var $$selectedVal = Array.prototype.filter
-                .call($event.target.options, function(o) {
-                  return o.selected
-                })
-                .map(function(o) {
-                  var val = "_value" in o ? o._value : o.value
-                  return val
-                })
-              _vm.$set(
-                _vm.item.icms,
-                "situacaoTributaria",
-                $event.target.multiple ? $$selectedVal : $$selectedVal[0]
-              )
-            }
-          }
-        },
-        [
-          _c("option", { attrs: { value: "" } }, [_vm._v("Selecione...")]),
+  return _c("div", { staticClass: "row mt-2" }, [
+    _vm.mulSe(_vm.form.codigoRegimeTributario, [2, 3])
+      ? _c("div", { staticClass: "form-group col-md-12" }, [
+          _c("label", { attrs: { for: "" } }, [
+            _vm._v(" Situação tributária do ICMS ")
+          ]),
           _vm._v(" "),
-          _vm._l(_vm.situacaoTributaria, function(itemS, key) {
-            return _c("option", { key: key, domProps: { value: itemS.id } }, [
-              _vm._v(
-                "\n        " +
-                  _vm._s(
-                    (itemS.id != "" ? itemS.id + " - " : "") + itemS.texto
-                  ) +
-                  "\n      "
-              )
-            ])
-          })
-        ],
-        2
-      )
-    ]),
+          _c(
+            "select",
+            {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.item.icms_situacaoTributaria,
+                  expression: "item.icms_situacaoTributaria"
+                }
+              ],
+              staticClass: "form-control",
+              attrs: { placeholder: "Selecione..." },
+              on: {
+                change: function($event) {
+                  var $$selectedVal = Array.prototype.filter
+                    .call($event.target.options, function(o) {
+                      return o.selected
+                    })
+                    .map(function(o) {
+                      var val = "_value" in o ? o._value : o.value
+                      return val
+                    })
+                  _vm.$set(
+                    _vm.item,
+                    "icms_situacaoTributaria",
+                    $event.target.multiple ? $$selectedVal : $$selectedVal[0]
+                  )
+                }
+              }
+            },
+            [
+              _c("option", { attrs: { value: "" } }, [_vm._v("Selecione...")]),
+              _vm._v(" "),
+              _vm._l(_vm.situacaoTributaria, function(itemS, key) {
+                return _c(
+                  "option",
+                  { key: key, domProps: { value: itemS.id } },
+                  [
+                    _vm._v(
+                      "\n        " +
+                        _vm._s(
+                          (itemS.id != "" ? itemS.id + " - " : "") + itemS.texto
+                        ) +
+                        "\n      "
+                    )
+                  ]
+                )
+              })
+            ],
+            2
+          )
+        ])
+      : _vm._e(),
     _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-12" }, [
-      _c("label", { attrs: { for: "" } }, [
-        _vm._v(
-          "\n      Código de Situação da Operação – Simples Nacional (CSOSN)\n    "
+    _vm.mulSe(_vm.form.codigoRegimeTributario, [1])
+      ? _c("div", { staticClass: "form-group col-md-12" }, [
+          _c("label", { attrs: { for: "" } }, [
+            _vm._v(
+              "\n      Código de Situação da Operação – Simples Nacional (CSOSN)\n    "
+            )
+          ]),
+          _vm._v(" "),
+          _c(
+            "select",
+            {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.item.icms_codigoSituacao,
+                  expression: "item.icms_codigoSituacao"
+                }
+              ],
+              staticClass: "form-control",
+              attrs: { placeholder: "Selecione..." },
+              on: {
+                change: function($event) {
+                  var $$selectedVal = Array.prototype.filter
+                    .call($event.target.options, function(o) {
+                      return o.selected
+                    })
+                    .map(function(o) {
+                      var val = "_value" in o ? o._value : o.value
+                      return val
+                    })
+                  _vm.$set(
+                    _vm.item,
+                    "icms_codigoSituacao",
+                    $event.target.multiple ? $$selectedVal : $$selectedVal[0]
+                  )
+                }
+              }
+            },
+            [
+              _c("option", { attrs: { value: "" } }, [_vm._v("Selecione...")]),
+              _vm._v(" "),
+              _vm._l(_vm.codigoSituacao, function(itemS, key) {
+                return _c(
+                  "option",
+                  { key: key, domProps: { value: itemS.id } },
+                  [
+                    _vm._v(
+                      "\n        " +
+                        _vm._s(
+                          (itemS.id != "" ? itemS.id + " - " : "") + itemS.texto
+                        ) +
+                        "\n      "
+                    )
+                  ]
+                )
+              })
+            ],
+            2
+          )
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _c(
+      "ul",
+      {
+        staticClass: "nav nav-tabs col-12",
+        attrs: { role: "tablist", id: "myTabICMS" }
+      },
+      [
+        _vm._m(0),
+        _vm._v(" "),
+        _c(
+          "li",
+          {
+            directives: [
+              {
+                name: "show",
+                rawName: "v-show",
+                value:
+                  _vm.mulSe(_vm.item.icms_situacaoTributaria, [
+                    10,
+                    30,
+                    60,
+                    70,
+                    90
+                  ]) ||
+                  _vm.mulSe(_vm.item.icms_codigoSituacao, [201, 203, 500, 900]),
+                expression:
+                  "mulSe(item.icms_situacaoTributaria, [10, 30,60,70, 90]) || mulSe(item.icms_codigoSituacao, [201, 203, 500, 900])"
+              }
+            ],
+            staticClass: "nav-item"
+          },
+          [
+            _c(
+              "a",
+              {
+                staticClass: "nav-link",
+                attrs: {
+                  id: "tabItemST-tab",
+                  "data-toggle": "tab",
+                  href: "#tabItemST"
+                }
+              },
+              [_vm._v("Substituição tributaria")]
+            )
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "li",
+          {
+            directives: [
+              {
+                name: "show",
+                rawName: "v-show",
+                value:
+                  _vm.mulSe(_vm.item.icms_situacaoTributaria, [60]) ||
+                  _vm.mulSe(_vm.item.icms_codigoSituacao, [500]),
+                expression:
+                  "mulSe(item.icms_situacaoTributaria, [60]) || mulSe(item.icms_codigoSituacao, [500])"
+              }
+            ],
+            staticClass: "nav-item"
+          },
+          [
+            _c(
+              "a",
+              {
+                staticClass: "nav-link",
+                attrs: {
+                  id: "tabItemSTR-tab",
+                  "data-toggle": "tab",
+                  href: "#tabItemSTR"
+                }
+              },
+              [_vm._v("Substituição tributaria - Retenção")]
+            )
+          ]
         )
-      ]),
-      _vm._v(" "),
-      _c(
-        "select",
-        {
-          directives: [
-            {
-              name: "model",
-              rawName: "v-model",
-              value: _vm.item.icms.codigoSituacao,
-              expression: "item.icms.codigoSituacao"
-            }
-          ],
-          staticClass: "form-control",
-          attrs: { placeholder: "Selecione..." },
-          on: {
-            change: function($event) {
-              var $$selectedVal = Array.prototype.filter
-                .call($event.target.options, function(o) {
-                  return o.selected
-                })
-                .map(function(o) {
-                  var val = "_value" in o ? o._value : o.value
-                  return val
-                })
-              _vm.$set(
-                _vm.item.icms,
-                "codigoSituacao",
-                $event.target.multiple ? $$selectedVal : $$selectedVal[0]
-              )
-            }
-          }
-        },
-        [
-          _c("option", { attrs: { value: "" } }, [_vm._v("Selecione...")]),
-          _vm._v(" "),
-          _vm._l(_vm.codigoSituacao, function(itemS, key) {
-            return _c("option", { key: key, domProps: { value: itemS.id } }, [
-              _vm._v(
-                "\n        " +
-                  _vm._s(
-                    (itemS.id != "" ? itemS.id + " - " : "") + itemS.texto
-                  ) +
-                  "\n      "
-              )
-            ])
-          })
-        ],
-        2
-      )
-    ]),
-    _vm._v(" "),
-    _vm._m(0),
+      ]
+    ),
     _vm._v(" "),
     _c(
       "div",
@@ -44808,8 +44964,8 @@ var render = function() {
                       {
                         name: "model",
                         rawName: "v-model",
-                        value: _vm.item.icms.origem,
-                        expression: "item.icms.origem"
+                        value: _vm.item.icms_origem,
+                        expression: "item.icms_origem"
                       }
                     ],
                     staticClass: "form-control",
@@ -44825,8 +44981,8 @@ var render = function() {
                             return val
                           })
                         _vm.$set(
-                          _vm.item.icms,
-                          "origem",
+                          _vm.item,
+                          "icms_origem",
                           $event.target.multiple
                             ? $$selectedVal
                             : $$selectedVal[0]
@@ -44853,583 +45009,653 @@ var render = function() {
                 )
               ]),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-5" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v(" Modalidade BC ICMS ")
-                ]),
-                _vm._v(" "),
-                _c(
-                  "select",
-                  {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.item.icms.modalidadeBC,
-                        expression: "item.icms.modalidadeBC"
-                      }
-                    ],
-                    staticClass: "form-control",
-                    attrs: { placeholder: "Selecione..." },
-                    on: {
-                      change: function($event) {
-                        var $$selectedVal = Array.prototype.filter
-                          .call($event.target.options, function(o) {
-                            return o.selected
-                          })
-                          .map(function(o) {
-                            var val = "_value" in o ? o._value : o.value
-                            return val
-                          })
-                        _vm.$set(
-                          _vm.item.icms,
-                          "modalidadeBC",
-                          $event.target.multiple
-                            ? $$selectedVal
-                            : $$selectedVal[0]
-                        )
-                      }
-                    }
-                  },
-                  _vm._l(_vm.modalidadeBC, function(itemS, key) {
-                    return _c(
-                      "option",
-                      { key: key, domProps: { value: itemS.id } },
-                      [
-                        _vm._v(
-                          "\n              " +
-                            _vm._s(itemS.id) +
-                            " - " +
-                            _vm._s(itemS.texto) +
-                            "\n            "
-                        )
-                      ]
-                    )
-                  }),
-                  0
-                ),
-                _vm._v(
-                  "\n          SituacaoTributaria == 10,20,30 || CSOSN==201, 202, 203, 900\n        "
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("% Aplic. Créd ")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.aplicCred,
-                      expression: "item.icms.aplicCred"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "number" },
-                  domProps: { value: _vm.item.icms.aplicCred },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.item.icms, "aplicCred", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v("\n          CSOSN = 101, 201, 900\n        ")
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("Val. Aplic. Créd.")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.valorAplicCred,
-                      expression: "item.icms.valorAplicCred"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "number" },
-                  domProps: { value: _vm.item.icms.valorAplicCred },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(
-                        _vm.item.icms,
-                        "valorAplicCred",
-                        $event.target.value
-                      )
-                    }
-                  }
-                }),
-                _vm._v("\n          CSOSN = 101, 201, 900\n        ")
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("Valor da pauta por un ")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.valorPauta,
-                      expression: "item.icms.valorPauta"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.valorPauta },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.item.icms, "valorPauta", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v("\n          ModalidadeBC = 1\n        ")
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("Base ICMS ")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.baseICMS,
-                      expression: "item.icms.baseICMS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.baseICMS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.item.icms, "baseICMS", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v(
-                  "\n          SituacaoTributaria = 20, 41, 50, 51,60,70, 90 || CSOSN==201, 202,\n          900\n        "
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("Valor Base ICMS ")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.valorBaseICMS,
-                      expression: "item.icms.valorBaseICMS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.valorBaseICMS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(
-                        _vm.item.icms,
-                        "valorBaseICMS",
-                        $event.target.value
-                      )
-                    }
-                  }
-                }),
-                _vm._v(
-                  "\n          SituacaoTributaria = 20, 41, 50, 51,60,70, 90 || CSOSN==201, 202,\n          900\n        "
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("% Dif ICMS ")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.difICMS,
-                      expression: "item.icms.difICMS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.difICMS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.item.icms, "difICMS", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v(
-                  "\n          SituacaoTributaria = 51, 90 || CSOSN= 900\n        "
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("Presumido ")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.presumido,
-                      expression: "item.icms.presumido"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.presumido },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.item.icms, "presumido", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v(
-                  "\n          SituacaoTributaria != 40 && <>CSOSN\n        "
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("ICMS")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.ICMS,
-                      expression: "item.icms.ICMS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.ICMS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.item.icms, "ICMS", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v(
-                  "\n          SituacaoTributaria == 10,20,30 || CSOSN==201, 202, 203, 900\n        "
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("Valor ICMS ")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.valorICMS,
-                      expression: "item.icms.valorICMS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.valorICMS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.item.icms, "valorICMS", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v(
-                  "\n          SituacaoTributaria == 10,20,30 || CSOSN==201, 202, 203, 900\n        "
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("Posição de Alíquota ")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.posicaoAliquota,
-                      expression: "item.icms.posicaoAliquota"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "number" },
-                  domProps: { value: _vm.item.icms.posicaoAliquota },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(
-                        _vm.item.icms,
-                        "posicaoAliquota",
-                        $event.target.value
-                      )
-                    }
-                  }
-                }),
-                _vm._v("\n          SituacaoTributaria == 10,20,30\n        ")
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("FCP ")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.FCP,
-                      expression: "item.icms.FCP"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.FCP },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.item.icms, "FCP", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v("\n          SituacaoTributaria != 40\n        ")
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("Valor FCP ")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.valorFCP,
-                      expression: "item.icms.valorFCP"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.valorFCP },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.item.icms, "valorFCP", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v("\n          SituacaoTributaria != 40\n        ")
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("ICMS desonerado ")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.ICMSdesonerado,
-                      expression: "item.icms.ICMSdesonerado"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.ICMSdesonerado },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(
-                        _vm.item.icms,
-                        "ICMSdesonerado",
-                        $event.target.value
-                      )
-                    }
-                  }
-                }),
-                _vm._v(
-                  "\n          SituacaoTributaria = 20, 30, 40, 41, 50,60,70, 90\n        "
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("Motivo desoneração ")
-                ]),
-                _vm._v(" "),
-                _c(
-                  "select",
-                  {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.item.icms.motivoDesonerado,
-                        expression: "item.icms.motivoDesonerado"
-                      }
-                    ],
-                    staticClass: "form-control",
-                    attrs: { placeholder: "Selecione..." },
-                    on: {
-                      change: function($event) {
-                        var $$selectedVal = Array.prototype.filter
-                          .call($event.target.options, function(o) {
-                            return o.selected
-                          })
-                          .map(function(o) {
-                            var val = "_value" in o ? o._value : o.value
-                            return val
-                          })
-                        _vm.$set(
-                          _vm.item.icms,
-                          "motivoDesonerado",
-                          $event.target.multiple
-                            ? $$selectedVal
-                            : $$selectedVal[0]
-                        )
-                      }
-                    }
-                  },
-                  [
-                    _c("option", { attrs: { value: "" } }, [
-                      _vm._v("Selecione...")
+              _vm.mulSe(_vm.item.icms_situacaoTributaria, [10, 20, 30]) ||
+              _vm.mulSe(_vm.item.icms_codigoSituacao, [201, 202, 203, 900])
+                ? _c("div", { staticClass: "form-group col-md-5" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v(" Modalidade BC ICMS ")
                     ]),
                     _vm._v(" "),
-                    _vm._l(_vm.motivoDesonerado, function(itemS, key) {
-                      return _c(
-                        "option",
-                        { key: key, domProps: { value: itemS.id } },
-                        [
-                          _vm._v(
-                            "\n              " +
-                              _vm._s(
-                                (itemS.id != "" ? itemS.id + " - " : "") +
-                                  itemS.texto
-                              ) +
-                              "\n            "
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.item.icms_modalidadeBC,
+                            expression: "item.icms_modalidadeBC"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: { placeholder: "Selecione..." },
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.item,
+                              "icms_modalidadeBC",
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
+                      },
+                      _vm._l(_vm.modalidadeBC, function(itemS, key) {
+                        return _c(
+                          "option",
+                          { key: key, domProps: { value: itemS.id } },
+                          [
+                            _vm._v(
+                              "\n              " +
+                                _vm._s(itemS.id) +
+                                " - " +
+                                _vm._s(itemS.texto) +
+                                "\n            "
+                            )
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mulSe(_vm.item.icms_codigoSituacao, [101, 201, 900])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("% Aplic. Créd ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_aplicCred,
+                          expression: "item.icms_aplicCred"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "number" },
+                      domProps: { value: _vm.item.icms_aplicCred },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_aplicCred",
+                            $event.target.value
                           )
-                        ]
-                      )
+                        }
+                      }
                     })
-                  ],
-                  2
-                ),
-                _vm._v(
-                  "\n\n          SituacaoTributaria = 20, 30, 40 41, 50,60,70, 90\n        "
-                )
-              ]),
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mulSe(_vm.item.icms_codigoSituacao, [101, 201, 900])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Val. Aplic. Créd.")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_valorAplicCred,
+                          expression: "item.icms_valorAplicCred"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "number" },
+                      domProps: { value: _vm.item.icms_valorAplicCred },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_valorAplicCred",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.item.icms_modalidadeBC == 1
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Valor da pauta por un ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_valorPauta,
+                          expression: "item.icms_valorPauta"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_valorPauta },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_valorPauta",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mulSe(_vm.item.icms_situacaoTributaria, [
+                20,
+                41,
+                50,
+                51,
+                60,
+                70,
+                90
+              ]) || _vm.mulSe(_vm.item.icms_codigoSituacao, [201, 202, 900])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [_vm._v("Base ICMS ")]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_baseICMS,
+                          expression: "item.icms_baseICMS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_baseICMS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_baseICMS",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mulSe(_vm.item.icms_situacaoTributaria, [
+                20,
+                41,
+                50,
+                51,
+                60,
+                70,
+                90
+              ]) || _vm.mulSe(_vm.item.icms_codigoSituacao, [201, 202, 900])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Valor Base ICMS ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_valorBaseICMS,
+                          expression: "item.icms_valorBaseICMS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_valorBaseICMS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_valorBaseICMS",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mulSe(_vm.item.icms_situacaoTributaria, [51, 90]) ||
+              _vm.mulSe(_vm.item.icms_codigoSituacao, [900])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("% Dif ICMS ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_difICMS,
+                          expression: "item.icms_difICMS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_difICMS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_difICMS",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.item.icms_situacaoTributaria != 40 &&
+              !_vm.mulSe(_vm.form.codigoRegimeTributario, [1])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [_vm._v("Presumido ")]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_presumido,
+                          expression: "item.icms_presumido"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_presumido },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_presumido",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mulSe(_vm.item.icms_situacaoTributaria, [10, 20, 30]) ||
+              _vm.mulSe(_vm.item.icms_codigoSituacao, [201, 202, 203, 900])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [_vm._v("ICMS")]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_ICMS,
+                          expression: "item.icms_ICMS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_ICMS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(_vm.item, "icms_ICMS", $event.target.value)
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mulSe(_vm.item.icms_situacaoTributaria, [10, 20, 30]) ||
+              _vm.mulSe(_vm.item.icms_codigoSituacao, [201, 202, 203, 900])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Valor ICMS ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_valorICMS,
+                          expression: "item.icms_valorICMS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text", readonly: "" },
+                      domProps: { value: _vm.item.icms_valorICMS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_valorICMS",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mulSe(_vm.item.icms_situacaoTributaria, [10, 20, 30])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Posição de Alíquota ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_posicaoAliquota,
+                          expression: "item.icms_posicaoAliquota"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "number" },
+                      domProps: { value: _vm.item.icms_posicaoAliquota },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_posicaoAliquota",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.item.icms_situacaoTributaria != 40
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [_vm._v("FCP ")]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_FCP,
+                          expression: "item.icms_FCP"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_FCP },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(_vm.item, "icms_FCP", $event.target.value)
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.item.icms_situacaoTributaria != 40
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [_vm._v("Valor FCP ")]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_valorFCP,
+                          expression: "item.icms_valorFCP"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text", readonly: "" },
+                      domProps: { value: _vm.item.icms_valorFCP },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_valorFCP",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mulSe(_vm.item.icms_situacaoTributaria, [
+                20,
+                30,
+                40,
+                41,
+                50,
+                60,
+                70,
+                90
+              ])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("ICMS desonerado ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_ICMSdesonerado,
+                          expression: "item.icms_ICMSdesonerado"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_ICMSdesonerado },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_ICMSdesonerado",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mulSe(_vm.item.icms_situacaoTributaria, [
+                20,
+                30,
+                40,
+                41,
+                50,
+                60,
+                70,
+                90
+              ])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Motivo desoneração ")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.item.icms_motivoDesonerado,
+                            expression: "item.icms_motivoDesonerado"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: { placeholder: "Selecione..." },
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.item,
+                              "icms_motivoDesonerado",
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
+                      },
+                      [
+                        _c("option", { attrs: { value: "" } }, [
+                          _vm._v("Selecione...")
+                        ]),
+                        _vm._v(" "),
+                        _vm._l(_vm.motivoDesonerado, function(itemS, key) {
+                          return _c(
+                            "option",
+                            { key: key, domProps: { value: itemS.id } },
+                            [
+                              _vm._v(
+                                "\n              " +
+                                  _vm._s(
+                                    (itemS.id != "" ? itemS.id + " - " : "") +
+                                      itemS.texto
+                                  ) +
+                                  "\n            "
+                              )
+                            ]
+                          )
+                        })
+                      ],
+                      2
+                    )
+                  ])
+                : _vm._e(),
               _vm._v(" "),
               _c("div", { staticClass: "form-group col-md-4" }, [
                 _c("label", { attrs: { for: "" } }, [
@@ -45441,21 +45667,21 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.codigoBeneficio,
-                      expression: "item.icms.codigoBeneficio"
+                      value: _vm.item.icms_codigoBeneficio,
+                      expression: "item.icms_codigoBeneficio"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.codigoBeneficio },
+                  domProps: { value: _vm.item.icms_codigoBeneficio },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
                       _vm.$set(
-                        _vm.item.icms,
-                        "codigoBeneficio",
+                        _vm.item,
+                        "icms_codigoBeneficio",
                         $event.target.value
                       )
                     }
@@ -45473,21 +45699,21 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.informacoesComplementares,
-                      expression: "item.icms.informacoesComplementares"
+                      value: _vm.item.icms_informacoesComplementares,
+                      expression: "item.icms_informacoesComplementares"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.informacoesComplementares },
+                  domProps: { value: _vm.item.icms_informacoesComplementares },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
                       _vm.$set(
-                        _vm.item.icms,
-                        "informacoesComplementares",
+                        _vm.item,
+                        "icms_informacoesComplementares",
                         $event.target.value
                       )
                     }
@@ -45507,21 +45733,21 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.informacoesCompIFICMS,
-                      expression: "item.icms.informacoesCompIFICMS"
+                      value: _vm.item.icms_informacoesCompIFICMS,
+                      expression: "item.icms_informacoesCompIFICMS"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.informacoesCompIFICMS },
+                  domProps: { value: _vm.item.icms_informacoesCompIFICMS },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
                       _vm.$set(
-                        _vm.item.icms,
-                        "informacoesCompIFICMS",
+                        _vm.item,
+                        "icms_informacoesCompIFICMS",
                         $event.target.value
                       )
                     }
@@ -45536,9 +45762,6 @@ var render = function() {
           "div",
           { staticClass: "tab-pane fade", attrs: { id: "tabItemST" } },
           [
-            _vm._v(
-              "\n      SituacaoTributaria = 10, 30,60,70, 90 || CSOSN==201, 203, 500, 900\n      "
-            ),
             _c("div", { staticClass: "row" }, [
               _c("div", { staticClass: "form-group col-md-5" }, [
                 _c("label", { attrs: { for: "" } }, [
@@ -45552,8 +45775,8 @@ var render = function() {
                       {
                         name: "model",
                         rawName: "v-model",
-                        value: _vm.item.icms.STmodalidadeBC,
-                        expression: "item.icms.STmodalidadeBC"
+                        value: _vm.item.icms_STmodalidadeBC,
+                        expression: "item.icms_STmodalidadeBC"
                       }
                     ],
                     staticClass: "form-control",
@@ -45569,8 +45792,8 @@ var render = function() {
                             return val
                           })
                         _vm.$set(
-                          _vm.item.icms,
-                          "STmodalidadeBC",
+                          _vm.item,
+                          "icms_STmodalidadeBC",
                           $event.target.multiple
                             ? $$selectedVal
                             : $$selectedVal[0]
@@ -45597,44 +45820,45 @@ var render = function() {
                 )
               ]),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("Valor da pauta por un ")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.STvalorPauta,
-                      expression: "item.icms.STvalorPauta"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.STvalorPauta },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
+              _vm.item.icms_STmodalidadeBC == 1
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Valor da pauta por un ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_STvalorPauta,
+                          expression: "item.icms_STvalorPauta"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_STvalorPauta },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_STvalorPauta",
+                            $event.target.value
+                          )
+                        }
                       }
-                      _vm.$set(
-                        _vm.item.icms,
-                        "STvalorPauta",
-                        $event.target.value
-                      )
-                    }
-                  }
-                }),
-                _vm._v("\n          ModalidadeBC = 1\n        ")
-              ]),
+                    })
+                  ])
+                : _vm._e(),
               _vm._v(" "),
               _c("div", { staticClass: "form-group col-md-4" }, [
                 _c("label", { attrs: { for: "" } }, [
@@ -45654,21 +45878,21 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.STpercentualMargem,
-                      expression: "item.icms.STpercentualMargem"
+                      value: _vm.item.icms_STpercentualMargem,
+                      expression: "item.icms_STpercentualMargem"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.STpercentualMargem },
+                  domProps: { value: _vm.item.icms_STpercentualMargem },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
                       _vm.$set(
-                        _vm.item.icms,
-                        "STpercentualMargem",
+                        _vm.item,
+                        "icms_STpercentualMargem",
                         $event.target.value
                       )
                     }
@@ -45692,19 +45916,19 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.STbaseICMS,
-                      expression: "item.icms.STbaseICMS"
+                      value: _vm.item.icms_STbaseICMS,
+                      expression: "item.icms_STbaseICMS"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.STbaseICMS },
+                  domProps: { value: _vm.item.icms_STbaseICMS },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
-                      _vm.$set(_vm.item.icms, "STbaseICMS", $event.target.value)
+                      _vm.$set(_vm.item, "icms_STbaseICMS", $event.target.value)
                     }
                   }
                 })
@@ -45726,21 +45950,21 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.STvalorBaseICMS,
-                      expression: "item.icms.STvalorBaseICMS"
+                      value: _vm.item.icms_STvalorBaseICMS,
+                      expression: "item.icms_STvalorBaseICMS"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.STvalorBaseICMS },
+                  domProps: { value: _vm.item.icms_STvalorBaseICMS },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
                       _vm.$set(
-                        _vm.item.icms,
-                        "STvalorBaseICMS",
+                        _vm.item,
+                        "icms_STvalorBaseICMS",
                         $event.target.value
                       )
                     }
@@ -45763,19 +45987,19 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.STaliqICMS,
-                      expression: "item.icms.STaliqICMS"
+                      value: _vm.item.icms_STaliqICMS,
+                      expression: "item.icms_STaliqICMS"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.STaliqICMS },
+                  domProps: { value: _vm.item.icms_STaliqICMS },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
-                      _vm.$set(_vm.item.icms, "STaliqICMS", $event.target.value)
+                      _vm.$set(_vm.item, "icms_STaliqICMS", $event.target.value)
                     }
                   }
                 })
@@ -45795,21 +46019,21 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.STvalorICMS,
-                      expression: "item.icms.STvalorICMS"
+                      value: _vm.item.icms_STvalorICMS,
+                      expression: "item.icms_STvalorICMS"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.STvalorICMS },
+                  domProps: { value: _vm.item.icms_STvalorICMS },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
                       _vm.$set(
-                        _vm.item.icms,
-                        "STvalorICMS",
+                        _vm.item,
+                        "icms_STvalorICMS",
                         $event.target.value
                       )
                     }
@@ -45817,227 +46041,245 @@ var render = function() {
                 })
               ]),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("Valor Base PIS ST ")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.STvalorBasePIS,
-                      expression: "item.icms.STvalorBasePIS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.STvalorBasePIS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
+              !_vm.mulSe(_vm.form.codigoRegimeTributario, [1])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Valor Base PIS ST ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_STvalorBasePIS,
+                          expression: "item.icms_STvalorBasePIS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text", readonly: "" },
+                      domProps: { value: _vm.item.icms_STvalorBasePIS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_STvalorBasePIS",
+                            $event.target.value
+                          )
+                        }
                       }
-                      _vm.$set(
-                        _vm.item.icms,
-                        "STvalorBasePIS",
-                        $event.target.value
-                      )
-                    }
-                  }
-                }),
-                _vm._v("\n          <>CSOSN\n        ")
-              ]),
+                    })
+                  ])
+                : _vm._e(),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("Alíq. PIS ST ")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.STaliqPIS,
-                      expression: "item.icms.STaliqPIS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.STaliqPIS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
+              !_vm.mulSe(_vm.form.codigoRegimeTributario, [1])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Alíq. PIS ST ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_STaliqPIS,
+                          expression: "item.icms_STaliqPIS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_STaliqPIS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_STaliqPIS",
+                            $event.target.value
+                          )
+                        }
                       }
-                      _vm.$set(_vm.item.icms, "STaliqPIS", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v("\n          <>CSOSN\n        ")
-              ]),
+                    })
+                  ])
+                : _vm._e(),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("Valor PIS ST ")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.STvalorPIS,
-                      expression: "item.icms.STvalorPIS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.STvalorPIS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
+              !_vm.mulSe(_vm.form.codigoRegimeTributario, [1])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Valor PIS ST ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_STvalorPIS,
+                          expression: "item.icms_STvalorPIS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text", readonly: "" },
+                      domProps: { value: _vm.item.icms_STvalorPIS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_STvalorPIS",
+                            $event.target.value
+                          )
+                        }
                       }
-                      _vm.$set(_vm.item.icms, "STvalorPIS", $event.target.value)
-                    }
-                  }
-                }),
-                _vm._v("\n          <>CSOSN\n        ")
-              ]),
+                    })
+                  ])
+                : _vm._e(),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("Valor Base COFINS ST ")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.STvalorBaseCOFINS,
-                      expression: "item.icms.STvalorBaseCOFINS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.STvalorBaseCOFINS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
+              !_vm.mulSe(_vm.form.codigoRegimeTributario, [1])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Valor Base COFINS ST ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_STvalorBaseCOFINS,
+                          expression: "item.icms_STvalorBaseCOFINS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text", readonly: "" },
+                      domProps: { value: _vm.item.icms_STvalorBaseCOFINS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_STvalorBaseCOFINS",
+                            $event.target.value
+                          )
+                        }
                       }
-                      _vm.$set(
-                        _vm.item.icms,
-                        "STvalorBaseCOFINS",
-                        $event.target.value
-                      )
-                    }
-                  }
-                }),
-                _vm._v("\n          <>CSOSN\n        ")
-              ]),
+                    })
+                  ])
+                : _vm._e(),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("Alíq. COFINS ST ")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.STaliqCOFINS,
-                      expression: "item.icms.STaliqCOFINS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.STaliqCOFINS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
+              !_vm.mulSe(_vm.form.codigoRegimeTributario, [1])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Alíq. COFINS ST ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_STaliqCOFINS,
+                          expression: "item.icms_STaliqCOFINS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_STaliqCOFINS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_STaliqCOFINS",
+                            $event.target.value
+                          )
+                        }
                       }
-                      _vm.$set(
-                        _vm.item.icms,
-                        "STaliqCOFINS",
-                        $event.target.value
-                      )
-                    }
-                  }
-                }),
-                _vm._v("\n          <>CSOSN\n        ")
-              ]),
+                    })
+                  ])
+                : _vm._e(),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("Valor COFINS ST ")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.STvalorCONFIS,
-                      expression: "item.icms.STvalorCONFIS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.STvalorCONFIS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
+              !_vm.mulSe(_vm.form.codigoRegimeTributario, [1])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("Valor COFINS ST ")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_STvalorCONFIS,
+                          expression: "item.icms_STvalorCONFIS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text", readonly: "" },
+                      domProps: { value: _vm.item.icms_STvalorCONFIS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_STvalorCONFIS",
+                            $event.target.value
+                          )
+                        }
                       }
-                      _vm.$set(
-                        _vm.item.icms,
-                        "STvalorCONFIS",
-                        $event.target.value
-                      )
-                    }
-                  }
-                }),
-                _vm._v("\n          <>CSOSN\n        ")
-              ])
+                    })
+                  ])
+                : _vm._e()
             ])
           ]
         ),
@@ -46046,7 +46288,6 @@ var render = function() {
           "div",
           { staticClass: "tab-pane fade", attrs: { id: "tabItemSTR" } },
           [
-            _vm._v("\n      SituacaoTributaria = 60 || CSOSN= 500\n      "),
             _c("div", { staticClass: "row" }, [
               _c("div", { staticClass: "form-group col-md-4" }, [
                 _c("label", { attrs: { for: "" } }, [
@@ -46064,21 +46305,21 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.STRvalorICMSsub,
-                      expression: "item.icms.STRvalorICMSsub"
+                      value: _vm.item.icms_STRvalorICMSsub,
+                      expression: "item.icms_STRvalorICMSsub"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.STRvalorICMSsub },
+                  domProps: { value: _vm.item.icms_STRvalorICMSsub },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
                       _vm.$set(
-                        _vm.item.icms,
-                        "STRvalorICMSsub",
+                        _vm.item,
+                        "icms_STRvalorICMSsub",
                         $event.target.value
                       )
                     }
@@ -46102,21 +46343,21 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.STRvalorBaseICMS,
-                      expression: "item.icms.STRvalorBaseICMS"
+                      value: _vm.item.icms_STRvalorBaseICMS,
+                      expression: "item.icms_STRvalorBaseICMS"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.STRvalorBaseICMS },
+                  domProps: { value: _vm.item.icms_STRvalorBaseICMS },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
                       _vm.$set(
-                        _vm.item.icms,
-                        "STRvalorBaseICMS",
+                        _vm.item,
+                        "icms_STRvalorBaseICMS",
                         $event.target.value
                       )
                     }
@@ -46124,44 +46365,45 @@ var render = function() {
                 })
               ]),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-4" }, [
-                _c("label", { attrs: { for: "" } }, [
-                  _vm._v("% Base ICMS ST Retido")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "money",
-                      rawName: "v-money",
-                      value: _vm.money,
-                      expression: "money"
-                    },
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.item.icms.STRbaseICMS,
-                      expression: "item.icms.STRbaseICMS"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.STRbaseICMS },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
+              _vm.mulSe(_vm.form.codigoRegimeTributario, [500])
+                ? _c("div", { staticClass: "form-group col-md-4" }, [
+                    _c("label", { attrs: { for: "" } }, [
+                      _vm._v("% Base ICMS ST Retido")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "money",
+                          rawName: "v-money",
+                          value: _vm.money,
+                          expression: "money"
+                        },
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.item.icms_STRbaseICMS,
+                          expression: "item.icms_STRbaseICMS"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.item.icms_STRbaseICMS },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.item,
+                            "icms_STRbaseICMS",
+                            $event.target.value
+                          )
+                        }
                       }
-                      _vm.$set(
-                        _vm.item.icms,
-                        "STRbaseICMS",
-                        $event.target.value
-                      )
-                    }
-                  }
-                }),
-                _vm._v("\n          CSOSN= 500\n        ")
-              ]),
+                    })
+                  ])
+                : _vm._e(),
               _vm._v(" "),
               _c("div", { staticClass: "form-group col-md-4" }, [
                 _c("label", { attrs: { for: "" } }, [
@@ -46179,21 +46421,21 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.STRaliqICMS,
-                      expression: "item.icms.STRaliqICMS"
+                      value: _vm.item.icms_STRaliqICMS,
+                      expression: "item.icms_STRaliqICMS"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text" },
-                  domProps: { value: _vm.item.icms.STRaliqICMS },
+                  domProps: { value: _vm.item.icms_STRaliqICMS },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
                       _vm.$set(
-                        _vm.item.icms,
-                        "STRaliqICMS",
+                        _vm.item,
+                        "icms_STRaliqICMS",
                         $event.target.value
                       )
                     }
@@ -46217,21 +46459,21 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.item.icms.STRvalorICMS,
-                      expression: "item.icms.STRvalorICMS"
+                      value: _vm.item.icms_STRvalorICMS,
+                      expression: "item.icms_STRvalorICMS"
                     }
                   ],
                   staticClass: "form-control",
                   attrs: { type: "text", readonly: "" },
-                  domProps: { value: _vm.item.icms.STRvalorICMS },
+                  domProps: { value: _vm.item.icms_STRvalorICMS },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
                       _vm.$set(
-                        _vm.item.icms,
-                        "STRvalorICMS",
+                        _vm.item,
+                        "icms_STRvalorICMS",
                         $event.target.value
                       )
                     }
@@ -46250,59 +46492,20 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c(
-      "ul",
-      {
-        staticClass: "nav nav-tabs col-12",
-        attrs: { role: "tablist", id: "myTabICMS" }
-      },
-      [
-        _c("li", { staticClass: "nav-item" }, [
-          _c(
-            "a",
-            {
-              staticClass: "nav-link active",
-              attrs: {
-                id: "tabItemGeral-tab",
-                "data-toggle": "tab",
-                href: "#tabItemGeral"
-              }
-            },
-            [_vm._v("Geral")]
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "nav-item" }, [
-          _c(
-            "a",
-            {
-              staticClass: "nav-link",
-              attrs: {
-                id: "tabItemST-tab",
-                "data-toggle": "tab",
-                href: "#tabItemST"
-              }
-            },
-            [_vm._v("Substituição tributaria")]
-          )
-        ]),
-        _vm._v(" "),
-        _c("li", { staticClass: "nav-item" }, [
-          _c(
-            "a",
-            {
-              staticClass: "nav-link",
-              attrs: {
-                id: "tabItemSTR-tab",
-                "data-toggle": "tab",
-                href: "#tabItemSTR"
-              }
-            },
-            [_vm._v("Substituição tributaria - Retenção")]
-          )
-        ])
-      ]
-    )
+    return _c("li", { staticClass: "nav-item" }, [
+      _c(
+        "a",
+        {
+          staticClass: "nav-link active",
+          attrs: {
+            id: "tabItemGeral-tab",
+            "data-toggle": "tab",
+            href: "#tabItemGeral"
+          }
+        },
+        [_vm._v("Geral")]
+      )
+    ])
   }
 ]
 render._withStripped = true
@@ -46326,7 +46529,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "row" }, [
+  return _c("div", { staticClass: "row mt-2" }, [
     _c("div", { staticClass: "form-group col-md-4" }, [
       _c("label", { attrs: { for: "" } }, [
         _vm._v(" Situação tributária do IPI ")
@@ -46339,8 +46542,8 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.item.ipi.situacaoTributaria,
-              expression: "item.ipi.situacaoTributaria"
+              value: _vm.item.ipi_situacaoTributaria,
+              expression: "item.ipi_situacaoTributaria"
             }
           ],
           staticClass: "form-control",
@@ -46356,8 +46559,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.item.ipi,
-                "situacaoTributaria",
+                _vm.item,
+                "ipi_situacaoTributaria",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -46396,19 +46599,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.ipi.aliqIPI,
-            expression: "item.ipi.aliqIPI"
+            value: _vm.item.ipi_aliqIPI,
+            expression: "item.ipi_aliqIPI"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.ipi.aliqIPI },
+        domProps: { value: _vm.item.ipi_aliqIPI },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.ipi, "aliqIPI", $event.target.value)
+            _vm.$set(_vm.item, "ipi_aliqIPI", $event.target.value)
           }
         }
       })
@@ -46428,19 +46631,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.ipi.baseIPI,
-            expression: "item.ipi.baseIPI"
+            value: _vm.item.ipi_baseIPI,
+            expression: "item.ipi_baseIPI"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.ipi.baseIPI },
+        domProps: { value: _vm.item.ipi_baseIPI },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.ipi, "baseIPI", $event.target.value)
+            _vm.$set(_vm.item, "ipi_baseIPI", $event.target.value)
           }
         }
       })
@@ -46460,19 +46663,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.ipi.valorBaseIPI,
-            expression: "item.ipi.valorBaseIPI"
+            value: _vm.item.ipi_valorBaseIPI,
+            expression: "item.ipi_valorBaseIPI"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.ipi.valorBaseIPI },
+        domProps: { value: _vm.item.ipi_valorBaseIPI },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.ipi, "valorBaseIPI", $event.target.value)
+            _vm.$set(_vm.item, "ipi_valorBaseIPI", $event.target.value)
           }
         }
       })
@@ -46492,19 +46695,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.ipi.valorIPI,
-            expression: "item.ipi.valorIPI"
+            value: _vm.item.ipi_valorIPI,
+            expression: "item.ipi_valorIPI"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.ipi.valorIPI },
+        domProps: { value: _vm.item.ipi_valorIPI },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.ipi, "valorIPI", $event.target.value)
+            _vm.$set(_vm.item, "ipi_valorIPI", $event.target.value)
           }
         }
       })
@@ -46520,8 +46723,8 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.item.ipi.codEnquad,
-              expression: "item.ipi.codEnquad"
+              value: _vm.item.ipi_codEnquad,
+              expression: "item.ipi_codEnquad"
             }
           ],
           staticClass: "form-control",
@@ -46537,8 +46740,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.item.ipi,
-                "codEnquad",
+                _vm.item,
+                "ipi_codEnquad",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -46565,19 +46768,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.ipi.codExcecaoTIPI,
-            expression: "item.ipi.codExcecaoTIPI"
+            value: _vm.item.ipi_codExcecaoTIPI,
+            expression: "item.ipi_codExcecaoTIPI"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.ipi.codExcecaoTIPI },
+        domProps: { value: _vm.item.ipi_codExcecaoTIPI },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.ipi, "codExcecaoTIPI", $event.target.value)
+            _vm.$set(_vm.item, "ipi_codExcecaoTIPI", $event.target.value)
           }
         }
       })
@@ -46593,19 +46796,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.ipi.informacoesComp,
-            expression: "item.ipi.informacoesComp"
+            value: _vm.item.ipi_informacoesComp,
+            expression: "item.ipi_informacoesComp"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.ipi.informacoesComp },
+        domProps: { value: _vm.item.ipi_informacoesComp },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.ipi, "informacoesComp", $event.target.value)
+            _vm.$set(_vm.item, "ipi_informacoesComp", $event.target.value)
           }
         }
       })
@@ -46621,19 +46824,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.ipi.informacoesCompIF,
-            expression: "item.ipi.informacoesCompIF"
+            value: _vm.item.ipi_informacoesCompIF,
+            expression: "item.ipi_informacoesCompIF"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.ipi.informacoesCompIF },
+        domProps: { value: _vm.item.ipi_informacoesCompIF },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.ipi, "informacoesCompIF", $event.target.value)
+            _vm.$set(_vm.item, "ipi_informacoesCompIF", $event.target.value)
           }
         }
       })
@@ -46662,7 +46865,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "row" }, [
+  return _c("div", { staticClass: "row mt-2" }, [
     _c("div", { staticClass: "form-group col-md-4" }, [
       _c("label", { attrs: { for: "" } }, [
         _vm._v(" Situação tributária do ISSQN ")
@@ -46675,8 +46878,8 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.item.issqn.situacaoTributaria,
-              expression: "item.issqn.situacaoTributaria"
+              value: _vm.item.issqn_situacaoTributaria,
+              expression: "item.issqn_situacaoTributaria"
             }
           ],
           staticClass: "form-control",
@@ -46692,8 +46895,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.item.issqn,
-                "situacaoTributaria",
+                _vm.item,
+                "issqn_situacaoTributaria",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -46724,8 +46927,8 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.item.issqn.descontarISS,
-              expression: "item.issqn.descontarISS"
+              value: _vm.item.issqn_descontarISS,
+              expression: "item.issqn_descontarISS"
             }
           ],
           staticClass: "form-control",
@@ -46741,8 +46944,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.item.issqn,
-                "descontarISS",
+                _vm.item,
+                "issqn_descontarISS",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -46767,8 +46970,8 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.item.issqn.reterISS,
-              expression: "item.issqn.reterISS"
+              value: _vm.item.issqn_reterISS,
+              expression: "item.issqn_reterISS"
             }
           ],
           staticClass: "form-control",
@@ -46784,8 +46987,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.item.issqn,
-                "reterISS",
+                _vm.item,
+                "issqn_reterISS",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -46814,19 +47017,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.issqn.baseISSQN,
-            expression: "item.issqn.baseISSQN"
+            value: _vm.item.issqn_baseISSQN,
+            expression: "item.issqn_baseISSQN"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.issqn.baseISSQN },
+        domProps: { value: _vm.item.issqn_baseISSQN },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.issqn, "baseISSQN", $event.target.value)
+            _vm.$set(_vm.item, "issqn_baseISSQN", $event.target.value)
           }
         }
       })
@@ -46846,19 +47049,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.issqn.valorBaseISSQN,
-            expression: "item.issqn.valorBaseISSQN"
+            value: _vm.item.issqn_valorBaseISSQN,
+            expression: "item.issqn_valorBaseISSQN"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.issqn.valorBaseISSQN },
+        domProps: { value: _vm.item.issqn_valorBaseISSQN },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.issqn, "valorBaseISSQN", $event.target.value)
+            _vm.$set(_vm.item, "issqn_valorBaseISSQN", $event.target.value)
           }
         }
       })
@@ -46878,19 +47081,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.issqn.aliqISSQN,
-            expression: "item.issqn.aliqISSQN"
+            value: _vm.item.issqn_aliqISSQN,
+            expression: "item.issqn_aliqISSQN"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.issqn.aliqISSQN },
+        domProps: { value: _vm.item.issqn_aliqISSQN },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.issqn, "aliqISSQN", $event.target.value)
+            _vm.$set(_vm.item, "issqn_aliqISSQN", $event.target.value)
           }
         }
       })
@@ -46910,19 +47113,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.issqn.valorISSQN,
-            expression: "item.issqn.valorISSQN"
+            value: _vm.item.issqn_valorISSQN,
+            expression: "item.issqn_valorISSQN"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.issqn.valorISSQN },
+        domProps: { value: _vm.item.issqn_valorISSQN },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.issqn, "valorISSQN", $event.target.value)
+            _vm.$set(_vm.item, "issqn_valorISSQN", $event.target.value)
           }
         }
       })
@@ -46936,19 +47139,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.issqn.codListaServico,
-            expression: "item.issqn.codListaServico"
+            value: _vm.item.issqn_codListaServico,
+            expression: "item.issqn_codListaServico"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "number" },
-        domProps: { value: _vm.item.issqn.codListaServico },
+        domProps: { value: _vm.item.issqn_codListaServico },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.issqn, "codListaServico", $event.target.value)
+            _vm.$set(_vm.item, "issqn_codListaServico", $event.target.value)
           }
         }
       })
@@ -46968,19 +47171,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.issqn.valorRetido,
-            expression: "item.issqn.valorRetido"
+            value: _vm.item.issqn_valorRetido,
+            expression: "item.issqn_valorRetido"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.issqn.valorRetido },
+        domProps: { value: _vm.item.issqn_valorRetido },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.issqn, "valorRetido", $event.target.value)
+            _vm.$set(_vm.item, "issqn_valorRetido", $event.target.value)
           }
         }
       })
@@ -46996,19 +47199,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.issqn.informacoesComp,
-            expression: "item.issqn.informacoesComp"
+            value: _vm.item.issqn_informacoesComp,
+            expression: "item.issqn_informacoesComp"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.issqn.informacoesComp },
+        domProps: { value: _vm.item.issqn_informacoesComp },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.issqn, "informacoesComp", $event.target.value)
+            _vm.$set(_vm.item, "issqn_informacoesComp", $event.target.value)
           }
         }
       })
@@ -47024,19 +47227,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.issqn.informacoesCompIF,
-            expression: "item.issqn.informacoesCompIF"
+            value: _vm.item.issqn_informacoesCompIF,
+            expression: "item.issqn_informacoesCompIF"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.issqn.informacoesCompIF },
+        domProps: { value: _vm.item.issqn_informacoesCompIF },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.issqn, "informacoesCompIF", $event.target.value)
+            _vm.$set(_vm.item, "issqn_informacoesCompIF", $event.target.value)
           }
         }
       })
@@ -47065,7 +47268,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "row" }, [
+  return _c("div", { staticClass: "row mt-2" }, [
     _c("div", { staticClass: "form-group col-md-4" }, [
       _c("label", { attrs: { for: "" } }, [
         _vm._v(" Presumido no cálculo do PIS/COFINS ")
@@ -47078,8 +47281,8 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.item.outros.presumidoCalculo,
-              expression: "item.outros.presumidoCalculo"
+              value: _vm.item.outros_presumidoCalculo,
+              expression: "item.outros_presumidoCalculo"
             }
           ],
           staticClass: "form-control",
@@ -47095,8 +47298,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.item.outros,
-                "presumidoCalculo",
+                _vm.item,
+                "outros_presumidoCalculo",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -47125,19 +47328,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.aliqFunrural,
-            expression: "item.outros.aliqFunrural"
+            value: _vm.item.outros_aliqFunrural,
+            expression: "item.outros_aliqFunrural"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.outros.aliqFunrural },
+        domProps: { value: _vm.item.outros_aliqFunrural },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.outros, "aliqFunrural", $event.target.value)
+            _vm.$set(_vm.item, "outros_aliqFunrural", $event.target.value)
           }
         }
       })
@@ -47153,8 +47356,8 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.item.outros.tipoItem,
-              expression: "item.outros.tipoItem"
+              value: _vm.item.outros_tipoItem,
+              expression: "item.outros_tipoItem"
             }
           ],
           staticClass: "form-control",
@@ -47170,8 +47373,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.item.outros,
-                "tipoItem",
+                _vm.item,
+                "outros_tipoItem",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -47204,19 +47407,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.baseComissao,
-            expression: "item.outros.baseComissao"
+            value: _vm.item.outros_baseComissao,
+            expression: "item.outros_baseComissao"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.outros.baseComissao },
+        domProps: { value: _vm.item.outros_baseComissao },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.outros, "baseComissao", $event.target.value)
+            _vm.$set(_vm.item, "outros_baseComissao", $event.target.value)
           }
         }
       })
@@ -47236,19 +47439,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.aliquotaComissao,
-            expression: "item.outros.aliquotaComissao"
+            value: _vm.item.outros_aliquotaComissao,
+            expression: "item.outros_aliquotaComissao"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.outros.aliquotaComissao },
+        domProps: { value: _vm.item.outros_aliquotaComissao },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.outros, "aliquotaComissao", $event.target.value)
+            _vm.$set(_vm.item, "outros_aliquotaComissao", $event.target.value)
           }
         }
       })
@@ -47268,19 +47471,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.valorComissao,
-            expression: "item.outros.valorComissao"
+            value: _vm.item.outros_valorComissao,
+            expression: "item.outros_valorComissao"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text", readonly: "" },
-        domProps: { value: _vm.item.outros.valorComissao },
+        domProps: { value: _vm.item.outros_valorComissao },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.outros, "valorComissao", $event.target.value)
+            _vm.$set(_vm.item, "outros_valorComissao", $event.target.value)
           }
         }
       })
@@ -47296,19 +47499,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.numeroPedido,
-            expression: "item.outros.numeroPedido"
+            value: _vm.item.outros_numeroPedido,
+            expression: "item.outros_numeroPedido"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "number" },
-        domProps: { value: _vm.item.outros.numeroPedido },
+        domProps: { value: _vm.item.outros_numeroPedido },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.outros, "numeroPedido", $event.target.value)
+            _vm.$set(_vm.item, "outros_numeroPedido", $event.target.value)
           }
         }
       })
@@ -47324,19 +47527,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.nrItemPedido,
-            expression: "item.outros.nrItemPedido"
+            value: _vm.item.outros_nrItemPedido,
+            expression: "item.outros_nrItemPedido"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "number" },
-        domProps: { value: _vm.item.outros.nrItemPedido },
+        domProps: { value: _vm.item.outros_nrItemPedido },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.outros, "nrItemPedido", $event.target.value)
+            _vm.$set(_vm.item, "outros_nrItemPedido", $event.target.value)
           }
         }
       })
@@ -47356,19 +47559,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.aproxTrib,
-            expression: "item.outros.aproxTrib"
+            value: _vm.item.outros_aproxTrib,
+            expression: "item.outros_aproxTrib"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.outros.aproxTrib },
+        domProps: { value: _vm.item.outros_aproxTrib },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.outros, "aproxTrib", $event.target.value)
+            _vm.$set(_vm.item, "outros_aproxTrib", $event.target.value)
           }
         }
       })
@@ -47388,19 +47591,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.valorAproxTrib,
-            expression: "item.outros.valorAproxTrib"
+            value: _vm.item.outros_valorAproxTrib,
+            expression: "item.outros_valorAproxTrib"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.outros.valorAproxTrib },
+        domProps: { value: _vm.item.outros_valorAproxTrib },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.outros, "valorAproxTrib", $event.target.value)
+            _vm.$set(_vm.item, "outros_valorAproxTrib", $event.target.value)
           }
         }
       })
@@ -47414,19 +47617,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.unidadeTributaria,
-            expression: "item.outros.unidadeTributaria"
+            value: _vm.item.outros_unidadeTributaria,
+            expression: "item.outros_unidadeTributaria"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "number" },
-        domProps: { value: _vm.item.outros.unidadeTributaria },
+        domProps: { value: _vm.item.outros_unidadeTributaria },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.outros, "unidadeTributaria", $event.target.value)
+            _vm.$set(_vm.item, "outros_unidadeTributaria", $event.target.value)
           }
         }
       })
@@ -47446,21 +47649,21 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.quantidadeTributaria,
-            expression: "item.outros.quantidadeTributaria"
+            value: _vm.item.outros_quantidadeTributaria,
+            expression: "item.outros_quantidadeTributaria"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.outros.quantidadeTributaria },
+        domProps: { value: _vm.item.outros_quantidadeTributaria },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.item.outros,
-              "quantidadeTributaria",
+              _vm.item,
+              "outros_quantidadeTributaria",
               $event.target.value
             )
           }
@@ -47484,19 +47687,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.valorUnitario,
-            expression: "item.outros.valorUnitario"
+            value: _vm.item.outros_valorUnitario,
+            expression: "item.outros_valorUnitario"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text", readonly: "" },
-        domProps: { value: _vm.item.outros.valorUnitario },
+        domProps: { value: _vm.item.outros_valorUnitario },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.outros, "valorUnitario", $event.target.value)
+            _vm.$set(_vm.item, "outros_valorUnitario", $event.target.value)
           }
         }
       })
@@ -47516,21 +47719,21 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.outros.valorOutrasDespesas,
-            expression: "item.outros.valorOutrasDespesas"
+            value: _vm.item.outros_valorOutrasDespesas,
+            expression: "item.outros_valorOutrasDespesas"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text", readonly: "" },
-        domProps: { value: _vm.item.outros.valorOutrasDespesas },
+        domProps: { value: _vm.item.outros_valorOutrasDespesas },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.item.outros,
-              "valorOutrasDespesas",
+              _vm.item,
+              "outros_valorOutrasDespesas",
               $event.target.value
             )
           }
@@ -47561,7 +47764,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "row" }, [
+  return _c("div", { staticClass: "row mt-2" }, [
     _c("div", { staticClass: "form-group col-md-12" }, [
       _c("label", { attrs: { for: "" } }, [
         _vm._v("Situação tributária do PIS ")
@@ -47574,8 +47777,8 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.item.pis.situacaoTributaria,
-              expression: "item.pis.situacaoTributaria"
+              value: _vm.item.pis_situacaoTributaria,
+              expression: "item.pis_situacaoTributaria"
             }
           ],
           staticClass: "form-control",
@@ -47591,8 +47794,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.item.pis,
-                "situacaoTributaria",
+                _vm.item,
+                "pis_situacaoTributaria",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -47631,19 +47834,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.pis.basePIS,
-            expression: "item.pis.basePIS"
+            value: _vm.item.pis_basePIS,
+            expression: "item.pis_basePIS"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.pis.basePIS },
+        domProps: { value: _vm.item.pis_basePIS },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.pis, "basePIS", $event.target.value)
+            _vm.$set(_vm.item, "pis_basePIS", $event.target.value)
           }
         }
       })
@@ -47663,19 +47866,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.pis.valorBase,
-            expression: "item.pis.valorBase"
+            value: _vm.item.pis_valorBase,
+            expression: "item.pis_valorBase"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.pis.valorBase },
+        domProps: { value: _vm.item.pis_valorBase },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.pis, "valorBase", $event.target.value)
+            _vm.$set(_vm.item, "pis_valorBase", $event.target.value)
           }
         }
       })
@@ -47695,19 +47898,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.pis.aliqPIS,
-            expression: "item.pis.aliqPIS"
+            value: _vm.item.pis_aliqPIS,
+            expression: "item.pis_aliqPIS"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.pis.aliqPIS },
+        domProps: { value: _vm.item.pis_aliqPIS },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.pis, "aliqPIS", $event.target.value)
+            _vm.$set(_vm.item, "pis_aliqPIS", $event.target.value)
           }
         }
       })
@@ -47727,19 +47930,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.pis.valorPIS,
-            expression: "item.pis.valorPIS"
+            value: _vm.item.pis_valorPIS,
+            expression: "item.pis_valorPIS"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.pis.valorPIS },
+        domProps: { value: _vm.item.pis_valorPIS },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.pis, "valorPIS", $event.target.value)
+            _vm.$set(_vm.item, "pis_valorPIS", $event.target.value)
           }
         }
       })
@@ -47759,19 +47962,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.pis.valorFixoPIS,
-            expression: "item.pis.valorFixoPIS"
+            value: _vm.item.pis_valorFixoPIS,
+            expression: "item.pis_valorFixoPIS"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.pis.valorFixoPIS },
+        domProps: { value: _vm.item.pis_valorFixoPIS },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.pis, "valorFixoPIS", $event.target.value)
+            _vm.$set(_vm.item, "pis_valorFixoPIS", $event.target.value)
           }
         }
       })
@@ -47787,19 +47990,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.pis.informacoesComp,
-            expression: "item.pis.informacoesComp"
+            value: _vm.item.pis_informacoesComp,
+            expression: "item.pis_informacoesComp"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text", maxlength: "500" },
-        domProps: { value: _vm.item.pis.informacoesComp },
+        domProps: { value: _vm.item.pis_informacoesComp },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.pis, "informacoesComp", $event.target.value)
+            _vm.$set(_vm.item, "pis_informacoesComp", $event.target.value)
           }
         }
       })
@@ -47815,19 +48018,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.pis.informacoesCompIF,
-            expression: "item.pis.informacoesCompIF"
+            value: _vm.item.pis_informacoesCompIF,
+            expression: "item.pis_informacoesCompIF"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text", maxlength: "500" },
-        domProps: { value: _vm.item.pis.informacoesCompIF },
+        domProps: { value: _vm.item.pis_informacoesCompIF },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.pis, "informacoesCompIF", $event.target.value)
+            _vm.$set(_vm.item, "pis_informacoesCompIF", $event.target.value)
           }
         }
       })
@@ -47845,8 +48048,8 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.item.confis.situacaoTributaria,
-              expression: "item.confis.situacaoTributaria"
+              value: _vm.item.confis_situacaoTributaria,
+              expression: "item.confis_situacaoTributaria"
             }
           ],
           staticClass: "form-control",
@@ -47862,8 +48065,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.item.confis,
-                "situacaoTributaria",
+                _vm.item,
+                "confis_situacaoTributaria",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -47888,7 +48091,7 @@ var render = function() {
       )
     ]),
     _vm._v(" "),
-    _vm.mulSeText(_vm.item.confis.situacaoTributaria, [
+    _vm.mulSeText(_vm.item.confis_situacaoTributaria, [
       "3",
       "4",
       "5",
@@ -47911,19 +48114,19 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.item.confis.baseCONFIS,
-                expression: "item.confis.baseCONFIS"
+                value: _vm.item.confis_baseCONFIS,
+                expression: "item.confis_baseCONFIS"
               }
             ],
             staticClass: "form-control",
             attrs: { type: "text" },
-            domProps: { value: _vm.item.confis.baseCONFIS },
+            domProps: { value: _vm.item.confis_baseCONFIS },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.$set(_vm.item.confis, "baseCONFIS", $event.target.value)
+                _vm.$set(_vm.item, "confis_baseCONFIS", $event.target.value)
               }
             }
           })
@@ -47944,25 +48147,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.confis.valorCONFIS,
-            expression: "item.confis.valorCONFIS"
+            value: _vm.item.confis_valorCONFIS,
+            expression: "item.confis_valorCONFIS"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.confis.valorCONFIS },
+        domProps: { value: _vm.item.confis_valorCONFIS },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.confis, "valorCONFIS", $event.target.value)
+            _vm.$set(_vm.item, "confis_valorCONFIS", $event.target.value)
           }
         }
       })
     ]),
     _vm._v(" "),
-    _vm.mulSeText(_vm.item.confis.situacaoTributaria, [
+    _vm.mulSeText(_vm.item.confis_situacaoTributaria, [
       "4",
       "5",
       "6",
@@ -47984,21 +48187,21 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.item.confis.valorBaseCONFIS,
-                expression: "item.confis.valorBaseCONFIS"
+                value: _vm.item.confis_valorBaseCONFIS,
+                expression: "item.confis_valorBaseCONFIS"
               }
             ],
             staticClass: "form-control",
             attrs: { type: "text" },
-            domProps: { value: _vm.item.confis.valorBaseCONFIS },
+            domProps: { value: _vm.item.confis_valorBaseCONFIS },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
                 _vm.$set(
-                  _vm.item.confis,
-                  "valorBaseCONFIS",
+                  _vm.item,
+                  "confis_valorBaseCONFIS",
                   $event.target.value
                 )
               }
@@ -48021,19 +48224,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.confis.aliqCONFIS,
-            expression: "item.confis.aliqCONFIS"
+            value: _vm.item.confis_aliqCONFIS,
+            expression: "item.confis_aliqCONFIS"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.confis.aliqCONFIS },
+        domProps: { value: _vm.item.confis_aliqCONFIS },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.confis, "aliqCONFIS", $event.target.value)
+            _vm.$set(_vm.item, "confis_aliqCONFIS", $event.target.value)
           }
         }
       })
@@ -48053,19 +48256,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.confis.valorFixoCONFIS,
-            expression: "item.confis.valorFixoCONFIS"
+            value: _vm.item.confis_valorFixoCONFIS,
+            expression: "item.confis_valorFixoCONFIS"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.confis.valorFixoCONFIS },
+        domProps: { value: _vm.item.confis_valorFixoCONFIS },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.confis, "valorFixoCONFIS", $event.target.value)
+            _vm.$set(_vm.item, "confis_valorFixoCONFIS", $event.target.value)
           }
         }
       })
@@ -48081,19 +48284,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.confis.informacoesComp,
-            expression: "item.confis.informacoesComp"
+            value: _vm.item.confis_informacoesComp,
+            expression: "item.confis_informacoesComp"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text", maxlength: "500" },
-        domProps: { value: _vm.item.confis.informacoesComp },
+        domProps: { value: _vm.item.confis_informacoesComp },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.confis, "informacoesComp", $event.target.value)
+            _vm.$set(_vm.item, "confis_informacoesComp", $event.target.value)
           }
         }
       })
@@ -48109,19 +48312,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.confis.informacoesCompIF,
-            expression: "item.confis.informacoesCompIF"
+            value: _vm.item.confis_informacoesCompIF,
+            expression: "item.confis_informacoesCompIF"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text", maxlength: "500" },
-        domProps: { value: _vm.item.confis.informacoesCompIF },
+        domProps: { value: _vm.item.confis_informacoesCompIF },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.confis, "informacoesCompIF", $event.target.value)
+            _vm.$set(_vm.item, "confis_informacoesCompIF", $event.target.value)
           }
         }
       })
@@ -48150,7 +48353,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "row" }, [
+  return _c("div", { staticClass: "row mt-2" }, [
     _c("div", { staticClass: "form-group col-md-4" }, [
       _c("label", { attrs: { for: "" } }, [_vm._v("Imposto retido ")]),
       _vm._v(" "),
@@ -48161,8 +48364,8 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.item.retencoes.impostoRetido,
-              expression: "item.retencoes.impostoRetido"
+              value: _vm.item.retencoes_impostoRetido,
+              expression: "item.retencoes_impostoRetido"
             }
           ],
           staticClass: "form-control",
@@ -48178,8 +48381,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.item.retencoes,
-                "impostoRetido",
+                _vm.item,
+                "retencoes_impostoRetido",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -48208,19 +48411,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.retencoes.aliqIR,
-            expression: "item.retencoes.aliqIR"
+            value: _vm.item.retencoes_aliqIR,
+            expression: "item.retencoes_aliqIR"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.retencoes.aliqIR },
+        domProps: { value: _vm.item.retencoes_aliqIR },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.retencoes, "aliqIR", $event.target.value)
+            _vm.$set(_vm.item, "retencoes_aliqIR", $event.target.value)
           }
         }
       })
@@ -48240,19 +48443,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.retencoes.baseIR,
-            expression: "item.retencoes.baseIR"
+            value: _vm.item.retencoes_baseIR,
+            expression: "item.retencoes_baseIR"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text", readonly: "" },
-        domProps: { value: _vm.item.retencoes.baseIR },
+        domProps: { value: _vm.item.retencoes_baseIR },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.retencoes, "baseIR", $event.target.value)
+            _vm.$set(_vm.item, "retencoes_baseIR", $event.target.value)
           }
         }
       })
@@ -48272,19 +48475,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.retencoes.valorIR,
-            expression: "item.retencoes.valorIR"
+            value: _vm.item.retencoes_valorIR,
+            expression: "item.retencoes_valorIR"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text", readonly: "" },
-        domProps: { value: _vm.item.retencoes.valorIR },
+        domProps: { value: _vm.item.retencoes_valorIR },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.retencoes, "valorIR", $event.target.value)
+            _vm.$set(_vm.item, "retencoes_valorIR", $event.target.value)
           }
         }
       })
@@ -48304,19 +48507,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.retencoes.aliqCSLL,
-            expression: "item.retencoes.aliqCSLL"
+            value: _vm.item.retencoes_aliqCSLL,
+            expression: "item.retencoes_aliqCSLL"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text" },
-        domProps: { value: _vm.item.retencoes.aliqCSLL },
+        domProps: { value: _vm.item.retencoes_aliqCSLL },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.retencoes, "aliqCSLL", $event.target.value)
+            _vm.$set(_vm.item, "retencoes_aliqCSLL", $event.target.value)
           }
         }
       })
@@ -48336,19 +48539,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.item.retencoes.valorCSLL,
-            expression: "item.retencoes.valorCSLL"
+            value: _vm.item.retencoes_valorCSLL,
+            expression: "item.retencoes_valorCSLL"
           }
         ],
         staticClass: "form-control",
         attrs: { type: "text", readonly: "" },
-        domProps: { value: _vm.item.retencoes.valorCSLL },
+        domProps: { value: _vm.item.retencoes_valorCSLL },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.item.retencoes, "valorCSLL", $event.target.value)
+            _vm.$set(_vm.item, "retencoes_valorCSLL", $event.target.value)
           }
         }
       })
@@ -48378,7 +48581,7 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "col-12 row" }, [
-    _c("div", { staticClass: "form-group col-md-3" }, [
+    _c("div", { staticClass: "form-group col-md-2" }, [
       _c("label", { attrs: { for: "" } }, [_vm._v("Dias ")]),
       _vm._v(" "),
       _c("input", {
@@ -48404,7 +48607,7 @@ var render = function() {
       })
     ]),
     _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-3" }, [
+    _c("div", { staticClass: "form-group col-md-2" }, [
       _c("label", { attrs: { for: "" } }, [_vm._v("Data ")]),
       _vm._v(" "),
       _c("input", {
@@ -48430,7 +48633,7 @@ var render = function() {
       })
     ]),
     _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-3" }, [
+    _c("div", { staticClass: "form-group col-md-2" }, [
       _c("label", { attrs: { for: "" } }, [_vm._v("Valor ")]),
       _vm._v(" "),
       _c("input", {
@@ -48463,7 +48666,7 @@ var render = function() {
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "form-group col-md-3" }, [
-      _c("label", { attrs: { for: "" } }, [_vm._v("Forma FKIDFormaPagamento")]),
+      _c("label", { attrs: { for: "" } }, [_vm._v("Forma")]),
       _vm._v(" "),
       _c("input", {
         directives: [
@@ -48512,6 +48715,17 @@ var render = function() {
           }
         }
       })
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: " div-excluir text-right" }, [
+      _c("i", {
+        staticClass: "fas fa-trash pointer red",
+        on: {
+          click: function($event) {
+            return _vm.remover()
+          }
+        }
+      })
     ])
   ])
 }
@@ -48551,21 +48765,21 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.pagamento.condicaoPagamento,
-              expression: "form.pagamento.condicaoPagamento"
+              value: _vm.form.pagamento_condicaoPagamento,
+              expression: "form.pagamento_condicaoPagamento"
             }
           ],
           staticClass: "form-control",
-          attrs: { type: "integer", name: "pagamento.condicaoPagamento" },
-          domProps: { value: _vm.form.pagamento.condicaoPagamento },
+          attrs: { type: "integer", name: "pagamento_condicaoPagamento" },
+          domProps: { value: _vm.form.pagamento_condicaoPagamento },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
               _vm.$set(
-                _vm.form.pagamento,
-                "condicaoPagamento",
+                _vm.form,
+                "pagamento_condicaoPagamento",
                 $event.target.value
               )
             }
@@ -48581,32 +48795,50 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.pagamento.FKIDCategoria,
-              expression: "form.pagamento.FKIDCategoria"
+              value: _vm.form.pagamento_FKIDCategoria,
+              expression: "form.pagamento_FKIDCategoria"
             }
           ],
           staticClass: "form-control",
-          attrs: { type: "integer", name: "pagamento.FKIDCategoria" },
-          domProps: { value: _vm.form.pagamento.FKIDCategoria },
+          attrs: { type: "integer", name: "pagamento_FKIDCategoria" },
+          domProps: { value: _vm.form.pagamento_FKIDCategoria },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
-              _vm.$set(_vm.form.pagamento, "FKIDCategoria", $event.target.value)
+              _vm.$set(_vm.form, "pagamento_FKIDCategoria", $event.target.value)
             }
           }
         })
       ]),
       _vm._v(" "),
-      _vm._m(1),
-      _vm._v(" "),
-      _vm._l(_vm.form.pagamento.itens, function(item) {
+      _vm._l(_vm.form.pagamentoItens, function(item) {
         return _c("Item", {
-          key: item.id,
-          attrs: { money: _vm.money, item: item }
+          key: item.keyCont,
+          attrs: { money: _vm.money, item: item },
+          on: { remover: _vm.remover }
         })
-      })
+      }),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-12 text-right" }, [
+        _c(
+          "a",
+          {
+            staticClass: "pointer",
+            attrs: { href: "#" },
+            on: {
+              click: function($event) {
+                return _vm.novo()
+              }
+            }
+          },
+          [
+            _vm._v("Adicionar Novo Pagamento "),
+            _c("i", { staticClass: "fas fa-plus" })
+          ]
+        )
+      ])
     ],
     2
   )
@@ -48618,18 +48850,6 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "col-12" }, [
       _c("h5", [_vm._v("Pagamento")])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-12" }, [
-      _c("hr"),
-      _vm._v(" "),
-      _c("h6", [_vm._v("Itens")]),
-      _vm._v(" "),
-      _c("hr")
     ])
   }
 ]
@@ -48655,8 +48875,8 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "col-12 row" }, [
-    _c("div", { staticClass: "form-group col-md-3" }, [
-      _c("label", { attrs: { for: "" } }, [_vm._v("Contato FKIDContato")]),
+    _c("div", { staticClass: "form-group col-md-4" }, [
+      _c("label", { attrs: { for: "" } }, [_vm._v("Contato")]),
       _vm._v(" "),
       _c("input", {
         directives: [
@@ -48668,7 +48888,7 @@ var render = function() {
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "integer", name: "item.FKIDContato" },
+        attrs: { type: "integer", sname: "item.FKIDContato" },
         domProps: { value: _vm.item.FKIDContato },
         on: {
           input: function($event) {
@@ -48681,7 +48901,7 @@ var render = function() {
       })
     ]),
     _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-3" }, [
+    _c("div", { staticClass: "form-group col-md-4" }, [
       _c("label", { attrs: { for: "" } }, [_vm._v("CPF/CNPJ ")]),
       _vm._v(" "),
       _c("input", {
@@ -48694,7 +48914,7 @@ var render = function() {
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", maxlength: "20", name: "item.CPFCNPJ" },
+        attrs: { type: "text", maxlength: "20", sname: "item.CPFCNPJ" },
         domProps: { value: _vm.item.CPFCNPJ },
         on: {
           input: function($event) {
@@ -48704,6 +48924,13 @@ var render = function() {
             _vm.$set(_vm.item, "CPFCNPJ", $event.target.value)
           }
         }
+      })
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: " div-excluir text-right" }, [
+      _c("i", {
+        staticClass: "fas fa-trash pointer red",
+        on: { click: _vm.remover }
       })
     ])
   ])
@@ -48737,8 +48964,27 @@ var render = function() {
       _vm._m(0),
       _vm._v(" "),
       _vm._l(_vm.form.pessoasAutorizadas, function(item) {
-        return _c("Item", { key: item.id, attrs: { item: item } })
-      })
+        return _c("Item", {
+          key: item.keyCont,
+          attrs: { item: item },
+          on: { remover: _vm.remover }
+        })
+      }),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-12 text-right" }, [
+        _c(
+          "a",
+          {
+            staticClass: "pointer",
+            attrs: { href: "#" },
+            on: { click: _vm.novo }
+          },
+          [
+            _vm._v("Adicionar Nova Pessoa "),
+            _c("i", { staticClass: "fas fa-plus" })
+          ]
+        )
+      ])
     ],
     2
   )
@@ -48791,23 +49037,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.retencoes.minimoRetencao,
-            expression: "form.retencoes.minimoRetencao"
+            value: _vm.form.retencoes_minimoRetencao,
+            expression: "form.retencoes_minimoRetencao"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "retencoes.minimoRetencao"
+          name: "retencoes_minimoRetencao"
         },
-        domProps: { value: _vm.form.retencoes.minimoRetencao },
+        domProps: { value: _vm.form.retencoes_minimoRetencao },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.retencoes, "minimoRetencao", $event.target.value)
+            _vm.$set(_vm.form, "retencoes_minimoRetencao", $event.target.value)
           }
         }
       })
@@ -48827,23 +49073,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.retencoes.baseRetencao,
-            expression: "form.retencoes.baseRetencao"
+            value: _vm.form.retencoes_baseRetencao,
+            expression: "form.retencoes_baseRetencao"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "retencoes.baseRetencao"
+          name: "retencoes_baseRetencao"
         },
-        domProps: { value: _vm.form.retencoes.baseRetencao },
+        domProps: { value: _vm.form.retencoes_baseRetencao },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.retencoes, "baseRetencao", $event.target.value)
+            _vm.$set(_vm.form, "retencoes_baseRetencao", $event.target.value)
           }
         }
       })
@@ -48863,23 +49109,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.retencoes.valorIR,
-            expression: "form.retencoes.valorIR"
+            value: _vm.form.retencoes_valorIR,
+            expression: "form.retencoes_valorIR"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "retencoes.valorIR"
+          name: "retencoes_valorIR"
         },
-        domProps: { value: _vm.form.retencoes.valorIR },
+        domProps: { value: _vm.form.retencoes_valorIR },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.retencoes, "valorIR", $event.target.value)
+            _vm.$set(_vm.form, "retencoes_valorIR", $event.target.value)
           }
         }
       })
@@ -48899,23 +49145,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.retencoes.valorCSLL,
-            expression: "form.retencoes.valorCSLL"
+            value: _vm.form.retencoes_valorCSLL,
+            expression: "form.retencoes_valorCSLL"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "retencoes.valorCSLL"
+          name: "retencoes_valorCSLL"
         },
-        domProps: { value: _vm.form.retencoes.valorCSLL },
+        domProps: { value: _vm.form.retencoes_valorCSLL },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.retencoes, "valorCSLL", $event.target.value)
+            _vm.$set(_vm.form, "retencoes_valorCSLL", $event.target.value)
           }
         }
       })
@@ -48935,23 +49181,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.retencoes.valorPISretido,
-            expression: "form.retencoes.valorPISretido"
+            value: _vm.form.retencoes_valorPISretido,
+            expression: "form.retencoes_valorPISretido"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "retencoes.valorPISretido"
+          name: "retencoes_valorPISretido"
         },
-        domProps: { value: _vm.form.retencoes.valorPISretido },
+        domProps: { value: _vm.form.retencoes_valorPISretido },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.retencoes, "valorPISretido", $event.target.value)
+            _vm.$set(_vm.form, "retencoes_valorPISretido", $event.target.value)
           }
         }
       })
@@ -48971,25 +49217,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.retencoes.valorCOFINSRetido,
-            expression: "form.retencoes.valorCOFINSRetido"
+            value: _vm.form.retencoes_valorCOFINSRetido,
+            expression: "form.retencoes_valorCOFINSRetido"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           readonly: _vm.form.calculoimposto.calculoAutomatico,
-          name: "retencoes.valorCOFINSRetido"
+          name: "retencoes_valorCOFINSRetido"
         },
-        domProps: { value: _vm.form.retencoes.valorCOFINSRetido },
+        domProps: { value: _vm.form.retencoes_valorCOFINSRetido },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.retencoes,
-              "valorCOFINSRetido",
+              _vm.form,
+              "retencoes_valorCOFINSRetido",
               $event.target.value
             )
           }
@@ -49011,19 +49257,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.retencoes.valorISSRetido,
-            expression: "form.retencoes.valorISSRetido"
+            value: _vm.form.retencoes_valorISSRetido,
+            expression: "form.retencoes_valorISSRetido"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", name: "retencoes.valorISSRetido" },
-        domProps: { value: _vm.form.retencoes.valorISSRetido },
+        attrs: { type: "text", name: "retencoes_valorISSRetido" },
+        domProps: { value: _vm.form.retencoes_valorISSRetido },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.retencoes, "valorISSRetido", $event.target.value)
+            _vm.$set(_vm.form, "retencoes_valorISSRetido", $event.target.value)
           }
         }
       })
@@ -49072,19 +49318,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.nome,
-            expression: "form.transportador.nome"
+            value: _vm.form.transportador_nome,
+            expression: "form.transportador_nome"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", maxlength: "255", name: "transportador.nome" },
-        domProps: { value: _vm.form.transportador.nome },
+        attrs: { type: "text", maxlength: "255", name: "transportador_nome" },
+        domProps: { value: _vm.form.transportador_nome },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "nome", $event.target.value)
+            _vm.$set(_vm.form, "transportador_nome", $event.target.value)
           }
         }
       })
@@ -49100,13 +49346,13 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.transportador.freteConta,
-              expression: "form.transportador.freteConta"
+              value: _vm.form.transportador_freteConta,
+              expression: "form.transportador_freteConta"
             }
           ],
           staticClass: "form-control",
           attrs: {
-            name: "transportador.freteConta",
+            name: "transportador_freteConta",
             placeholder: "Selecione..."
           },
           on: {
@@ -49120,8 +49366,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.form.transportador,
-                "freteConta",
+                _vm.form,
+                "transportador_freteConta",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -49150,25 +49396,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.placaVeiculo,
-            expression: "form.transportador.placaVeiculo"
+            value: _vm.form.transportador_placaVeiculo,
+            expression: "form.transportador_placaVeiculo"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "10",
-          name: "transportador.placaVeiculo"
+          name: "transportador_placaVeiculo"
         },
-        domProps: { value: _vm.form.transportador.placaVeiculo },
+        domProps: { value: _vm.form.transportador_placaVeiculo },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.transportador,
-              "placaVeiculo",
+              _vm.form,
+              "transportador_placaVeiculo",
               $event.target.value
             )
           }
@@ -49186,13 +49432,13 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.transportador.UFveiculo,
-              expression: "form.transportador.UFveiculo"
+              value: _vm.form.transportador_UFveiculo,
+              expression: "form.transportador_UFveiculo"
             }
           ],
           staticClass: "form-control",
           attrs: {
-            name: "transportador.UFveiculo",
+            name: "transportador_UFveiculo",
             placeholder: "Selecione..."
           },
           on: {
@@ -49206,8 +49452,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.form.transportador,
-                "UFveiculo",
+                _vm.form,
+                "transportador_UFveiculo",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -49234,19 +49480,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.RNTC,
-            expression: "form.transportador.RNTC"
+            value: _vm.form.transportador_RNTC,
+            expression: "form.transportador_RNTC"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", maxlength: "50", name: "transportador.RNTC" },
-        domProps: { value: _vm.form.transportador.RNTC },
+        attrs: { type: "text", maxlength: "50", name: "transportador_RNTC" },
+        domProps: { value: _vm.form.transportador_RNTC },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "RNTC", $event.target.value)
+            _vm.$set(_vm.form, "transportador_RNTC", $event.target.value)
           }
         }
       })
@@ -49260,19 +49506,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.CNPJCPF,
-            expression: "form.transportador.CNPJCPF"
+            value: _vm.form.transportador_CNPJCPF,
+            expression: "form.transportador_CNPJCPF"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", maxlength: "15", name: "transportador.CNPJCPF" },
-        domProps: { value: _vm.form.transportador.CNPJCPF },
+        attrs: { type: "text", maxlength: "15", name: "transportador_CNPJCPF" },
+        domProps: { value: _vm.form.transportador_CNPJCPF },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "CNPJCPF", $event.target.value)
+            _vm.$set(_vm.form, "transportador_CNPJCPF", $event.target.value)
           }
         }
       })
@@ -49286,25 +49532,25 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.inscricaoEstadual,
-            expression: "form.transportador.inscricaoEstadual"
+            value: _vm.form.transportador_inscricaoEstadual,
+            expression: "form.transportador_inscricaoEstadual"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "100",
-          name: "transportador.inscricaoEstadual"
+          name: "transportador_inscricaoEstadual"
         },
-        domProps: { value: _vm.form.transportador.inscricaoEstadual },
+        domProps: { value: _vm.form.transportador_inscricaoEstadual },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
             _vm.$set(
-              _vm.form.transportador,
-              "inscricaoEstadual",
+              _vm.form,
+              "transportador_inscricaoEstadual",
               $event.target.value
             )
           }
@@ -49322,12 +49568,12 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.form.transportador.UF,
-              expression: "form.transportador.UF"
+              value: _vm.form.transportador_UF,
+              expression: "form.transportador_UF"
             }
           ],
           staticClass: "form-control",
-          attrs: { name: "transportador.UF", placeholder: "Selecione..." },
+          attrs: { name: "transportador_UF", placeholder: "Selecione..." },
           on: {
             change: function($event) {
               var $$selectedVal = Array.prototype.filter
@@ -49339,8 +49585,8 @@ var render = function() {
                   return val
                 })
               _vm.$set(
-                _vm.form.transportador,
-                "UF",
+                _vm.form,
+                "transportador_UF",
                 $event.target.multiple ? $$selectedVal : $$selectedVal[0]
               )
             }
@@ -49367,23 +49613,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.municipio,
-            expression: "form.transportador.municipio"
+            value: _vm.form.transportador_municipio,
+            expression: "form.transportador_municipio"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "255",
-          name: "transportador.municipio"
+          name: "transportador_municipio"
         },
-        domProps: { value: _vm.form.transportador.municipio },
+        domProps: { value: _vm.form.transportador_municipio },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "municipio", $event.target.value)
+            _vm.$set(_vm.form, "transportador_municipio", $event.target.value)
           }
         }
       })
@@ -49397,23 +49643,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.endereco,
-            expression: "form.transportador.endereco"
+            value: _vm.form.transportador_endereco,
+            expression: "form.transportador_endereco"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "255",
-          name: "transportador.endereco"
+          name: "transportador_endereco"
         },
-        domProps: { value: _vm.form.transportador.endereco },
+        domProps: { value: _vm.form.transportador_endereco },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "endereco", $event.target.value)
+            _vm.$set(_vm.form, "transportador_endereco", $event.target.value)
           }
         }
       })
@@ -49427,19 +49673,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.quantidade,
-            expression: "form.transportador.quantidade"
+            value: _vm.form.transportador_quantidade,
+            expression: "form.transportador_quantidade"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "number", name: "transportador.quantidade" },
-        domProps: { value: _vm.form.transportador.quantidade },
+        attrs: { type: "number", name: "transportador_quantidade" },
+        domProps: { value: _vm.form.transportador_quantidade },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "quantidade", $event.target.value)
+            _vm.$set(_vm.form, "transportador_quantidade", $event.target.value)
           }
         }
       })
@@ -49453,23 +49699,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.especie,
-            expression: "form.transportador.especie"
+            value: _vm.form.transportador_especie,
+            expression: "form.transportador_especie"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "100",
-          name: "transportador.especie"
+          name: "transportador_especie"
         },
-        domProps: { value: _vm.form.transportador.especie },
+        domProps: { value: _vm.form.transportador_especie },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "especie", $event.target.value)
+            _vm.$set(_vm.form, "transportador_especie", $event.target.value)
           }
         }
       })
@@ -49483,19 +49729,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.marca,
-            expression: "form.transportador.marca"
+            value: _vm.form.transportador_marca,
+            expression: "form.transportador_marca"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", maxlength: "100", name: "transportador.marca" },
-        domProps: { value: _vm.form.transportador.marca },
+        attrs: { type: "text", maxlength: "100", name: "transportador_marca" },
+        domProps: { value: _vm.form.transportador_marca },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "marca", $event.target.value)
+            _vm.$set(_vm.form, "transportador_marca", $event.target.value)
           }
         }
       })
@@ -49509,19 +49755,19 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.numero,
-            expression: "form.transportador.numero"
+            value: _vm.form.transportador_numero,
+            expression: "form.transportador_numero"
           }
         ],
         staticClass: "form-control",
-        attrs: { type: "text", name: "transportador.numero" },
-        domProps: { value: _vm.form.transportador.numero },
+        attrs: { type: "text", name: "transportador_numero" },
+        domProps: { value: _vm.form.transportador_numero },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "numero", $event.target.value)
+            _vm.$set(_vm.form, "transportador_numero", $event.target.value)
           }
         }
       })
@@ -49535,23 +49781,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.presoBruto,
-            expression: "form.transportador.presoBruto"
+            value: _vm.form.transportador_presoBruto,
+            expression: "form.transportador_presoBruto"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "10",
-          name: "transportador.presoBruto"
+          name: "transportador_presoBruto"
         },
-        domProps: { value: _vm.form.transportador.presoBruto },
+        domProps: { value: _vm.form.transportador_presoBruto },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "presoBruto", $event.target.value)
+            _vm.$set(_vm.form, "transportador_presoBruto", $event.target.value)
           }
         }
       })
@@ -49565,23 +49811,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.pesoLiquido,
-            expression: "form.transportador.pesoLiquido"
+            value: _vm.form.transportador_pesoLiquido,
+            expression: "form.transportador_pesoLiquido"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "10",
-          name: "transportador.pesoLiquido"
+          name: "transportador_pesoLiquido"
         },
-        domProps: { value: _vm.form.transportador.pesoLiquido },
+        domProps: { value: _vm.form.transportador_pesoLiquido },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "pesoLiquido", $event.target.value)
+            _vm.$set(_vm.form, "transportador_pesoLiquido", $event.target.value)
           }
         }
       })
@@ -49595,23 +49841,23 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.logistica,
-            expression: "form.transportador.logistica"
+            value: _vm.form.transportador_logistica,
+            expression: "form.transportador_logistica"
           }
         ],
         staticClass: "form-control",
         attrs: {
           type: "text",
           maxlength: "100",
-          name: "transportador.logistica"
+          name: "transportador_logistica"
         },
-        domProps: { value: _vm.form.transportador.logistica },
+        domProps: { value: _vm.form.transportador_logistica },
         on: {
           input: function($event) {
             if ($event.target.composing) {
               return
             }
-            _vm.$set(_vm.form.transportador, "logistica", $event.target.value)
+            _vm.$set(_vm.form, "transportador_logistica", $event.target.value)
           }
         }
       })
@@ -49620,7 +49866,7 @@ var render = function() {
     _c("div", { staticClass: "form-group col-md-3" }, [
       _c(
         "label",
-        { attrs: { for: "transportador.enderecoEntregaDiferente" } },
+        { attrs: { for: "transportador_enderecoEntregaDiferente" } },
         [_vm._v("Endereço de entrega diferente da cobrança ")]
       ),
       _vm._v(" "),
@@ -49629,26 +49875,26 @@ var render = function() {
           {
             name: "model",
             rawName: "v-model",
-            value: _vm.form.transportador.enderecoEntregaDiferente,
-            expression: "form.transportador.enderecoEntregaDiferente"
+            value: _vm.form.transportador_enderecoEntregaDiferente,
+            expression: "form.transportador_enderecoEntregaDiferente"
           }
         ],
         attrs: {
           type: "checkbox",
           value: "1",
-          id: "transportador.enderecoEntregaDiferente",
-          name: "transportador.enderecoEntregaDiferente"
+          id: "transportador_enderecoEntregaDiferente",
+          name: "transportador_enderecoEntregaDiferente"
         },
         domProps: {
           checked: Array.isArray(
-            _vm.form.transportador.enderecoEntregaDiferente
+            _vm.form.transportador_enderecoEntregaDiferente
           )
-            ? _vm._i(_vm.form.transportador.enderecoEntregaDiferente, "1") > -1
-            : _vm.form.transportador.enderecoEntregaDiferente
+            ? _vm._i(_vm.form.transportador_enderecoEntregaDiferente, "1") > -1
+            : _vm.form.transportador_enderecoEntregaDiferente
         },
         on: {
           change: function($event) {
-            var $$a = _vm.form.transportador.enderecoEntregaDiferente,
+            var $$a = _vm.form.transportador_enderecoEntregaDiferente,
               $$el = $event.target,
               $$c = $$el.checked ? true : false
             if (Array.isArray($$a)) {
@@ -49657,20 +49903,20 @@ var render = function() {
               if ($$el.checked) {
                 $$i < 0 &&
                   _vm.$set(
-                    _vm.form.transportador,
-                    "enderecoEntregaDiferente",
+                    _vm.form,
+                    "transportador_enderecoEntregaDiferente",
                     $$a.concat([$$v])
                   )
               } else {
                 $$i > -1 &&
                   _vm.$set(
-                    _vm.form.transportador,
-                    "enderecoEntregaDiferente",
+                    _vm.form,
+                    "transportador_enderecoEntregaDiferente",
                     $$a.slice(0, $$i).concat($$a.slice($$i + 1))
                   )
               }
             } else {
-              _vm.$set(_vm.form.transportador, "enderecoEntregaDiferente", $$c)
+              _vm.$set(_vm.form, "transportador_enderecoEntregaDiferente", $$c)
             }
           }
         }
@@ -62037,6 +62283,12 @@ window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js")
 var selectCount = 1;
 Vue.mixin({
   methods: {
+    valorInput: function valorInput(valor) {
+      if (valor == false) valor = "";
+      if (valor == true) valor = 1;
+      valor = valor == null ? "" : valor;
+      return valor;
+    },
     mulSe: function mulSe(valor, lista) {
       var Nvalor = parseInt(valor);
       return lista.indexOf(Nvalor) > -1;

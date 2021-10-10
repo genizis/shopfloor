@@ -1,48 +1,49 @@
 <?php
 
-class ISSQNRegrasTributacao extends CI_Model{    
-    
+class ISSQNRegrasTributacao extends CI_Model
+{
+
     var $table = 'ISSQN_regras_tributacao';
     var $tableEstado = 'ISSQN_link_estado';
     var $tableProduto = 'ISSQN_link_produtos';
-    
+
     var $FKID = 'FKIDRegrasTributacaoISSQN';
-    public function insert($data){
-       $resultado = $this->db->insert($this->table, $data);
+    public function insert($data)
+    {
+        $resultado = $this->db->insert($this->table, $data);
 
-       if($resultado) return $this->db->insert_id();
-       else return false;
-   }
-   
-   public function update($id, $data){
-       $this->db->where('id', $id);
+        if ($resultado) return $this->db->insert_id();
+        else return false;
+    }
 
-       $resultado =  $this->db->update($this->table, $data);
+    public function update($id, $data)
+    {
+        $this->db->where('id', $id);
 
-       return $resultado?$id:false;
-   }
+        $resultado =  $this->db->update($this->table, $data);
 
-   public function getObjetoNatureza($id){
+        return $resultado ? $id : false;
+    }
 
-       $this->load->model('NaturezaOperacao');
+    public function getObjetoNatureza($id)
+    {
 
-       $this->db->where($this->table.'.FKIDNaturezaOperacao', $id);
+        $this->load->model('NaturezaOperacao');
 
-       $this->db->select($this->table.'.*');
-       $this->db->from($this->table);
+        $this->db->where($this->table . '.FKIDNaturezaOperacao', $id);
 
-       $query = $this->db->get()->result();
+        $this->db->select($this->table . '.*');
+        $this->db->from($this->table);
 
-       if (is_array($query)) {
-        foreach ($query as $key => $item) {
-          $item->estados = $this->NaturezaOperacao->getObjetoEstado($item->id,$this->tableEstado,$this->FKID);
-          $item->produtos = $this->NaturezaOperacao->getObjetoProduto($item->id,$this->tableProduto,$this->FKID);
-      }
-  }
+        $query = $this->db->get()->result();
 
-  return $query;
-} 
+        if (is_array($query)) {
+            foreach ($query as $key => $item) {
+                $item->estados = $this->NaturezaOperacao->getObjetoEstado($item->id, $this->tableEstado, $this->FKID);
+                $item->produtos = $this->NaturezaOperacao->getObjetoProduto($item->id, $this->tableProduto, $this->FKID);
+            }
+        }
 
-
-
+        return $query;
+    }
 }

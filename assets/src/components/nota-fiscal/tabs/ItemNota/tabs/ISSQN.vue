@@ -1,10 +1,10 @@
 <template>
-  <div class="row">
+  <div class="row mt-2">
     <div class="form-group col-md-4">
       <label for=""> Situação tributária do ISSQN </label>
       <select
         class="form-control"
-        v-model="item.issqn.situacaoTributaria"
+        v-model="item.issqn_situacaoTributaria"
         placeholder="Selecione..."
       >
         <option value="">Selecione...</option>
@@ -22,7 +22,7 @@
       <label for=""> Descontar ISS do total faturado </label>
       <select
         class="form-control"
-        v-model="item.issqn.descontarISS"
+        v-model="item.issqn_descontarISS"
         placeholder="Selecione..."
       >
         <option :value="itemS.id" :key="key" v-for="(itemS, key) in simNao">
@@ -35,7 +35,7 @@
       <label for=""> Reter ISS </label>
       <select
         class="form-control"
-        v-model="item.issqn.reterISS"
+        v-model="item.issqn_reterISS"
         placeholder="Selecione..."
       >
         <option :value="itemS.id" :key="key" v-for="(itemS, key) in simNao">
@@ -50,7 +50,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.issqn.baseISSQN"
+        v-model="item.issqn_baseISSQN"
       />
     </div>
 
@@ -60,7 +60,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.issqn.valorBaseISSQN"
+        v-model="item.issqn_valorBaseISSQN"
       />
     </div>
 
@@ -70,7 +70,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.issqn.aliqISSQN"
+        v-model="item.issqn_aliqISSQN"
       />
     </div>
 
@@ -80,7 +80,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.issqn.valorISSQN"
+        v-model="item.issqn_valorISSQN"
       />
     </div>
 
@@ -89,7 +89,7 @@
       <input
         type="number"
         class="form-control"
-        v-model="item.issqn.codListaServico"
+        v-model="item.issqn_codListaServico"
       />
     </div>
 
@@ -99,7 +99,7 @@
         type="text"
         class="form-control"
         v-money="money"
-        v-model="item.issqn.valorRetido"
+        v-model="item.issqn_valorRetido"
       />
     </div>
 
@@ -108,7 +108,7 @@
       <input
         type="text"
         class="form-control"
-        v-model="item.issqn.informacoesComp"
+        v-model="item.issqn_informacoesComp"
       />
     </div>
 
@@ -119,7 +119,7 @@
       <input
         type="text"
         class="form-control"
-        v-model="item.issqn.informacoesCompIF"
+        v-model="item.issqn_informacoesCompIF"
       />
     </div>
   </div>
@@ -144,11 +144,7 @@ export default {
     };
   },
   mounted() {
-    Vue.set(this.item, "issqn", {
-      situacaoTributaria: 0,
-      reterISS: 0,
-      descontarISS: 0,
-    });
+    
   },
   methods: {}, //,    components: {}
   directives: { money: VMoney },
