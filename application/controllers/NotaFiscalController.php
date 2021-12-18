@@ -31,24 +31,258 @@ class NotaFiscalController extends CI_Controller
 
         echo json_encode($this->venda->getProdutoFaturadoPorFaturamento($id));
     }
+    public function gerarNotaFiscalXML($faturamentoPedidoID)
+    {
+        require_once "vendor/autoload.php";
 
+        $this->load->model('NotaFiscal');
+        $notaFiscal = $this->NotaFiscal->getNotaFiscalIDFaturamento($faturamentoPedidoID);
+
+        try {
+            $nfe = new NFePHP\NFe\Make();
+
+            $std = new \stdClass();
+            $std->versao = '3.10';
+            $nfe->taginfNFe($std);
+
+            $std = new \stdClass();
+            $std->cUF = 35;#TODO
+            $std->cNF = '80070008';#TODO
+            $std->natOp = $notaFiscal->FKIDnaturezaOperacaoText;
+            $std->indPag = 0;#TODO
+            $std->mod = 55;#TODO
+            $std->serie = $notaFiscal->serie;
+            $std->nNF = $notaFiscal->numero;
+            $std->dhEmi = (new \DateTime($notaFiscal->dataEmissao.' '.$notaFiscal->horaEmissao))->format('Y-m-d\TH:i:sP');
+            $std->dhSaiEnt = (new \DateTime($notaFiscal->dataSaida.' '.$notaFiscal->horaSaida))->format('Y-m-d\TH:i:sP');
+            $std->tpNF = $notaFiscal->tipoSaida;; //tipoSaida
+            $std->idDest = 1;#TODO
+            $std->cMunFG = 3518800;#TODO
+            $std->tpImp = 1;#TODO
+            $std->tpEmis = 1;#TODO
+            $std->cDV = 2;#TODO
+            $std->tpAmb = 2; // Se deixar o tpAmb como 2 você emitirá a nota em ambiente de homologação(teste) e as notas fiscais aqui não tem valor fiscal
+            $std->finNFe = $notaFiscal->finalidade;
+            $std->indFinal = 0;#TODO
+            $std->indPres = $notaFiscal->indicadorPresenca;
+            $std->procEmi = '3.10.31';
+            $std->verProc = 1;#TODO
+            $nfe->tagide($std);
+
+            $std = new \stdClass(); #TODO //Empresa Emitente
+            $std->xNome = 'Empresa teste';
+            $std->IE = '6564344535';
+            $std->CRT = 3;
+            $std->CNPJ = '78767865000156';
+            $nfe->tagemit($std);
+
+            $std = new \stdClass();
+            $std->xLgr = "Rua Teste";
+            $std->nro = '203';
+            $std->xBairro = 'Centro';
+            $std->cMun = '4317608';
+            $std->xMun = 'Porto Alegre';
+            $std->UF = 'RS';
+            $std->CEP = '955500-000';
+            $std->cPais = '1058';
+            $std->xPais = 'BRASIL';
+            $nfe->tagenderEmit($std);
+
+            $std = new \stdClass(); //Empresa destinatário
+            $std->xNome = $notaFiscal->destinatario_nomeContato;
+            $std->indIEDest = 1;
+            $std->IE = $notaFiscal->destinatario_inscricaoEstadual;
+            $std->CNPJ = $notaFiscal->destinatario_cnpj;
+            $nfe->tagdest($std);
+
+            $std = new \stdClass();
+            $std->xLgr = $notaFiscal->destinatario_endereco;
+            $std->nro = $notaFiscal->destinatario_numero;
+            $std->xBairro = $notaFiscal->destinatario_bairro;
+            $std->cMun = '4317608';#TODO
+            $std->xMun = $notaFiscal->destinatario_municipio;
+            $std->UF = $notaFiscal->destinatario_UF;
+            $std->CEP = $notaFiscal->destinatario_cep;
+            $std->cPais = '1058';#TODO
+            $std->xPais = $notaFiscal->destinatario_pais;
+            $nfe->tagenderDest($std);
+
+            //Itens da nota
+            foreach ($notaFiscal->itensNota as $key => $item) {
+                $this->itensNotaFiscal($nfe, $item);
+            }
+            
+            $std = new \stdClass();
+            $std->vBC = 0.00;#TODO
+            $std->vICMS = $notaFiscal->calculoimposto_valorICMS;
+            $std->vICMSDeson = 0.00;#TODO
+            $std->vBCST = $notaFiscal->calculoimposto_baseICMSST;
+            $std->vST = $notaFiscal->calculoimposto_valorICMSST;
+            $std->vProd = $notaFiscal->calculoimposto_totalProdutos;
+            $std->vFrete = $notaFiscal->calculoimposto_valorFrete;
+            $std->vSeg = $notaFiscal->calculoimposto_valorSeguro;
+            $std->vDesc = $notaFiscal->calculoimposto_desconto;
+            $std->vII = 0.00;#TODO
+            $std->vIPI = $notaFiscal->calculoimposto_valorIPI;
+            $std->vPIS = 0.00;#TODO
+            $std->vCOFINS = 0.00;#TODO
+            $std->vOutro = $notaFiscal->calculoimposto_outrasDespesas;
+            $std->vNF = $notaFiscal->calculoimposto_totalNota;
+            $std->vTotTrib = $notaFiscal->calculoimposto_totalAtributos;
+            $nfe->tagICMSTot($std);
+
+            $std = new \stdClass();
+            $std->modFrete = $notaFiscal->transportador_freteConta;
+            $nfe->tagtransp($std);
+            /*
+            $std = new \stdClass();
+            $std->nFat = '100';
+            $std->vOrig = 100;
+            $std->vLiq = 100;
+            $nfe->tagfat($std);
+
+            $std = new \stdClass();
+            $std->nDup = '100';
+            $std->dVenc = '2017-08-22';
+            $std->vDup = 11.03;
+            $nfe->tagdup($std);
+            */
+            $xml = $nfe->getXML(); // O conteúdo do XML fica armazenado na variável $xml
+
+            $resultXml = $this->NotaFiscal->update($notaFiscal->id, ['xml' => $xml]);
+            if (!$resultXml) return false;
+
+            //ASSINAR NOTA
+            //$this->assinarCertificado();
+
+            return true;
+        } catch (\Exception $e) {
+            var_dump($e);
+            return;
+        }
+    }
+    public function itensNotaFiscal($nfe, $item)
+    {
+
+        $produto = $this->produto->getProdutoPorCodigo($item->codigo);
+        //var_dump($item);
+        $std = new \stdClass();
+        $std->item = $item->id;
+        $std->cProd = $item->codigo;
+        $std->xProd = $item->descricao;
+        $std->NCM = $item->NCM;
+        $std->CFOP = $item->CFOP;
+        $std->uCom = 'PÇ';#TODO
+        $std->qCom = $item->quantidade;
+        $std->vUnCom = $item->valorUnitario;
+        $std->vProd = '00';#TODO
+        $std->uTrib = 'PÇ';#TODO
+        $std->qTrib = '00';#TODO
+        $std->vUnTrib = '00';#TODO
+        $std->indTot = 1;#todo
+        $nfe->tagprod($std);
+
+        $std = new \stdClass();
+        $std->item = $item->id;
+        $std->vTotTrib = 0;#TODO
+        $nfe->tagimposto($std);
+
+        $std = new \stdClass();
+        $std->item = $item->id;
+        $std->orig = $item->icms_origem;
+        //$std->CST = $item->icms_situacaoTributaria;#TODO dando erro ao inseri-la
+        $std->modBC = $item->icms_modalidadeBC;
+        $std->vBC = $item->icms_valorPauta;
+        $std->pICMS = $item->icms_presumido;##DUVIDA
+        $std->vICMS =  $item->icms_ICMS;##DUVIDA ou valorICMS
+        $nfe->tagICMS($std);
+
+        $std = new \stdClass();
+        $std->item = $item->id;
+        $std->cEnq = $item->ipi_codEnquad;
+        $std->CST = $item->ipi_situacaoTributaria;
+        $std->vIPI = $item->ipi_valorIPI;
+        $std->vBC = 0;#TODO
+        $std->pIPI = 0;#TODO
+        $nfe->tagIPI($std);
+
+        $std = new \stdClass();
+        $std->item = $item->id;
+        $std->CST = $item->pis_situacaoTributaria;
+        $std->vBC = 0;#TODO
+        $std->pPIS = 0;#TODO
+        $std->vPIS = $item->pis_valorPIS;
+        $nfe->tagPIS($std);
+
+        $std = new \stdClass();
+        $std->item = $item->id;
+        $std->vCOFINS = $item->confis_valorCONFIS;
+        $std->vBC = 0;#TODO
+        $std->pCOFINS = 0;#TODO
+        $nfe->tagCOFINSST($std);
+
+        $std = new \stdClass();
+        $std->item = $item->id;
+        $std->qVol = 0;#TODO
+        $std->esp = 'caixa';#TODO
+        $std->marca = 'OLX';#TODO
+        $std->nVol = '000';#TODO
+        $std->pesoL = $produto->peso_liq;
+        $std->pesoB = $produto->peso_bruto;
+        $nfe->tagvol($std);
+    }
+    public function assinarCertificado()
+    {
+        $config = [
+            "atualizacao" => "2018-02-06 06:01:21",
+            "tpAmb" => 2, // Se deixar o tpAmb como 2 você emitirá a nota em ambiente de homologação(teste) e as notas fiscais aqui não tem valor fiscal
+            "razaosocial" => "Empresa teste",
+            "siglaUF" => "RS",
+            "cnpj" => "78767865000156",
+            "schemes" => "PL_008i2",
+            "versao" => "3.10",
+            "tokenIBPT" => "AAAAAAA"
+        ];
+        $configJson = json_encode($config);
+        /*
+    $certificadoDigital = file_get_contents('certificado.pfx');
+
+    $tools = new NFePHP\NFe\Tools($configJson, NFePHP\Common\Certificate::readPfx($certificadoDigital, 'senha do certificado'));
+    $xmlAssinado = $tools->signNFe($xml);
+
+    $idLote = str_pad(100, 15, '0', STR_PAD_LEFT); // Identificador do lote
+    $resp = $tools->sefazEnviaLote([$xmlAssinado], $idLote);
+
+    $st = new NFePHP\NFe\Common\Standardize();
+    $std = $st->toStd($resp);
+    if ($std->cStat != 103) {
+        //erro registrar e voltar
+        exit("[$std->cStat] $std->xMotivo");
+    }
+    $recibo = $std->infRec->nRec; // Vamos usar a variável $recibo para consultar o status da nota
+    $protocolo = $tools->seFazConsultaRecibo($recibo);
+    $protocol = new NFePHP\NFe\Factories\Protocol();
+    $xmlProtocolado = $protocol->add($xmlAssinado, $protocolo);
+        */
+    }
     public function inserirNotaFiscal()
     {
         $this->load->model('NotaFiscal');
 
-    // var_dump($this->input->post('calculoimposto_calculoAutomatico'));
-       // return '';
+        // var_dump($this->input->post('calculoimposto_calculoAutomatico'));
+        // return '';
 
         $camposNotaFiscal = [
             'int' =>
             ['intermediador'],
             'text' =>
-            ['FKIDfaturamentoPedido', 'tipoSaida', 'serie', 'numero', 'loja', 'FKIDunidade', 'FKIDnaturezaOperacao', 'dataEmissao', 'horaEmissao', 'dataSaida', 'horaSaida', 'codigoRegimeTributario', 'finalidade', 'indicadorPresenca', 'exportacaoLocal', 'exportacaoLocalUF', 'intermediadorCNPJ','intermediadorID']
+            ['FKIDfaturamentoPedido', 'tipoSaida', 'serie', 'numero', 'loja', 'FKIDunidade', 'FKIDnaturezaOperacao', 'dataEmissao', 'horaEmissao', 'dataSaida', 'horaSaida', 'codigoRegimeTributario', 'finalidade', 'indicadorPresenca', 'exportacaoLocal', 'exportacaoLocalUF', 'intermediadorCNPJ', 'intermediadorID']
         ];
 
         $data = [
             'empresaIDFK' => getDadosUsuarioLogado()['id_empresa']
         ];
+        $faturamentoPedidoID =  $this->input->post('FKIDfaturamentoPedido');
 
         foreach ($camposNotaFiscal as $key => $lista) { //Popular $data
             $default = $key == 'int' ? 0 : null;
@@ -203,16 +437,6 @@ class NotaFiscalController extends CI_Controller
                         $item,
                         $this->NotaFiscalParcelasPagamento
                     );
-                    /*                    
-                    foreach ($campos as $key => $campo) {
-                        $info[$campo] = $item[$campo] ? $item[$campo] : null;
-                    }
-                    $idEdicao = isset($item['id']) ? $item['id'] : null; //Se existir Editar
-                    if ($idEdicao != null) { //Edição
-                        $idRegra = $this->NotaFiscalParcelasPagamento->update($idEdicao, $info);
-                    } else
-                        $idRegra = $this->NotaFiscalParcelasPagamento->insert($info); //Cadastro    
-              */
                 }
             //pessoas_autorizadas
             $this->load->model('NotaFiscalPessoasAutorizadas');
@@ -231,17 +455,6 @@ class NotaFiscalController extends CI_Controller
                         $item,
                         $this->NotaFiscalPessoasAutorizadas
                     );
-                    /*
-                    $info = ['FKIDNotaFiscal' => $idNota];
-                    foreach ($campos as $key => $campo) {
-                        $info[$campo] = $item[$campo] ? $item[$campo] : null;
-                    }
-                    $idEdicao = isset($item['id']) ? $item['id'] : null; //Se existir Editar
-                    if ($idEdicao != null) { //Edição
-                        $idRegra = $this->NotaFiscalPessoasAutorizadas->update($idEdicao, $info);
-                    } else
-                        $idRegra = $this->NotaFiscalPessoasAutorizadas->insert($info); //Cadastro    
-               */
                 }
         }
 
@@ -277,19 +490,6 @@ class NotaFiscalController extends CI_Controller
                     $camposInput,
                     $this->NotaFiscalItem
                 );
-                /*
-                $info = ['FKIDNotaFiscal' => $idNota];
-                foreach ($campos as $key => $campo) {
-                    $default = isset($camposInt[$campo]) ? 0 : null;
-                    $info[$campo] = $camposInput[$campo] ? $camposInput[$campo] : $default;
-                }
-
-                $idNota = isset($camposInput['id']) ? $camposInput['id'] : null; //Se existir Editar
-                if ($idNota != null) { //Edição
-                    $idNota = $this->NotaFiscalItem->update($idNota, $info);
-                } else
-                    $idNota = $this->NotaFiscalItem->insert($info); //Cadastro    
-*/
                 if ($idNota != null) { //Itens nota fiscal
                     //Nota Fiscal Itens ICMS
 
@@ -393,6 +593,14 @@ class NotaFiscalController extends CI_Controller
             }
         }
 
+        $resultXml  = $this->gerarNotaFiscalXML($faturamentoPedidoID);
+        if (!$resultXml) {
+            return responseJson($this, [
+                'resultado' => $resultXml,
+                'msg' => 'Erro ao gerar XML',
+                'id' => $idNota
+            ]);
+        }
         return responseJson($this, [
             'resultado' => true,
             'msg' => 'nota da operação cadastrada com sucesso',
@@ -402,17 +610,15 @@ class NotaFiscalController extends CI_Controller
 
     public function salvarObjetoRegraFiscal($prefix, $camposInt, $campos, $info, $origemRequest, $instanciaModel)
     {
-        $campos = array_merge($campos,$camposInt);
+        $campos = array_merge($campos, $camposInt);
         $id = isset($origemRequest[$prefix . 'id']) ? $origemRequest[$prefix . 'id'] : null; //Se existir Editar
-        $info = $id==null?$info:[];
+        $info = $id == null ? $info : [];
         foreach ($campos as $key => $campo) {
-            if(array_search($campo,$camposInt) !== false){
-                $info[$campo] = isset($origemRequest[$prefix . $campo]) && $origemRequest[$prefix . $campo]!="" ? true : null;
-              
-            }else{ 
+            if (array_search($campo, $camposInt) !== false) {
+                $info[$campo] = isset($origemRequest[$prefix . $campo]) && $origemRequest[$prefix . $campo] != "" ? true : null;
+            } else {
                 $info[$campo] = isset($origemRequest[$prefix . $campo]) ? $origemRequest[$prefix . $campo] : null;
             }
-           
         }
 
         if ($id != null) { //Edição
@@ -427,5 +633,4 @@ class NotaFiscalController extends CI_Controller
 
         return $id;
     }
-
 }
