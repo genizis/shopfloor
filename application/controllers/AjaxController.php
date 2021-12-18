@@ -156,6 +156,21 @@ class AjaxController extends CI_Controller
         echo json_encode($lista);
     }
 
+    public function getNotaFiscalXML()
+    {
+        $this->load->model('NotaFiscal');
+
+        $id = $this->input->get('filtro');
+        $lista = $this->NotaFiscal->getNotaFiscalXML($id);
+
+        $f = fopen('php://memory', 'w');
+        fwrite($f, $lista->xml);
+        fseek($f, 0);
+		header('Content-Type: application/xml');
+		header('Content-Disposition: attachment; filename="notaFiscal_' . $id . '.xml";');
+		fpassthru($f);
+    }
+
     public function excluirVinculoProdutoNaturezaOperacao()
     {
         $this->load->model('NaturezaOperacao');
