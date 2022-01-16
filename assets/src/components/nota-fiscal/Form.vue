@@ -43,6 +43,14 @@
       <!-- FIM BODY -->
       <div class="modal-footer col-12 text-right">
         <!-- FOOTER -->
+        <a
+        v-if="form.id"
+          :href="'/ajax/nota-fiscal-xml?filtro='+form.id"
+          class="btn btn-info"
+        >
+          <i class="fas fa-file"></i> Nota fiscal
+        </a>
+
         <button
           type="submit"
           class="btn btn-primary"

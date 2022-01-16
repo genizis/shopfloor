@@ -5996,6 +5996,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -40248,6 +40256,20 @@ var render = function() {
           : _vm._e(),
         _vm._v(" "),
         _c("div", { staticClass: "modal-footer col-12 text-right" }, [
+          _vm.form.id
+            ? _c(
+                "a",
+                {
+                  staticClass: "btn btn-info",
+                  attrs: { href: "/ajax/nota-fiscal-xml?filtro=" + _vm.form.id }
+                },
+                [
+                  _c("i", { staticClass: "fas fa-file" }),
+                  _vm._v(" Nota fiscal\n      ")
+                ]
+              )
+            : _vm._e(),
+          _vm._v(" "),
           _vm._m(0),
           _vm._v(" "),
           _c(

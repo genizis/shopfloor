@@ -556,3 +556,6 @@ $route['ajax/excluir-nota-fiscal-pessoa-autorizada']['GET'] = 'AjaxController/ex
 
 $route['ajax/excluir-nota-fiscal-parcela']['GET'] = 'AjaxController/excluirNotaFiscalPagamentoParcela';
 
+$route['ajax/nota-fiscal-xml']['GET'] = 'AjaxController/getNotaFiscalXML';
+
+
