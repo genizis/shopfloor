@@ -5997,13 +5997,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
 
 
 
@@ -40264,8 +40257,8 @@ var render = function() {
                   attrs: { href: "/ajax/nota-fiscal-xml?filtro=" + _vm.form.id }
                 },
                 [
-                  _c("i", { staticClass: "fas fa-file" }),
-                  _vm._v(" Nota fiscal\n      ")
+                  _c("i", { staticClass: "fas fa-receipt" }),
+                  _vm._v(" XML nota fiscal")
                 ]
               )
             : _vm._e(),

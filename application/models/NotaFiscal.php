@@ -104,7 +104,14 @@ class NotaFiscal extends CI_Model
         }
         return $campos;
     }
-    
+    public function getNotaFiscalXML($id)
+    {
+        $this->db->select($this->table. '.xml',$this->table.'.id');
+        $this->db->where($this->table.'.id',$id);
+        $this->db->from($this->table);
+
+        return $this->db->get()->row();
+    }
     public function getNotaFiscalIDFaturamento($idFaturamento)
     {
         $this->load->model('NaturezaOperacao');
